@@ -9,7 +9,7 @@ The ThoughtSpot REST API can export and import TML in JSON as well as YAML. The 
 ## thoughtspot_tml overview
 The thoughtspot_tml library provides classes modeling the TML representation of each ThoughtSpot object type (Tables, Worksheets, Views, Answers, Liveboards).
 
-There is also a helper class called YAMLTML for processing files in TML YAML format.
+There is also a helper class called `YAMLTML` for processing files in TML YAML format.
 
 Each of the TML classes takes an input of an OrderedDict in the constructor, which becomes the `.tml` property of the objects.
 

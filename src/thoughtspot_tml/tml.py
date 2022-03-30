@@ -1,6 +1,5 @@
 from typing import Optional, Dict, List # , OrderedDict
 import typing
-from enum import Enum, auto
 from random import randrange
 import random
 import string
@@ -12,13 +11,13 @@ import oyaml as yaml
 
 
 class TML:
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        self.tml = tml_dict
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        self.tml = tml_ordereddict
         # Answers within a Pinboard just have an "id"
-        if 'guid' in tml_dict:
-            self.guid = tml_dict["guid"]
-        elif 'id' in tml_dict:
-            self.guid = tml_dict["id"]
+        if 'guid' in tml_ordereddict:
+            self.guid = tml_ordereddict["guid"]
+        elif 'id' in tml_ordereddict:
+            self.guid = tml_ordereddict["id"]
 
         self.content_type = None
         # TML file outer is always a guid, then the type of Object being modeled
@@ -89,8 +88,8 @@ class TML:
 
 
 class Worksheet(TML):
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        super().__init__(tml_dict=tml_dict)
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
 
     @staticmethod
     def generate_tml_from_scratch(worksheet_name: str, table_name: str, table_path_id: str = None):
@@ -221,14 +220,14 @@ worksheet:
 
 
 class View(TML):
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        super().__init__(tml_dict=tml_dict)
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
     pass
 
 
 class Table(TML):
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        super().__init__(tml_dict=tml_dict)
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
 
     @staticmethod
     def generate_tml_from_scratch(connection_name: str, db_name: str, schema: str, db_table: str,
@@ -399,8 +398,8 @@ table:
 
 
 class Answer(TML):
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        super().__init__(tml_dict=tml_dict)
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
 
         class ChartTypes:
             COLUMN = 'COLUMN'
@@ -531,8 +530,8 @@ class Answer(TML):
 
 
 class Pinboard(TML):
-    def __init__(self, tml_dict: [Dict, typing.OrderedDict]):
-        super().__init__(tml_dict=tml_dict)
+    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
 
     class TileSizes:
         EXTRA_SMALL = 'EXTRA_SMALL'
