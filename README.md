@@ -25,7 +25,7 @@ Any library wishing to use the thoughtspot_tml objects should output an OrderedD
 Alternatively, a library can export the YAML string from the REST API, then use the YAMLTML class to load into an OrderedDict, and use the YAMLTML class to dump to YAML string for import.
 
 ## GUIDs 
-TML files downloaded from a ThoughtSpot instance will have a `guid` property at the top of the property. 
+TML files downloaded from a ThoughtSpot instance will have a `guid` property at the top of the file. 
 
 GUID is the unique identifier within the given ThoughtSpot instance. 
 
@@ -72,7 +72,7 @@ If the REST API library outputs the YAML string from the TML export call, you ca
     lb_obj = Liveboard(YAMLTML.load_string(ts.tml.export_tml_string(guid=lb_guid)))
 
 ### Opening a TML file from disk and loading into a TML object
-The YAMLTML object contains static methods to help with correct import and formatting of ThoughtSpot's TML YAML.
+The `YAMLTML` object contains static methods to help with correct import and formatting of ThoughtSpot's TML YAML.
 
     with open('tml_file.worksheet.tml', 'r') as fh:
         tml_yaml_str = fh.read()
@@ -85,6 +85,22 @@ The YAMLTML object contains static methods to help with correct import and forma
 
 
 Full example of working with a YAML string in `examples/tml_yaml_intro.py`.
+
+### Factory method for getting objects
+`YAMLTML.get_tml_object(tml_yaml_str)` returns back the appropriate object for the type of TML object opened. 
+
+You can then check the `.content_type` property before attempting actions that are specific to a given object type.
+
+Remember that the TML content_type property for a Liveboard is still `pinboard` at this time.
+
+    with open('tml_file.worksheet.tml', 'r') as fh:
+        tml_yaml_str = fh.read()
+
+    tml_obj = YAMLTML.get_tml_object(tml_yaml_str)
+
+    tml_obj.description = tml_obj.description + "(Copied from previous instance)"
+    if tml_obj.content_type == 'pinboard':
+        # Liveboard specific changes
 
 ### Dumping to YAML or JSON
 Each TML object keeps the OrderedDict representing the TML file itself in the `.tml` property.

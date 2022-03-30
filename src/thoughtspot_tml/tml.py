@@ -681,3 +681,30 @@ class YAMLTML:
     @staticmethod
     def load_string(tml_yaml_str) -> OrderedDict:
         return yaml.load(tml_yaml_str, Loader=yaml.Loader)
+
+    # Factory method to return the correct object type
+    @staticmethod
+    def get_tml_object(tml_yaml_str) -> TML:
+        tml_od = YAMLTML.load_string(tml_yaml_str)
+        # TML file outer is always a guid, then the type of Object being modeled
+        content_type = 'tml'
+        for key in tml_od:
+            if key in ["guid", "id"]:
+                continue
+            else:
+                content_type = key
+
+        if content_type == 'tml':
+            return TML(tml_od)
+        elif content_type == 'table':
+            return Table(tml_od)
+        elif content_type == 'worksheet':
+            return Worksheet(tml_od)
+        elif content_type == 'view':
+            return View(tml_od)
+        elif content_type == 'liveboard':
+            return Liveboard(tml_od)
+        elif content_type == 'pinboard':
+            return Liveboard(tml_od)
+        elif content_type == 'answer':
+            return Answer(tml_od)
