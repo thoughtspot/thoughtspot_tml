@@ -1,19 +1,50 @@
-# thoughtspot_tml
-Python library for working with ThoughtSpot Modeling Language (TML) files programmatically
+*Python library for programmatically working with ThoughtSpot Modeling Language (TML) files.*
 
-## ThoughtSpot Modeling Language
-ThoughtSpot Modeling Language (TML) is a YAML based representation of objects in ThoughtSpot. The TML format for each object type is documente at https://cloud-docs.thoughtspot.com/admin/ts-cloud/tml.html . 
-
-The ThoughtSpot REST API can export and import TML in JSON as well as YAML. The user interface to ThoughtSpot only shows the YAML based format, so we recommend using YAML when saving to disk.
-
-## thoughtspot_tml overview
-The thoughtspot_tml library provides classes modeling the TML representation of each ThoughtSpot object type (Tables, Worksheets, Views, Answers, Liveboards).
+The `thoughtspot_tml` library provides classes modeling the TML representation of each ThoughtSpot object content type: Tables, Worksheets, Views, Answers, Liveboards.
 
 There is also a helper class called `YAMLTML` for processing files in TML YAML format.
 
 Each of the TML classes takes an input of an OrderedDict in the constructor, which becomes the `.tml` property of the objects.
 
 Methods then exist in each class to manipulate the specific properties of the various types.
+
+
+> ## ThoughtSpot Modeling Language
+> ThoughtSpot Modeling Language (TML) is a YAML based representation of objects in ThoughtSpot. The TML format can be found in the official documentation.
+> 
+> https://docs.thoughtspot.com/cloud/latest/tml
+
+---
+
+## Getting Started
+
+To install ThoughtSpot Rest API V1, simply run this simple command in your terminal of choice:
+
+```
+$ python -m pip install thoughtspot_rest_api_v1_python
+```
+
+### Getting the source code
+
+```
+$ git clone https://github.com/thoughtspot/thoughtspot_rest_api_v1_python.git
+```
+
+Once you have a copy of the source, you can embed it in your own Python package, or install it into your site-packages easily:
+
+```
+$ cd thoughtspot_rest_api_v1_python
+$ python -m pip install .
+```
+
+---
+
+## Importing the library
+The simplest way to use thoughtspot_tml is:
+
+    from thoughtspot_tml import *
+
+This will get you the YAMLTML helper class as well as each of the ThoughtSpot object classes: Table, Worksheet, View, Answer, Liveboard
 
 ## REST API import and export of TML to work with thoughtspot_tml
 The constructor of each TML object class requires an OrderedDict Python object.
@@ -37,19 +68,9 @@ The REST API import call has an argument that *forces new objects to be created,
 
 In any case where a new object is created, the TML file you import will not be exactly what exists on the ThoughtSpot instance, because the new GUID will be added at the top of the TML file when you export it again.
 
-## Installing thoughtspot_tml
-You should be able to install thoughtspot_tml via pip:
-
-    pip install thoughtspot_tml
-
-## Using thoughtspot_tml
-The simplest way to use thoughtspot_tml is:
-
-    from thoughtspot_tml import *
-
-This will get you the YAMLTML helper class as well as each of the ThoughtSpot object classes: Table, Worksheet, View, Answer, Liveboard
 
 ### Retrieving the TML as a Python OrderedDict from REST API
+
 As noted above, each TML object uses an OrderedDict. If a library returns the OrderedDict, you can load that directly into the object constructor: 
 
 The following example shows using a library where the `export_tml(guid)` method returns an OrderedDict. 
