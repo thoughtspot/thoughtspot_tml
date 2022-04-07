@@ -74,7 +74,7 @@ If the REST API library outputs the YAML string from the TML export call, you ca
 ### Opening a TML file from disk and loading into a TML object
 The `YAMLTML` object contains static methods to help with correct import and formatting of ThoughtSpot's TML YAML.
 
-    with open('tml_file.worksheet.tml', 'r') as fh:
+    with open('tml_file.worksheet.tml', 'r', encoding='utf-8') as fh:
         tml_yaml_str = fh.read()
 
     tml_yaml_ordereddict = YAMLTML.load_string(tml_yaml_str)
@@ -93,7 +93,7 @@ You can then check the `.content_type` property before attempting actions that a
 
 Remember that the TML content_type property for a Liveboard is still `pinboard` at this time.
 
-    with open('tml_file.worksheet.tml', 'r') as fh:
+    with open('tml_file.worksheet.tml', 'r', encoding='utf-8') as fh:
         tml_yaml_str = fh.read()
 
     tml_obj = YAMLTML.get_tml_object(tml_yaml_str)
@@ -115,7 +115,7 @@ Note that `YAMLTML.dump_tml_object()` takes the full TML object, vs. passing the
 
     tml_obj.description = "Adding a wonderful description to this document"
     modified_tml_string = YAMLTML.dump_tml_object(tml_obj)
-    with open('modified_tml.worksheet.tml', 'w') as fh:
+    with open('modified_tml.worksheet.tml', 'w', encoding='utf-8') as fh:
         fh.write(modified_tml_string)
 
 ### TML base class
