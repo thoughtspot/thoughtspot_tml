@@ -609,24 +609,32 @@ class Pinboard(TML):
         # Add Answer to Pinboard
         self.content['visualizations'].append(answer.tml)
 
-        # Add to Layout Tiles in the right order
+        # Add to Layout Tiles in the right order, if they exist
         layout_tiles = self.layout_tiles
-        new_tile = {"visualization_id": new_id, "size": tile_size}
-        layout_tiles.insert(index, new_tile)
-        print(layout_tiles)
-        self.layout_tiles = layout_tiles
+        if layout_tiles is not None:
+            new_tile = {"visualization_id": new_id, "size": tile_size}
+            layout_tiles.insert(index, new_tile)
+            print(layout_tiles)
+            self.layout_tiles = layout_tiles
 
     @property
     def layout_tiles(self):
         first_level_key = "layout"
         second_level_key = "tiles"
-        return self.content[first_level_key][second_level_key]
+        # it's possible that 'layout' property doesn't exist, if no changes have been made from default
+        if first_level_key in self.content:
+            return self.content[first_level_key][second_level_key]
+        else:
+            return None
 
     @layout_tiles.setter
     def layout_tiles(self, new_tiles):
         first_level_key = "layout"
         second_level_key = "tiles"
-        self.content[first_level_key][second_level_key] = new_tiles
+        if first_level_key in self.content:
+            self.content[first_level_key][second_level_key] = new_tiles
+        # If the 'layout':'tiles' key doesn't exist, should we create it? Would require replicating the
+
 
     # Pass through to allow hitting all Answers contained with a single pinboard
     # You can also do this individually if working the objects one by one
@@ -708,3 +716,17 @@ class YAMLTML:
             return Liveboard(tml_od)
         elif content_type == 'answer':
             return Answer(tml_od)
+
+    # Factory method to return the object type as string
+    @staticmethod
+    def get_tml_type(tml_yaml_str) -> str:
+        tml_od = YAMLTML.load_string(tml_yaml_str)
+        # TML file outer is always a guid, then the type of Object being modeled
+        content_type = 'tml'
+        for key in tml_od:
+            if key in ["guid", "id"]:
+                continue
+            else:
+                content_type = key
+        return content_type
+
