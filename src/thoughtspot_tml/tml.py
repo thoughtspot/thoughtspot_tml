@@ -569,30 +569,34 @@ class Pinboard(TML):
         v_id = answer['id']
         new_layout_tiles = []
         layout_tiles = self.layout_tiles
-        for tile in layout_tiles:
-            if tile['visualization_id'] == v_id:
-                continue
-            else:
-                new_layout_tiles.append(tile)
-        self.layout_tiles = new_layout_tiles
+        # Layout may not exist
+        if layout_tiles is not None:
+            for tile in layout_tiles:
+                if tile['visualization_id'] == v_id:
+                    continue
+                else:
+                    new_layout_tiles.append(tile)
+            self.layout_tiles = new_layout_tiles
 
     def remove_answer_by_layout_index(self, index: int):
         # Index of the Answer in the layout section, and then the reference in the Answer section is found nad removed
 
         # Needs to delete both the Answer and its reference in the Layout Tiles
+
         layout_tiles = self.layout_tiles
-        layout_answer = layout_tiles.pop(index)
-        self.layout_tiles = layout_tiles
-        # Now find the answer in the visualizations
-        answer = self.content['visualizations']
-        v_id = layout_answer['visualization_id']
-        new_answers = []
-        for answer in self.visualizations:
-            if answer['id'] == v_id:
-                continue
-            else:
-                new_answers.append(answer)
-        self.content['visualizations'] = new_answers
+        if layout_tiles is not None:
+            layout_answer = layout_tiles.pop(index)
+            self.layout_tiles = layout_tiles
+            # Now find the answer in the visualizations
+            answer = self.content['visualizations']
+            v_id = layout_answer['visualization_id']
+            new_answers = []
+            for answer in self.visualizations:
+                if answer['id'] == v_id:
+                    continue
+                else:
+                    new_answers.append(answer)
+            self.content['visualizations'] = new_answers
 
     def add_answer_by_index(self, answer: Answer, index: int, tile_size: str):
         # Answers need a Viz_ID to be mapped in the Tiles, replaced any GUID
