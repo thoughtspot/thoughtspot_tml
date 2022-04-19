@@ -26,6 +26,9 @@ class TML:
                 continue
             else:
                 self.content_type = key
+                # Some answers have additional properties later ("display_headline_column"), so need to break after
+                # the actual content_type is found to not overwrite
+                break
 
     def _first_level_property(self, property_key):
         if property_key in self.content:
