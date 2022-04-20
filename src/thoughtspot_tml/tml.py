@@ -679,9 +679,9 @@ class YAMLTML:
     # Special method to match the initial output from PyYAML with the output from ThoughtSPot itself
     # Allows manipulation as object then dump to a file with minimum changes tracked in Git
     @staticmethod
-    def dump_tml_object(tml_obj) -> str:
+    def dump_tml_object(tml_obj, tml_export_width=10000) -> str:
         # The width property must be large to not introduce line breaks into long formulas
-        dump_yaml_string = yaml.dump(tml_obj.tml, Dumper=yaml.Dumper, width=700)
+        dump_yaml_string = yaml.dump(tml_obj.tml, Dumper=yaml.Dumper, width=tml_export_width)
 
         # The 'expr' tag in a worksheet is always double-quoted, but PyYAML output does not do
         re_pattern = "(expr: )(.+)\n"
