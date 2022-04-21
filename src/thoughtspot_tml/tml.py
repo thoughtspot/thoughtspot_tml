@@ -687,7 +687,11 @@ class YAMLTML:
         re_pattern = "(expr: )(.+)\n"
 
         def double_quote_expr_values(matchobj):
-            return '{}"{}"\n'.format(matchobj.group(1), matchobj.group(2))
+            yaml_key = matchobj.group(1)
+            yaml_value = matchobj.group(2)
+            # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
+            yaml_value = yaml_value.replace('"', '\\"')
+            return '{}"{}"\n'.format(yaml_key, yaml_value)
 
         final_yaml = re.sub(re_pattern, double_quote_expr_values, dump_yaml_string)
         return final_yaml
