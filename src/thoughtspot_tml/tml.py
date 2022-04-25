@@ -72,6 +72,7 @@ class TML:
 
     def remove_calendars(self):
         """Removes any references to customer calendars, which aren't supported on Embrace tables."""
+        # The above comment may no longer be true in recent versions
         try:
             # Remove from the content.
             for col in self.content['worksheet_columns']:
@@ -116,6 +117,13 @@ worksheet:
 """
         return template.format(name=worksheet_name, table_name=table_name, table_path_id=table_path_id)
 
+    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
+    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        for a in self.tables:
+            table_name = a['name']
+            if table_name in name_guid_map:
+                a['fqn'] = name_guid_map[table_name]
 
     @property
     def description(self):
@@ -226,6 +234,14 @@ class View(TML):
     def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
     pass
+
+    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
+    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        for a in self.tables:
+            table_name = a['name']
+            if table_name in name_guid_map:
+                a['fqn'] = name_guid_map[table_name]
 
 
 class Table(TML):
@@ -438,6 +454,14 @@ class Answer(TML):
             CANDLESTICK = 'CANDLESTICK'
         self.CHART_TYPES = ChartTypes
 
+    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
+    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        for a in self.tables:
+            table_name = a['name']
+            if table_name in name_guid_map:
+                a['fqn'] = name_guid_map[table_name]
+
     @property
     def description(self):
         key = "description"
@@ -642,6 +666,11 @@ class Pinboard(TML):
             self.content[first_level_key][second_level_key] = new_tiles
         # If the 'layout':'tiles' key doesn't exist, should we create it? Would require replicating the
 
+    # The rule here is that the none of the Answers can connect to separate Worksheets with the same display name
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        for a in self.visualizations:
+            answer = Answer(a)
+            answer.add_fqns_from_name_guid_map(name_guid_map=name_guid_map)
 
     # Pass through to allow hitting all Answers contained with a single pinboard
     # You can also do this individually if working the objects one by one
