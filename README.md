@@ -60,6 +60,23 @@ The following example shows using a library where the `export_tml(guid)` method 
     # Or do it all in one step: 
     lb_obj = Liveboard(ts.tml.export_tml(guid=lb_guid))
 
+#### Retrieving TML with associated object GUIDs
+At the current time, TML export does not include the GUIDs of "table objects" (really data objects), only their names.
+
+When doing SDLC processes, it is very useful to store the exact GUIDs for these objects in the TML file initially. 
+
+The GUIDS of the associated objects can be retrieved from the REST API call that requests the TML, by using the 'export_associated=true' argument in the REST API call to `/metadata/tml/export`.
+
+The `Worksheet`, `View`, `Answer` and `Liveboard` classes all have a method called `add_fqns_from_name_guid_map(name_guid_map)` which takes in a dict in form `{ 'name' : 'guid' }`. This will add the GUID as the additional 'FQN' property within the `table` section of the file. `Table` objects do not need this method, because Connections have unique names, so Connection Name or other connection details can be changed directly.
+
+The follow example uses a library where `metadata_export_tml_with_associations_map` returns both the OrderedDict and the `{'name': 'guid'}` Dict necessary
+
+    lb_od, name_guid_map = ts.tsrest.metadata_export_tml_with_associations_map(guid=lb_guid)
+    # Create a Liveboard TML object
+    lb_obj = Liveboard(lb_od)
+    lb_obj.add_fqns_from_name_guid_map(name_guid_map=name_guid_map)
+    
+
 ### Retrieving TML as YAML string from REST API
 If the REST API library outputs the YAML string from the TML export call, you can use the YAMLTML class to load it to OrderedDict:
 
@@ -70,6 +87,25 @@ If the REST API library outputs the YAML string from the TML export call, you ca
     lb_obj = Liveboard(lb_od)
     # Or do it all in one step: 
     lb_obj = Liveboard(YAMLTML.load_string(ts.tml.export_tml_string(guid=lb_guid)))
+
+#### Retrieving TML with associated object GUIDs
+At the current time, TML export does not include the GUIDs of "table objects" (really data objects), only their names.
+
+When doing SDLC processes, it is very useful to store the exact GUIDs for these objects in the TML file initially. 
+
+The GUIDS of the associated objects can be retrieved from the REST API call that requests the TML, by using the 'export_associated=true' argument in the REST API call to `/metadata/tml/export`.
+
+The `Worksheet`, `View`, `Answer` and `Liveboard` classes all have a method called `add_fqns_from_name_guid_map(name_guid_map)` which takes in a dict in form `{ 'name' : 'guid' }`. This will add the GUID as the additional 'FQN' property within the `table` section of the file. `Table` objects do not need this method, because Connections have unique names, so Connection Name or other connection details can be changed directly.
+
+The follow example uses a library where `metadata_export_tml_with_associations_map` returns both the OrderedDict and the `{'name': 'guid'}` Dict necessary
+
+    lb_str, name_guid_map = ts.tsrest.metadata_export_tml_string_with_associations_map(guid=lb_guid)
+    # Create a Liveboard TML object
+    lb_obj = Liveboard(YAMLTML.load_string(lb_str))
+    lb_obj.add_fqns_from_name_guid_map(name_guid_map=name_guid_map)
+    final_yaml_str = YAMLTML.dump_tml_object(lb_obj)
+    with open('tml_file.liveboard.tml', 'w', encoding='utf-8') as fh:
+        fh.write(final_yaml_str)
 
 ### Opening a TML file from disk and loading into a TML object
 The `YAMLTML` object contains static methods to help with correct import and formatting of ThoughtSpot's TML YAML.
