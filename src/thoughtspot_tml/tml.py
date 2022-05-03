@@ -60,11 +60,15 @@ class TML:
         self.content["name"] = new_name
 
     def remove_guid(self):
-        del self.tml['guid']
+        if 'guid' in self.tml:
+            del self.tml['guid']
 
     @property
     def guid(self):
-        return self.tml['guid']
+        if 'guid' in self.tml:
+            return self.tml['guid']
+        else:
+            return None
 
     @guid.setter
     def guid(self, new_guid: str):
@@ -732,7 +736,7 @@ class YAMLTML:
 
     # Factory method to return the correct object type
     @staticmethod
-    def get_tml_object(tml_yaml_str) -> TML:
+    def get_tml_object(tml_yaml_str):
         tml_od = YAMLTML.load_string(tml_yaml_str)
         # TML file outer is always a guid, then the type of Object being modeled
         content_type = 'tml'
