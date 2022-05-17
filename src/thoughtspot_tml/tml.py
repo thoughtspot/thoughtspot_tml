@@ -74,6 +74,11 @@ class TML:
     def guid(self, new_guid: str):
         self.tml['guid'] = new_guid
 
+    @property
+    def tables(self):
+        key = "tables"
+        return self._first_level_property(key)
+
     def remove_calendars(self):
         """Removes any references to customer calendars, which aren't supported on Embrace tables."""
         # The above comment may no longer be true in recent versions
@@ -94,6 +99,13 @@ class TML:
                 strval += f"{k}: {v}\n"
         return strval
 
+    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
+    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        for a in self.tables:
+            table_name = a['name']
+            if table_name in name_guid_map:
+                a['fqn'] = name_guid_map[table_name]
 
 class Worksheet(TML):
     def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
@@ -120,14 +132,6 @@ worksheet:
     join_progressive: true
 """
         return template.format(name=worksheet_name, table_name=table_name, table_path_id=table_path_id)
-
-    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
-    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
-    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
-        for a in self.tables:
-            table_name = a['name']
-            if table_name in name_guid_map:
-                a['fqn'] = name_guid_map[table_name]
 
     @property
     def description(self):
@@ -167,11 +171,6 @@ worksheet:
         first_level_key = "properties"
         second_level_key = "join_progressive"
         self.content[first_level_key][second_level_key] = str(new_value).lower()
-
-    @property
-    def tables(self):
-        key = "tables"
-        return self._first_level_property(key)
 
     @property
     def joins(self):
@@ -270,6 +269,14 @@ table:
             table_name = db_table
         return template.format(connection_name=connection_name, name=table_name, db=db_name, schema=schema,
                                db_table=db_table)
+
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        pass
+
+    @property
+    def tables(self):
+        key = "tables"
+        return None
 
     @property
     def db_name(self):
@@ -458,14 +465,6 @@ class Answer(TML):
             CANDLESTICK = 'CANDLESTICK'
         self.CHART_TYPES = ChartTypes
 
-    # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
-    # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
-    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
-        for a in self.tables:
-            table_name = a['name']
-            if table_name in name_guid_map:
-                a['fqn'] = name_guid_map[table_name]
-
     @property
     def description(self):
         key = "description"
@@ -572,6 +571,11 @@ class Pinboard(TML):
         LARGE_SMALL = 'LARGE_SMALL'
         MEDIUM_SMALL = 'MEDIUM_SMALL'
         EXTRA_LARGE = 'EXTRA_LARGE'
+
+    @property
+    def tables(self):
+        key = "tables"
+        return None
 
     @property
     def visualizations(self):

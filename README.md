@@ -69,7 +69,7 @@ The GUIDS of the associated objects can be retrieved from the REST API call that
 
 The `Worksheet`, `View`, `Answer` and `Liveboard` classes all have a method called `add_fqns_from_name_guid_map(name_guid_map)` which takes in a dict in form `{ 'name' : 'guid' }`. This will add the GUID as the additional 'FQN' property within the `table` section of the file. `Table` objects do not need this method, because Connections have unique names, so Connection Name or other connection details can be changed directly.
 
-The follow example uses a library where `metadata_export_tml_with_associations_map` returns both the OrderedDict and the `{'name': 'guid'}` Dict necessary
+The following example uses the thoughtspot-rest-api-v1 module, where `metadata_export_tml_with_associations_map` returns both the OrderedDict of the main exported TML object and a `{'name': 'guid'}` Dict generated from all the other associated objects that can be used in the `.add_fqns_from_name_guid_map()` method
 
     lb_od, name_guid_map = ts.tsrest.metadata_export_tml_with_associations_map(guid=lb_guid)
     # Create a Liveboard TML object
@@ -97,7 +97,7 @@ The GUIDS of the associated objects can be retrieved from the REST API call that
 
 The `Worksheet`, `View`, `Answer` and `Liveboard` classes all have a method called `add_fqns_from_name_guid_map(name_guid_map)` which takes in a dict in form `{ 'name' : 'guid' }`. This will add the GUID as the additional 'FQN' property within the `table` section of the file. `Table` objects do not need this method, because Connections have unique names, so Connection Name or other connection details can be changed directly.
 
-The follow example uses a library where `metadata_export_tml_with_associations_map` returns both the OrderedDict and the `{'name': 'guid'}` Dict necessary
+The following example uses the thoughtspot-rest-api-v1 module, where library where `metadata_export_tml_with_associations_map` returns both the string representation of the main exported TML object and a `{'name': 'guid'}` Dict generated from all the other associated objects that can be used in the `.add_fqns_from_name_guid_map()` method:
 
     lb_str, name_guid_map = ts.tsrest.metadata_export_tml_string_with_associations_map(guid=lb_guid)
     # Create a Liveboard TML object
@@ -341,6 +341,8 @@ Whether the Answer displays as a Chart or a Table is the `display_mode` property
 
 ### Changing References (Switching a Liveboard to a different Worksheet, Worksheet to different tables etc.)
 One of the primary use cases of TML is taking an existing object (a Liveboard for example) and either making a copy that maps to a different Worksheet, or just updating the original. 
+
+The most effective way to get the GUIDs necessary to change references is to export the associated_objects when you first downloaded a TML file and added the `fqn` property using `add_fqns_from_name_guid_map()` method. 
 
 There are object references within the TML, that need GUIDs from the Server. Using the REST API commands, you can get these GUIDs.
 
