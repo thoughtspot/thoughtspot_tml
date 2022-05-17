@@ -102,10 +102,21 @@ class TML:
     # TML files do not include the GUIDs of related objects. But this can be retrieved from export_associated=true
     # option of the tml/export command. This takes a dictionary of Object Name: GUID generated from that REST API
     def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
-        for a in self.tables:
-            table_name = a['name']
-            if table_name in name_guid_map:
-                a['fqn'] = name_guid_map[table_name]
+        if self.tables is not None:
+            for a in self.tables:
+                table_name = a['name']
+                if table_name in name_guid_map:
+                    a['fqn'] = name_guid_map[table_name]
+
+    def replace_fqns_from_map(self, parent_child_guid_map: Dict):
+        if self.tables is not None:
+            for a in self.tables:
+                if 'fqn' in a:
+                    parent_fqn = a['fqn']
+                    if parent_fqn in parent_child_guid_map:
+                        a['fqn'] = parent_child_guid_map[parent_fqn]
+                    else:
+                        raise IndexError("Object GUID {} not found in parent:child GUID map".format(parent_fqn))
 
 class Worksheet(TML):
     def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
