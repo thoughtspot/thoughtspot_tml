@@ -108,7 +108,7 @@ class TML:
                 if table_name in name_guid_map:
                     a['fqn'] = name_guid_map[table_name]
 
-    def replace_fqns_from_map(self, parent_child_guid_map: Dict):
+    def replace_fqns_from_map(self, parent_child_guid_map: Dict, ignore_missing=False):
         if self.tables is not None:
             for a in self.tables:
                 if 'fqn' in a:
@@ -116,7 +116,8 @@ class TML:
                     if parent_fqn in parent_child_guid_map:
                         a['fqn'] = parent_child_guid_map[parent_fqn]
                     else:
-                        raise IndexError("Object GUID {} not found in parent:child GUID map".format(parent_fqn))
+                        if ignore_missing is False:
+                            raise IndexError("Object GUID {} not found in parent:child GUID map".format(parent_fqn))
 
 class Worksheet(TML):
     def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
@@ -330,8 +331,11 @@ table:
     def connection_name(self):
         first_level_key = "connection"
         second_level_key = "name"
-        if second_level_key in self.content[first_level_key]:
-            return self.content[first_level_key][second_level_key]
+        if first_level_key in self.content:
+            if second_level_key in self.content[first_level_key]:
+                return self.content[first_level_key][second_level_key]
+            else:
+                return None
         else:
             return None
 
