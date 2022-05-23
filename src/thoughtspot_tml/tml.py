@@ -735,17 +735,51 @@ class YAMLTML:
         # The width property must be large to not introduce line breaks into long formulas
         dump_yaml_string = yaml.dump(tml_obj.tml, Dumper=yaml.Dumper, width=tml_export_width)
 
-        # The 'expr' tag in a worksheet is always double-quoted, but PyYAML output does not do
+        # The 'expr' tag in a worksheet is always double-quoted, but PyYAML output does not do this automatically
+        # Except, when a formula starts with square-brackets (a 'special character' in YAML), it gets single-quotes
         re_pattern = "(expr: )(.+)\n"
 
         def double_quote_expr_values(matchobj):
             yaml_key = matchobj.group(1)
             yaml_value = matchobj.group(2)
+            # May need to remove single quotes from the yaml value, on occasion there are reasons it gets exported with them automatically
+            if yaml_value[0] == "'":
+                yaml_value = yaml_value[1:-1]
             # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
             yaml_value = yaml_value.replace('"', '\\"')
             return '{}"{}"\n'.format(yaml_key, yaml_value)
 
-        final_yaml = re.sub(re_pattern, double_quote_expr_values, dump_yaml_string)
+        expr_quoted_yaml = re.sub(re_pattern, double_quote_expr_values, dump_yaml_string)
+
+        # There is an "on" tag in RLS / JOINs, but "on" is a special character in YAML and thus is exported with
+        # single-quotes from PyYAML. TML format uses double-quotes around both the key AND the value
+
+        on_re_pattern = "('on': )(.+)\n"
+
+        def double_quote_on_values(matchobj):
+            yaml_key = matchobj.group(1)
+            yaml_value = matchobj.group(2)
+            # May need to remove single quotes from the yaml value, on occasion there are reasons it gets exported with them automatically
+            if yaml_value[0] == "'":
+                yaml_value = yaml_value[1:-1]
+            # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
+            yaml_value = yaml_value.replace('"', '\\"')
+            return '"on": "{}"\n'.format(yaml_value)
+        on_quoted_yaml = re.sub(on_re_pattern, double_quote_on_values, expr_quoted_yaml)
+
+        single_quote_re_pattern = "'(.+)'"
+
+        # There might be other things that are single-quoted, but TML always use double
+        def double_any_single_quotes(matchobj):
+            value = matchobj.group(1)
+            # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
+            value = value.replace('"', '\\"')
+            return '"{}"'.format(value)
+
+        double_quoted_yaml = re.sub(single_quote_re_pattern, double_any_single_quotes, on_quoted_yaml)
+        # Grab any bare single-quotes
+        double_quoted_yaml = double_quoted_yaml.replace("''", '""')
+        final_yaml = double_quoted_yaml
         return final_yaml
 
     # We use oyaml to load as an OrderedDict to maintain the order for identical output after manipulation
