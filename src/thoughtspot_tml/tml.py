@@ -11,7 +11,7 @@ import oyaml as yaml
 
 
 class TML:
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         self.tml = tml_ordereddict
         # Answers within a Pinboard just have an "id"
         if 'guid' in tml_ordereddict:
@@ -120,7 +120,7 @@ class TML:
                             raise IndexError("Object GUID {} not found in parent:child GUID map".format(parent_fqn))
 
 class Worksheet(TML):
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
 
     @staticmethod
@@ -246,7 +246,7 @@ worksheet:
 
 
 class View(TML):
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
     pass
 
@@ -260,7 +260,7 @@ class View(TML):
 
 
 class Table(TML):
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
 
     @staticmethod
@@ -443,7 +443,7 @@ table:
 
 
 class Answer(TML):
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
 
         class ChartTypes:
@@ -575,7 +575,7 @@ class Answer(TML):
 
 
 class Pinboard(TML):
-    def __init__(self, tml_ordereddict: [typing.OrderedDict, Dict]):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
         super().__init__(tml_ordereddict=tml_ordereddict)
 
     class TileSizes:
@@ -784,7 +784,7 @@ class YAMLTML:
 
     # We use oyaml to load as an OrderedDict to maintain the order for identical output after manipulation
     @staticmethod
-    def load_string(tml_yaml_str) -> OrderedDict:
+    def load_string(tml_yaml_str) -> "typing.OrderedDict":
         return yaml.load(tml_yaml_str, Loader=yaml.Loader)
 
     # Factory method to return the correct object type
