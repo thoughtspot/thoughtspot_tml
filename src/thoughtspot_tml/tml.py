@@ -719,6 +719,54 @@ class Pinboard(TML):
 class Liveboard(Pinboard):
     pass
 
+# Available through Data Workspace feature
+class SQLView(TML):
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
+
+    def add_fqns_from_name_guid_map(self, name_guid_map: Dict):
+        pass
+
+    @property
+    def tables(self):
+        key = "tables"
+        return None
+
+    @property
+    def connection(self):
+        if "connection" in self.content:
+            return self.content["connection"]
+        else:
+            return None
+
+    @property
+    def connection_name(self):
+        first_level_key = "connection"
+        second_level_key = "name"
+        if first_level_key in self.content:
+            if second_level_key in self.content[first_level_key]:
+                return self.content[first_level_key][second_level_key]
+            else:
+                return None
+        else:
+            return None
+
+    @connection_name.setter
+    def connection_name(self, new_value: str):
+        first_level_key = "connection"
+        second_level_key = "name"
+        self.content[first_level_key][second_level_key] = new_value
+
+    @property
+    def sql_query(self):
+        key = "sql_query"
+        return self._first_level_property(key)
+
+    @sql_query.setter
+    def sql_query(self, new_sql_query: str):
+        key = "sql_query"
+        self.content[key] = new_sql_query
+
 
 ###
 # YAML loader and dumper class
