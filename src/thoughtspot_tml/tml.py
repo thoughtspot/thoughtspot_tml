@@ -767,6 +767,12 @@ class SQLView(TML):
         key = "sql_query"
         self.content[key] = new_sql_query
 
+    @property
+    def columns(self):
+        # Create empty array for generating from scratch
+        if self.content["sql_view_columns"] is None:
+            self.content["sql_view_columns"] = []
+        return self.content["sql_view_columns"]
 
 ###
 # YAML loader and dumper class
