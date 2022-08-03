@@ -867,6 +867,8 @@ class YAMLTML:
             return Liveboard(tml_od)
         elif content_type == 'answer':
             return Answer(tml_od)
+        elif content_type == 'sql_view':
+            return SQLView(tml_od)
 
     # Factory method to return the object type as string
     @staticmethod
