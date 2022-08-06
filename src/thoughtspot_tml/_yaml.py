@@ -16,6 +16,14 @@ _TML_ID_REGEX = re.compile(r'^[^"][\w\s]+::[\w\s]+[^"]$')
 # Reserve characters are defined as any terminator or value or flow entry token.
 _TOKEN_CHARACTERS = set("[]{}:,")
 
+# fmt: off
+# Reserve words are anything that can convert to a boolean scalar in YAML.
+_RESERVED_WORDS = (
+    "y",   # Chart Axis
+    "on",  # JOIN expressions
+)
+# fmt: on
+
 
 def _double_quote_when_special_char(dumper: yaml.Dumper, data: Union[str, int, float]):
     """
@@ -27,7 +35,7 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: Union[str, int, f
           - it's empty
     """
     special = _TOKEN_CHARACTERS.intersection(set(data))
-    reserved = data in ("y", "n")
+    reserved = data in _RESERVED_WORDS
     is_tml_id = _TML_ID_REGEX.match(data)
     empty_str = not data
 
