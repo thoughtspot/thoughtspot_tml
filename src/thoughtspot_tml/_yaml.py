@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Dict, Union
 from math import inf as INFINITY
 import re
 
@@ -42,7 +42,7 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: Union[str, int, f
 yaml.add_representer(str, _double_quote_when_special_char)
 
 
-def load(document: str) -> str:
+def load(document: str) -> Dict[str, Any]:
     """
     Load a TML object.
     """
