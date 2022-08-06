@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 import re
 
-import oyaml as yaml
+from thoughtspot_tml._yaml import load, dump
 # TML class works on TML as a Python Dict or OrderedDict structure (i.e. the result of a JSON.loads() or oyaml.load() )
 
 
@@ -785,9 +785,9 @@ class YAMLTML:
     # Special method to match the initial output from PyYAML with the output from ThoughtSPot itself
     # Allows manipulation as object then dump to a file with minimum changes tracked in Git
     @staticmethod
-    def dump_tml_object(tml_obj, tml_export_width=10000) -> str:
+    def dump_tml_object(tml_obj) -> str:
         # The width property must be large to not introduce line breaks into long formulas
-        dump_yaml_string = yaml.dump(tml_obj.tml, Dumper=yaml.Dumper, width=tml_export_width)
+        dump_yaml_string = dump(tml_obj.tml)
 
         # The 'expr' tag in a worksheet is always double-quoted, but PyYAML output does not do this automatically
         # Except, when a formula starts with square-brackets (a 'special character' in YAML), it gets single-quotes
@@ -839,7 +839,7 @@ class YAMLTML:
     # We use oyaml to load as an OrderedDict to maintain the order for identical output after manipulation
     @staticmethod
     def load_string(tml_yaml_str) -> "typing.OrderedDict":
-        return yaml.load(tml_yaml_str, Loader=yaml.Loader)
+        return load(tml_yaml_str)
 
     # Factory method to return the correct object type
     @staticmethod
