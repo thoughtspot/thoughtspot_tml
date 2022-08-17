@@ -821,14 +821,16 @@ class YAMLTML:
             return '"on": "{}"\n'.format(yaml_value)
         on_quoted_yaml = re.sub(on_re_pattern, double_quote_on_values, expr_quoted_yaml)
 
-        single_quote_re_pattern = "'(.+)'"
+        single_quote_re_pattern = ": '(.+)'"
 
         # There might be other things that are single-quoted, but TML always use double
         def double_any_single_quotes(matchobj):
             value = matchobj.group(1)
+            # Grabbing ': " so drop that for the wrapping, then add back at the end
+            value = value[2:]
             # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
             value = value.replace('"', '\\"')
-            return '"{}"'.format(value)
+            return ': "{}"'.format(value)
 
         double_quoted_yaml = re.sub(single_quote_re_pattern, double_any_single_quotes, on_quoted_yaml)
         # Grab any bare single-quotes
