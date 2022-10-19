@@ -21,14 +21,18 @@ class TML:
 
         self.content_type = None
         # TML file outer is always a guid, then the type of Object being modeled
-        for key in self.tml:
-            if key in ["guid", "id"]:
-                continue
-            else:
-                self.content_type = key
-                # Some answers have additional properties later ("display_headline_column"), so need to break after
-                # the actual content_type is found to not overwrite
-                break
+        # BDB except for connections.
+        if tml_ordereddict.get('type') and tml_ordereddict.get('type').startswith('RDBMS'):  # have to do a special check for connection.
+            self.content_type = 'connection'
+        else:
+            for key in self.tml:
+                if key in ["guid", "id"]:
+                    continue
+                else:
+                    self.content_type = key
+                    # Some answers have additional properties later ("display_headline_column"), so need to break after
+                    # the actual content_type is found to not overwrite
+                    break
 
     def _first_level_property(self, property_key):
         if property_key in self.content:
@@ -719,6 +723,7 @@ class Pinboard(TML):
 class Liveboard(Pinboard):
     pass
 
+
 # Available through Data Workspace feature
 class SQLView(TML):
     def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
@@ -773,6 +778,41 @@ class SQLView(TML):
         if self.content["sql_view_columns"] is None:
             self.content["sql_view_columns"] = []
         return self.content["sql_view_columns"]
+
+
+class Connection(TML):
+    """
+    Encapsulates the connection.  Currently (8.7.cl) tables are just YAML and don't follow the TML conventions of other
+    files.
+    """
+    def __init__(self, tml_ordereddict: ["typing.OrderedDict", Dict]):
+        super().__init__(tml_ordereddict=tml_ordereddict)
+
+    @property
+    def name(self) -> str:
+        return self.tml.get("name")  # actual value or None
+
+    @property
+    def description(self) -> str:
+        return self.tml.get("description", "")  # API requires something.
+
+    @property
+    def type(self) -> str:
+        return self.tml.get("type")  # actual value or None
+
+    @property
+    def authentication_type(self) -> str:
+        return self.tml.get("authentication_type")  # actual value or None
+
+    @property
+    def properties(self) -> OrderedDict:
+        """List of authentication properties.  These will vary by the connection type."""
+        props = self.tml.get("properties")
+        return props
+
+    @property
+    def table(self):
+        return None
 
 ###
 # YAML loader and dumper class
@@ -849,28 +889,37 @@ class YAMLTML:
         tml_od = YAMLTML.load_string(tml_yaml_str)
         # TML file outer is always a guid, then the type of Object being modeled
         content_type = 'tml'
-        for key in tml_od:
-            if key in ["guid", "id"]:
-                continue
-            else:
-                content_type = key
+        # BDB - need to check for connections, which don't follow the TML pattern.
+        if tml_od.get('type') and tml_od.get('type').startswith('RDBMS'):  # have to do a special check for connection.
+            content_type = 'connection'
+        else:
+            for key in tml_od:
+                if key in ["guid", "id"]:
+                    continue
+                else:
+                    content_type = key
 
+        obj = None
         if content_type == 'tml':
-            return TML(tml_od)
+            obj = TML(tml_od)
         elif content_type == 'table':
-            return Table(tml_od)
+            obj = Table(tml_od)
         elif content_type == 'worksheet':
-            return Worksheet(tml_od)
+            obj = Worksheet(tml_od)
         elif content_type == 'view':
-            return View(tml_od)
+            obj = View(tml_od)
         elif content_type == 'liveboard':
-            return Liveboard(tml_od)
+            obj = Liveboard(tml_od)
         elif content_type == 'pinboard':
-            return Liveboard(tml_od)
+            obj = Liveboard(tml_od)
         elif content_type == 'answer':
-            return Answer(tml_od)
+            obj = Answer(tml_od)
         elif content_type == 'sql_view':
-            return SQLView(tml_od)
+            obj = SQLView(tml_od)
+        elif content_type == 'connection':
+            obj = Connection(tml_od)
+
+        return obj
 
     # Factory method to return the object type as string
     @staticmethod
@@ -878,10 +927,14 @@ class YAMLTML:
         tml_od = YAMLTML.load_string(tml_yaml_str)
         # TML file outer is always a guid, then the type of Object being modeled
         content_type = 'tml'
-        for key in tml_od:
-            if key in ["guid", "id"]:
-                continue
-            else:
-                content_type = key
+        # BDB - this doesn't apply to connections.
+        if tml_od.get('type') and tml_od.get('type').startswith('RDBMS'):  # have to do a special check for connection.
+            content_type = 'connection'
+        else:
+            for key in tml_od:
+                if key in ["guid", "id"]:
+                    continue
+                else:
+                    content_type = key
         return content_type
 
