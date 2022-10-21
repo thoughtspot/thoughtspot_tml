@@ -867,7 +867,7 @@ class YAMLTML:
         def double_any_single_quotes(matchobj):
             value = matchobj.group(1)
             # Grabbing ': " so drop that for the wrapping, then add back at the end
-            value = value[2:]
+            # value = value[2:]
             # Need to escape any double quotes with a backslash, to handle the possibility of quoted text in string calc
             value = value.replace('"', '\\"')
             return ': "{}"'.format(value)
