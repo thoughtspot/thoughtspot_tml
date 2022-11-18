@@ -1,3 +1,59 @@
 [build-system]
 requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["_protogen*"]
+
+[project]
+name = "thoughtspot_tml"
+version = "1.3.0"
+description = "Library for manipulating ThoughtSpot Modeling Language (TML) files"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Bryant Howell", email = "bryant.howell@thoughtspot.com"},
+    {name = "Bill B", email = "bill.back@thoughtspot.com"},
+    {name = "boonhapus", email = "nicholas.cooper@thoughtspot.com"},
+]
+maintainers = [
+    {name = "Bryant Howell", email = "bryant.howell@thoughtspot.com"},
+    {name = "boonhapus", email = "nicholas.cooper@thoughtspot.com"},
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    # "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "PyYAML"
+]
+
+[project.urls]
+repository = "https://github.com/thoughtspot/thoughtspot_tml"
+bug_tracker = "https://github.com/thoughtspot/thoughtspot_tml/issues"
+
+[project.optional-dependencies]
+dev = [
+    "betterproto[compiler]",
+    "black",
+]
+
+
+[tool.black]
+line-length = 120
+exclude = '''
+(
+      __pycache__  # ignore compiled bytecode
+    | \.venv       # ignore virtual environments
+)
+'''
