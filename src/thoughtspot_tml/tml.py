@@ -1,5 +1,5 @@
 from dataclasses import dataclass, fields, is_dataclass, asdict
-from typing import TYPE_CHECKING, get_origin
+from typing import TYPE_CHECKING, get_origin, get_args
 import pathlib
 import typing
 import os
@@ -52,15 +52,16 @@ def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
         # it's a List of basic types or ForwardRefs
         elif get_origin(field.type) is list:
             new_value = []
-            type_ = getattr(field.type.__args__[0], "__forward_value__", None)
+            args = get_args(field.type)
+            field_type = args[0].__forward_value__ if isinstance(args[0], typing.ForwardRef) else args[0]
 
             for item in value:
-                if type_ is not None:
-                    item = type_(**item)
+                if is_dataclass(field_type) and isinstance(item, dict):
+                    item = field_type(**item)
 
                 new_value.append(item)
 
-                if type_ is not None:
+                if is_dataclass(field_type):
                     _recursive_complex_attrs_to_dataclasses(item)
 
         else:
@@ -74,6 +75,7 @@ def _recursive_remove_null(mapping: typing.Dict[str, typing.Any]) -> typing.Dict
     Drop all keys with null values, they're optional.
     """
     new = {}
+
     for k, v in mapping.items():
         if isinstance(v, dict):
             new[k] = _recursive_remove_null(v)
@@ -92,8 +94,6 @@ class TML:
     """
     Base object for ThoughtSpot TML.
     """
-
-    guid: str
 
     def __post_init__(self):
         _recursive_complex_attrs_to_dataclasses(self)
@@ -132,11 +132,31 @@ class TML:
 
 
 @dataclass
+class Connection(TML):
+    """
+    Representation of a ThoughtSpot Connection YAML.
+    """
+    # @boonhapus, 2022/11/20
+    #
+    # "Why is this one different?"
+    # Connections do not yet have a TML representation. The TML data format is simply
+    # the YAML 1.1 spec. Connections were the first text representation of metadata in
+    # ThoughtSpot and leveraged the YAML extension.
+    #
+    name: str
+    type: str
+    authentication_type: str
+    properties: typing.List[_scriptability.KeyValueStr]
+    table: typing.List[_scriptability.ConnectionDocTableDoc]
+
+
+@dataclass
 class SQLView(TML):
     """
     Representation of a ThoughtSpot SQLView TML.
     """
 
+    guid: str
     sql_view: _scriptability.SqlViewEDocProto
 
 
@@ -146,4 +166,5 @@ class Answer(TML):
     Representation of a ThoughtSpot Answer TML.
     """
 
+    guid: str
     answer: _scriptability.AnswerEDocProto
