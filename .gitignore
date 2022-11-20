@@ -32,7 +32,7 @@ env.bak/
 venv.bak/
 
 # ignore spec generators
-src/*.json
-src/*.yaml
-src/*.proto
-src/*.toml
+_generate/*.json
+_generate/*.yaml
+_generate/*.proto
+_generate/*.toml
