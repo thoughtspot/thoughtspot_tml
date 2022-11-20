@@ -1,1 +1,1 @@
-from .tml import YAMLTML, Table, Answer, Liveboard, Worksheet, View, TML, Pinboard, SQLView, Connection
+from thoughtspot_tml.tml import SQLView
