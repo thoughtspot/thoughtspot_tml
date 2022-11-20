@@ -29,8 +29,13 @@ def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
     for field in fields(cls):
         value = getattr(instance, field.name)
 
-        # ignore nulls, they get dropped anyway
+        # ignore nulls, they get dropped to support optionality
         if value is None:
+            continue
+
+        # python-betterproto doesn't support optional map_fields
+        if value == {}:
+            setattr(instance, field.name, None)
             continue
 
         # it's a dataclass
@@ -133,3 +138,12 @@ class SQLView(TML):
     """
 
     sql_view: _scriptability.SqlViewEDocProto
+
+
+@dataclass
+class Answer(TML):
+    """
+    Representation of a ThoughtSpot Answer TML.
+    """
+
+    answer: _scriptability.AnswerEDocProto
