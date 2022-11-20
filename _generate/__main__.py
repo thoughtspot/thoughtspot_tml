@@ -122,7 +122,7 @@ def _clean_scriptability():
     text = SCRIPTABILITY_PY.read_text()
 
     # so our RegEx is simpler, and we can enforce optionality
-    text = re.sub(r"((?:string|double|bool|message)_field\(.*)\)", r"\1, optional=True)", text)
+    text = re.sub(r"((?:string|double|bool|message|int32)_field\(.*)\)", r"\1, optional=True)", text)
 
     SCRIPTABILITY_PY.write_text(text)
 
