@@ -19,6 +19,11 @@ import _proto_local
 console = Console()
 HERE = pathlib.Path(__file__).parent
 EDOC_PROTO = HERE / "edoc.proto"
+EDOC_IMPORTS = """
+package scriptability;
+option java_package = "com.thoughtspot.callosum.metadata";
+option java_outer_classname = "EDoc";
+"""
 EDOC_PY = HERE / "scriptability" / "__init__.py"
 
 PACKAGE_SRC = HERE.parent / "src" / "thoughtspot_tml"
@@ -59,7 +64,8 @@ def _clean_edoc_proto():
     if re.search(rf"^{RE_COMMON_PROTO}", text, flags=re.M):
         text = re.sub(RE_COMMON_PROTO, r"// \1", text, flags=re.M)
         text = re.sub(r"common\.(?!proto_validation)(.+) ", r"\1", text)
-        text += _proto_local.PROTO_COMMON
+        imports, package, rest = text.partition(EDOC_IMPORTS)
+        text = "\n".join([imports, package, _proto_local.PROTO_COMMON, rest])
 
     # replace missing protos with their local representation
     RE_NUMBER_FORMAT_PROTO = r'(import "protos/number_format.proto")'
@@ -67,7 +73,8 @@ def _clean_edoc_proto():
     if re.search(rf"^{RE_NUMBER_FORMAT_PROTO}", text, flags=re.M):
         text = re.sub(RE_NUMBER_FORMAT_PROTO, r"// \1", text, flags=re.M)
         text = re.sub(r"blink.numberFormatConfig\.(.+) ", r"\1", text)
-        text += _proto_local.PROTO_NUMBER_FORMAT_CONFIG
+        imports, package, rest = text.partition(EDOC_IMPORTS)
+        text = "\n".join([imports, package, _proto_local.PROTO_NUMBER_FORMAT_CONFIG, rest])
 
     # comment out validations import and strip out all their annotations
     text = re.sub(r'^(?!// )(import "common/proto_validation/annotation.proto")', r"// \1", text, flags=re.M)
