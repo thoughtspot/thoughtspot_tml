@@ -30,3 +30,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# ignore spec generators
+src/*.json
+src/*.yaml
+src/*.proto
+src/*.toml
