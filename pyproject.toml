@@ -44,8 +44,10 @@ bug_tracker = "https://github.com/thoughtspot/thoughtspot_tml/issues"
 
 [project.optional-dependencies]
 dev = [
-    "betterproto[compiler]",
+    "betterproto[compiler] >= 2.0.0b5",
     "black",
+    "ward",
+    "rich",
 ]
 
 
@@ -53,7 +55,9 @@ dev = [
 line-length = 120
 exclude = '''
 (
-      __pycache__  # ignore compiled bytecode
-    | \.venv       # ignore virtual environments
+      __pycache__        # ignore compiled bytecode
+    | \.venv             # ignore virtual environments
+    | _scriptability.py  # ignore generated files
 )
 '''
+
