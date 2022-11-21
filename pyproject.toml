@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["_protogen*"]
+exclude = ["_generate*"]
 
 [project]
 name = "thoughtspot_tml"
