@@ -9,6 +9,7 @@ of the maintainers of this library.
 """
 import subprocess as sp
 import pathlib
+import ast
 import re
 
 from rich.console import Console
@@ -37,7 +38,7 @@ def _subprocess_run(*cmd):
 
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT) as proc:
         for line in proc.stdout:
-            console.log(f"  {line.decode().strip()}")
+            console.log(f"[cyan]  {line.decode().strip()}")
 
         console.log()
 
@@ -100,14 +101,12 @@ def _run_protoc():
     # /_generate/scriptability/__init__.py   -->   /src/thoughtspot_tml/_scriptability.py
     #
     _subprocess_run(
-        *[
-            # fmt: off
-            "protoc",
-            "-I", HERE.as_posix(),
-            "--python_betterproto_out", HERE.as_posix(),
-            EDOC_PROTO.as_posix(),
-            # fmt: on
-        ]
+        # fmt: off
+        "protoc",
+        "-I", HERE.as_posix(),
+        "--python_betterproto_out", HERE.as_posix(),
+        EDOC_PROTO.as_posix(),
+        # fmt: on
     )
 
     EDOC_PY.replace(SCRIPTABILITY_PY)
@@ -123,24 +122,56 @@ def _clean_scriptability():
     #
     # As of right now, betterproto (v2.0.0b5) does not allow optionality.
     #
-    some_ridiculous_easter_egg_magic_number = "20120601"
+    class ThoughtSpotVisitor(ast.NodeVisitor):
+        # 👁️👄👁️ rules: rewrite Format.*Config dataclasses to have camelCase attributes
 
-    # reformat the file to have no line-wrapping
-    _subprocess_run(
-        *[
-            # fmt: off
-            "black", SCRIPTABILITY_PY.as_posix(),
-            "--line-length", some_ridiculous_easter_egg_magic_number,
-            # fmt: on
-        ]
-    )
+        @staticmethod
+        def snake_to_camel(snake_case: str) -> str:
+            components = snake_case.split('_')
+            # We capitalize the first letter of each component except the first one
+            # with the 'title' method and join them together.
+            return components[0] + ''.join(x.title() for x in components[1:])
+
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:
+            if "dataclass" in [deco.func.id for deco in node.decorator_list]:
+                for attribute in node.body:
+                    # if it's a Foramt.*Config, camelize its name
+                    if node.name.startswith("Format") and node.name.endswith("Config"):
+                        attribute.target.id = self.snake_to_camel(attribute.target.id)
+
+            self.generic_visit(node)
+
+    class BetterProtoVisitor(ast.NodeVisitor):
+        OPTIONAL_FIELDS = ("string_field", "double_field", "bool_field", "message_field", "int32_field", "enum_field",)
+        KW_OPTIONAL = ast.keyword(arg="optional", value=ast.Constant(True))  # optional=True
+
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:
+            if "dataclass" in [deco.func.id for deco in node.decorator_list]:
+                attrs = []
+                rest = []
+
+                for attribute in node.body:
+                    if isinstance(attribute, ast.AnnAssign):
+                        attrs.append(attribute)
+
+                        if attribute.value.func.attr in self.OPTIONAL_FIELDS:
+                            attribute.value.keywords.append(self.KW_OPTIONAL)
+                    else:
+                        rest.append(attribute)
+
+                # sort body so that all fields are numerically ordered
+                node.body = [*sorted(attrs, key=lambda e: e.value.args[0].value), *rest]
+
+            self.generic_visit(node)
 
     text = SCRIPTABILITY_PY.read_text()
-
-    # so our RegEx is simpler, and we can enforce optionality
-    text = re.sub(r"((?:string|double|bool|message|int32)_field\(.*)\)", r"\1, optional=True)", text)
+    tree = ast.parse(text, filename=SCRIPTABILITY_PY)
+    ThoughtSpotVisitor().visit(tree)
+    BetterProtoVisitor().visit(tree)
+    text = ast.unparse(tree)
 
     SCRIPTABILITY_PY.write_text(text)
+    _subprocess_run("black", SCRIPTABILITY_PY.as_posix(), "-v")
 
 
 if __name__ == "__main__":
