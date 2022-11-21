@@ -31,6 +31,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# ignore coverage file
+.coverage
+
 # ignore spec generators
 _generate/*.json
 _generate/*.yaml
