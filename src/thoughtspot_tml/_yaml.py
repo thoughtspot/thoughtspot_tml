@@ -21,7 +21,7 @@ _TML_ID_REGEX = re.compile(
     [^"]           #   cannot end with a double quote
     $              # end of string
     """,
-    flags=re.VERBOSE
+    flags=re.VERBOSE,
 )
 
 # Reserve characters are defined as any terminator or value or flow entry token.

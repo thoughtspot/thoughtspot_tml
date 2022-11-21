@@ -141,6 +141,7 @@ class Connection(TML):
     """
     Representation of a ThoughtSpot Connection YAML.
     """
+
     # @boonhapus, 2022/11/20
     #
     # "Why is this one different?"

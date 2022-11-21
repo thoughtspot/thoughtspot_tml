@@ -83,7 +83,7 @@ def _clean_edoc_proto():
 
     # strip out useless stuff that exists only for internal validation or historical reasons
     text = re.sub(r"(?<=destination.{4};\s)  .*on.*;(?=\n)", r"", text)  # black magic
-    text = re.sub(r"(?<=j.{13}\s{4}).*col.*(?=\s})", r"", text)          # blue magic
+    text = re.sub(r"(?<=j.{13}\s{4}).*col.*(?=\s})", r"", text)  # blue magic
     text = re.sub(r"message ObjectPermissions {[\s\S]+?}", r"", text)
     text = re.sub(r"message ObjectEDocProto {[\s\S]+?}", r"", text)
     text = re.sub(r"message Token {[\s\S]+?}", r"", text)
@@ -127,10 +127,10 @@ def _clean_scriptability():
 
         @staticmethod
         def snake_to_camel(snake_case: str) -> str:
-            components = snake_case.split('_')
+            components = snake_case.split("_")
             # We capitalize the first letter of each component except the first one
             # with the 'title' method and join them together.
-            return components[0] + ''.join(x.title() for x in components[1:])
+            return components[0] + "".join(x.title() for x in components[1:])
 
         def visit_ClassDef(self, node: ast.ClassDef) -> None:
             if "dataclass" in [deco.func.id for deco in node.decorator_list]:
@@ -142,7 +142,14 @@ def _clean_scriptability():
             self.generic_visit(node)
 
     class BetterProtoVisitor(ast.NodeVisitor):
-        OPTIONAL_FIELDS = ("string_field", "double_field", "bool_field", "message_field", "int32_field", "enum_field",)
+        OPTIONAL_FIELDS = (
+            "string_field",
+            "double_field",
+            "bool_field",
+            "message_field",
+            "int32_field",
+            "enum_field",
+        )
         KW_OPTIONAL = ast.keyword(arg="optional", value=ast.Constant(True))  # optional=True
 
         def visit_ClassDef(self, node: ast.ClassDef) -> None:
