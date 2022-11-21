@@ -172,12 +172,13 @@ def _clean_scriptability():
             self.generic_visit(node)
 
     text = SCRIPTABILITY_PY.read_text()
-    tree = ast.parse(text, filename=SCRIPTABILITY_PY)
+    warning, plugin, code = text.partition("# plugin: python-betterproto")
+    tree = ast.parse(code, filename=SCRIPTABILITY_PY)
     ThoughtSpotVisitor().visit(tree)
     BetterProtoVisitor().visit(tree)
     text = ast.unparse(tree)
 
-    SCRIPTABILITY_PY.write_text(text)
+    SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, text]))
     _subprocess_run("black", SCRIPTABILITY_PY.as_posix(), "-v")
 
 
