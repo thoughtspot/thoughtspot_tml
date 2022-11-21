@@ -48,6 +48,7 @@ dev = [
     "black",
     "ward",
     "rich",
+    "coverage[toml]",
 ]
 
 
@@ -57,7 +58,17 @@ exclude = '''
 (
       __pycache__        # ignore compiled bytecode
     | \.venv             # ignore virtual environments
-    | _scriptability.py  # ignore generated files
 )
 '''
 
+[tool.ward]
+order = "random"
+
+[tool.coverage.run]
+branch = true
+include = [
+    "src/**.py",
+]
+omit = [
+    "src/thoughtspot_tml/_scriptability.py",
+]
