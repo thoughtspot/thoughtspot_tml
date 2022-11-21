@@ -1,5 +1,6 @@
 from dataclasses import dataclass, fields, is_dataclass, asdict
 from typing import TYPE_CHECKING, get_origin, get_args
+from collections.abc import Collection
 import pathlib
 import typing
 import os
@@ -43,7 +44,7 @@ def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
             new_value = field.type(**value)
             _recursive_complex_attrs_to_dataclasses(new_value)
 
-        # it's an Annotation
+        # it's an Annotation that needs resolution
         elif isinstance(field.type, str) and isinstance(value, dict):
             type_ = getattr(_scriptability, field.type)
             new_value = type_(**value)
@@ -77,14 +78,18 @@ def _recursive_remove_null(mapping: typing.Dict[str, typing.Any]) -> typing.Dict
     new = {}
 
     for k, v in mapping.items():
+
         if isinstance(v, dict):
-            new[k] = _recursive_remove_null(v)
+            v = _recursive_remove_null(v)
 
-        elif isinstance(v, list):
-            new[k] = [_recursive_remove_null(element) if isinstance(element, dict) else element for element in v]
+        if isinstance(v, list):
+            v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
 
-        elif v is not None:
-            new[k] = v
+        # if v is an empty collection, discard it
+        if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):
+            continue
+
+        new[k] = v
 
     return new
 
@@ -151,6 +156,26 @@ class Connection(TML):
 
 
 @dataclass
+class Table(TML):
+    """
+    Representation of a ThoughtSpot System Table TML.
+    """
+
+    guid: str
+    table: _scriptability.LogicalTableEDocProto
+
+
+@dataclass
+class View(TML):
+    """
+    Representation of a ThoughtSpot View TML.
+    """
+
+    guid: str
+    view: _scriptability.ViewEDocProto
+
+
+@dataclass
 class SQLView(TML):
     """
     Representation of a ThoughtSpot SQLView TML.
@@ -161,6 +186,16 @@ class SQLView(TML):
 
 
 @dataclass
+class Worksheet(TML):
+    """
+    Representation of a ThoughtSpot Worksheet TML.
+    """
+
+    guid: str
+    worksheet: _scriptability.WorksheetEDocProto
+
+
+@dataclass
 class Answer(TML):
     """
     Representation of a ThoughtSpot Answer TML.
@@ -168,3 +203,23 @@ class Answer(TML):
 
     guid: str
     answer: _scriptability.AnswerEDocProto
+
+
+@dataclass
+class Liveboard(TML):
+    """
+    Representation of a ThoughtSpot Liveboard TML.
+    """
+
+    guid: str
+    liveboard: _scriptability.PinboardEDocProto
+
+
+@dataclass
+class Pinboard(TML):
+    """
+    Representation of a ThoughtSpot Pinboard TML.
+    """
+
+    guid: str
+    pinboard: _scriptability.PinboardEDocProto
