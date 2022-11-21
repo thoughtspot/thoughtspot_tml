@@ -5,13 +5,24 @@ import re
 import yaml as yaml
 
 
-# TML ids take the form..
+# TML column ids typically take the form..
 #
-#   LOGICAL_TABLE_NAME::LOGICAL_COLUMN_NAME
+#   LOGICAL_TABLE_NAME_#::LOGICAL_COLUMN_NAME
 #
-# Where both the logicals can contain spaces.
+# Where both the logicals can contain any character except these: {}[].
 #
-_TML_ID_REGEX = re.compile(r'^[^"][\w\s]+::[\w\s]+[^"]$')
+_TML_ID_REGEX = re.compile(
+    r"""
+    ^              # beginning of string
+    [^"]           #   cannot start with a double quote
+    [^\[\]\{\}]+?  #     match as few characters as possible, disregarding collection characters
+    ::             #     double colon separator
+    [^\[\]\{\}]+?  #     match as few characters as possible, disregarding collection characters
+    [^"]           #   cannot end with a double quote
+    $              # end of string
+    """,
+    flags=re.VERBOSE
+)
 
 # Reserve characters are defined as any terminator or value or flow entry token.
 _TOKEN_CHARACTERS = set("[]{}:,")
@@ -30,17 +41,19 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: Union[str, int, f
     Double quote the string when any condition is met.
 
       if..
-          - it contains special tokens but is not an TML ID
+          - it contains special tokens but not a TML ID (they don't need doublequotes!)
           - is a reserved word
           - it's empty
     """
     special = _TOKEN_CHARACTERS.intersection(set(data))
-    reserved = data in _RESERVED_WORDS
     is_tml_id = _TML_ID_REGEX.match(data)
+    reserved = data in _RESERVED_WORDS
     empty_str = not data
 
     if (special and not is_tml_id) or reserved or empty_str:
         style = '"'
+    # elif len(data.splitlines()) > 1:
+    #     style = "|"
     else:
         style = ""
 
@@ -61,7 +74,7 @@ def dump(document: Any) -> str:
     """
     Dump a TML object as YAML.
 
-    The Java TML to YAML mapper includes these settings.
+    The Java-based TML to YAML mapper includes these settings.
 
         Feature.ALLOW_COMMENTS = true
         Feature.MINIMIZE_QUOTES = true
