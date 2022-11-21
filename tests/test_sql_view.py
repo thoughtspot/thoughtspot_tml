@@ -6,7 +6,7 @@ from . import _const
 
 @test("SQLView deep attribute access")
 def _():
-    t = SQLView.load(_const.TESTS_DIR / "data" / "MY_SQL_VIEW.sqlview.tml")
+    t = SQLView.load(_const.DUMMY_SQL_VIEW)
 
     assert type(t) is SQLView
 
@@ -21,7 +21,7 @@ def _():
 
 @test("SQLView roundtrips")
 def _():
-    before_t = (_const.TESTS_DIR / "data" / "MY_SQL_VIEW.sqlview.tml").read_text()
+    before_t = _const.DUMMY_SQL_VIEW.read_text()
     t = SQLView.loads(before_t)
     after_t = t.dumps()
 

@@ -6,7 +6,7 @@ from . import _const
 
 @test("Answer deep attribute access")
 def _():
-    t = Answer.load(_const.TESTS_DIR / "data" / "MY_ANSWER.answer.tml")
+    t = Answer.load(_const.DUMMY_ANSWER)
 
     assert type(t) is Answer
 
@@ -22,7 +22,7 @@ def _():
 
 @test("Answer roundtrips")
 def _():
-    before_t = (_const.TESTS_DIR / "data" / "MY_ANSWER.answer.tml").read_text()
+    before_t = _const.DUMMY_ANSWER.read_text()
     t = Answer.loads(before_t)
     after_t = t.dumps()
 

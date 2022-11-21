@@ -6,7 +6,7 @@ from . import _const
 
 @test("Connection deep attribute access")
 def _():
-    t = Connection.load(_const.TESTS_DIR / "data" / "connection.yaml")
+    t = Connection.load(_const.DUMMY_CONNECTION)
 
     assert type(t) is Connection
 
@@ -23,7 +23,7 @@ def _():
 
 @test("Connection roundtrips")
 def _():
-    before_t = (_const.TESTS_DIR / "data" / "connection.yaml").read_text()
+    before_t = _const.DUMMY_CONNECTION.read_text()
     t = Connection.loads(before_t)
     after_t = t.dumps()
 
