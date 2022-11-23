@@ -31,11 +31,14 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    # "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11",
 ]
 
 dependencies = [
-    "PyYAML"
+    "PyYAML",
+
+    # version specific
+    "typing_extensions==4.4.0; python_version < '3.8.0'"
 ]
 
 [project.urls]
@@ -63,6 +66,7 @@ exclude = '''
 '''
 
 [tool.ward]
+path = "tests/"
 order = "random"
 
 [tool.coverage.run]
