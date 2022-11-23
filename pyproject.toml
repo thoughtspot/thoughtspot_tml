@@ -46,9 +46,10 @@ bug_tracker = "https://github.com/thoughtspot/thoughtspot_tml/issues"
 dev = [
     "betterproto[compiler] >= 2.0.0b5",
     "black",
-    "ward",
-    "rich",
     "coverage[toml]",
+    "nox",
+    "rich",
+    "ward",
 ]
 
 
