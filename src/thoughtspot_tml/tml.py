@@ -1,15 +1,19 @@
-from dataclasses import dataclass, fields, is_dataclass, asdict
-from typing import TYPE_CHECKING, get_origin, get_args
 from collections.abc import Collection
+from dataclasses import dataclass, fields, is_dataclass, asdict
+from typing import TYPE_CHECKING
 import pathlib
 import typing
-import os
+import json
 
+from thoughtspot_tml._compat import get_origin, get_args
+from thoughtspot_tml.types import GUID
 from thoughtspot_tml import _scriptability
 from thoughtspot_tml import _yaml
 
+
 if TYPE_CHECKING:
-    PathLike = typing.Union[str, bytes, os.PathLike]
+    from thoughtspot.types import PathLike
+
     TTML = typing.TypeVar("TTML", bound="TML")
 
 
@@ -119,12 +123,24 @@ class TML:
         path = pathlib.Path(fp)
         return cls.loads(path.read_text())
 
-    def dumps(self) -> str:
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
         """
-        Serialize this object as a YAML-formatted str.
+        Serialize this object to native python data types.
         """
-        data = _recursive_remove_null(asdict(self))
-        document = _yaml.dump(data)
+        return asdict(self)
+
+    def dumps(self, format_type: str = "YAML") -> str:
+        """
+        Serialize this object as a YAML- or JSON-formatted str.
+        """
+        data = _recursive_remove_null(self.to_dict())
+
+        if format_type.upper() == "YAML":
+            document = _yaml.dump(data)
+
+        if format_type.upper() == "JSON":
+            document = json.dumps(data, indent=4, sort_keys=False)  # to match the yaml semantic
+
         return document
 
     def dump(self, fp: "PathLike") -> None:
@@ -132,7 +148,7 @@ class TML:
         Serialize this object as a YAML-formatted stream to a filepath.
         """
         path = pathlib.Path(fp)
-        document = self.dumps()
+        document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
         path.write_text(document)
 
 
@@ -162,7 +178,7 @@ class Table(TML):
     Representation of a ThoughtSpot System Table TML.
     """
 
-    guid: str
+    guid: GUID
     table: _scriptability.LogicalTableEDocProto
 
 
@@ -172,7 +188,7 @@ class View(TML):
     Representation of a ThoughtSpot View TML.
     """
 
-    guid: str
+    guid: GUID
     view: _scriptability.ViewEDocProto
 
 
@@ -182,7 +198,7 @@ class SQLView(TML):
     Representation of a ThoughtSpot SQLView TML.
     """
 
-    guid: str
+    guid: GUID
     sql_view: _scriptability.SqlViewEDocProto
 
 
@@ -192,7 +208,7 @@ class Worksheet(TML):
     Representation of a ThoughtSpot Worksheet TML.
     """
 
-    guid: str
+    guid: GUID
     worksheet: _scriptability.WorksheetEDocProto
 
 
@@ -202,7 +218,7 @@ class Answer(TML):
     Representation of a ThoughtSpot Answer TML.
     """
 
-    guid: str
+    guid: GUID
     answer: _scriptability.AnswerEDocProto
 
 
@@ -212,7 +228,7 @@ class Liveboard(TML):
     Representation of a ThoughtSpot Liveboard TML.
     """
 
-    guid: str
+    guid: GUID
     liveboard: _scriptability.PinboardEDocProto
 
 
@@ -222,5 +238,5 @@ class Pinboard(TML):
     Representation of a ThoughtSpot Pinboard TML.
     """
 
-    guid: str
+    guid: GUID
     pinboard: _scriptability.PinboardEDocProto
