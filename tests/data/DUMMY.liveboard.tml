@@ -1,0 +1,49 @@
+guid: 4c6e8502-1695-4dc4-b0b0-215dae7a6d71
+liveboard:
+  name: This is our Product Universe
+  visualizations:
+  - id: Viz_1
+    answer:
+      name: How many items purchased by state?
+      tables:
+      - id: (Sample) Retail - Apparel
+        name: (Sample) Retail - Apparel
+      search_query: "[City] [State] [Zip Code] [Quantity Purchased]"
+      answer_columns:
+      - name: City
+      - name: Total Quantity Purchased
+      - name: State
+      - name: Zip Code
+      table:
+        table_columns:
+        - column_id: City
+          headline_aggregation: COUNT_DISTINCT
+        - column_id: State
+          headline_aggregation: COUNT_DISTINCT
+        - column_id: Zip Code
+          headline_aggregation: COUNT_DISTINCT
+        - column_id: Total Quantity Purchased
+          headline_aggregation: SUM
+        ordered_column_ids:
+        - City
+        - State
+        - Zip Code
+        - Total Quantity Purchased
+        client_state: ""
+        client_state_v2: "{\"tableVizPropVersion\": \"V1\"}"
+      chart:
+        type: GEO_AREA
+        chart_columns:
+        - column_id: City
+        - column_id: State
+        - column_id: Zip Code
+        - column_id: Total Quantity Purchased
+        axis_configs:
+        - x:
+          - State
+          "y":
+          - Total Quantity Purchased
+        client_state: ""
+        client_state_v2: "{\"version\": \"V4DOT2\",\"chartProperties\": {\"mapviewport\": {\"center\": [-1.0815372462017208E7,4944187.994859374],\"zoomLevel\": 5.2702518193745425},\"chartSpecific\": {}},\"axisProperties\": [{\"id\": \"83b2368b-7f97-4e38-9460-2ef7ab614fe6\",\"properties\": {\"axisType\": \"Y\",\"linkedColumns\": [\"Total Quantity Purchased\"],\"isOpposite\": false}},{\"id\": \"5af7038c-21ef-4f49-a975-6e37570cecb7\",\"properties\": {\"axisType\": \"X\",\"linkedColumns\": [\"State\"]}}],\"systemMultiColorSeriesColors\": [{\"serieName\": \"Total Quantity Purchased\",\"colorMap\": [{\"serieName\": \"State\",\"color\": [\"#ffffb2\",\"#fddd87\",\"#fba35d\",\"#f75534\",\"#f9140a\",\"#d70315\",\"#b10026\"]}]}]}"
+      display_mode: CHART_MODE
+    viz_guid: 3054df51-804e-4900-9df1-9a4e543d3a8f

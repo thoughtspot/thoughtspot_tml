@@ -1,0 +1,114 @@
+name: Retail - Apparel
+type: RDBMS_SNOWFLAKE
+authentication_type: SERVICE_ACCOUNT
+properties:
+- key: accountName
+  value: thoughtspot_partner
+- key: user
+  value: PMMUSER
+- key: password
+  value: ""
+- key: role
+  value: TS_PMM_RO_ROLE
+- key: warehouse
+  value: PMM_WH
+- key: database
+  value: PMMDB
+table:
+- name: fact_retapp_sales
+  id: 055fd813-be4d-4a08-969f-e0a89a7100b7
+  external_table:
+    db_name: PMMDB
+    schema_name: RETAILAPPAREL
+    table_name: fact_retapp_sales
+  column:
+  - name: salesid
+    id: 65ba6fa1-240f-4647-9239-d235c82c55cd
+    data_type: INT64
+    external_column: salesid
+  - name: productid
+    id: 4d3bddc8-fc22-43cc-a114-ef3efa7a4687
+    data_type: INT64
+    external_column: productid
+  - name: storeid
+    id: 42c99476-c851-4900-8e81-9cb48ec1860d
+    data_type: INT64
+    external_column: storeid
+  - name: quantitypurchased
+    id: 765d084c-8919-4bd5-b861-a7c54a2818d3
+    data_type: INT64
+    external_column: quantitypurchased
+  - name: itemprice
+    id: 28fd51a0-89a8-478e-bf11-69ec287ae584
+    data_type: DOUBLE
+    external_column: itemprice
+  - name: sales
+    id: f82faaf8-6064-4326-9fdc-198c81cc063b
+    data_type: DOUBLE
+    external_column: sales
+  - name: recorddate
+    id: 675ac5eb-b506-4f45-891e-690d73b254b3
+    data_type: DATE
+    external_column: recorddate
+- name: dim_retapp_stores
+  id: 3f3ae98c-8e8d-4445-b8b5-f7b6e991763c
+  external_table:
+    db_name: PMMDB
+    schema_name: RETAILAPPAREL
+    table_name: dim_retapp_stores
+  column:
+  - name: storeid
+    id: c22894f7-f478-4258-abf3-707680d4c367
+    data_type: INT64
+    external_column: storeid
+  - name: storename
+    id: 60ab52f0-2168-4ea6-86f5-21cc2d510294
+    data_type: VARCHAR
+    external_column: storename
+  - name: city
+    id: 31e1b761-7d50-4e83-a1bf-a36a665e9739
+    data_type: VARCHAR
+    external_column: city
+  - name: state
+    id: c29b32c0-779a-4488-ab27-ad1f1a4a8bd4
+    data_type: VARCHAR
+    external_column: state
+  - name: zipcode
+    id: 38c300f1-e466-4e91-8817-cc0f6e2db8d5
+    data_type: VARCHAR
+    external_column: zipcode
+  - name: county
+    id: 1da29ad0-56c4-4e7d-a3fe-5c6a05e90fd0
+    data_type: VARCHAR
+    external_column: county
+  - name: latitude
+    id: 1262899d-150a-41b4-a066-96179704e687
+    data_type: DOUBLE
+    external_column: latitude
+  - name: longitude
+    id: f3487487-5e91-47ea-a2db-d2ff6faa9632
+    data_type: DOUBLE
+    external_column: longitude
+  - name: region
+    id: 3d73f718-b2c5-4dc0-bdee-321719749ae2
+    data_type: VARCHAR
+    external_column: region
+- name: dim_retapp_products
+  id: 7fd39fdb-9dfe-4954-b5dd-9a5d846085b0
+  external_table:
+    db_name: PMMDB
+    schema_name: RETAILAPPAREL
+    table_name: dim_retapp_products
+  column:
+  - name: productid
+    id: 54f340c2-3673-4ca3-bdb0-3c1054aa2d90
+    data_type: INT64
+    external_column: productid
+  - name: productname
+    id: f36f2b01-ed2d-4de9-a7da-2a847cc9a8fe
+    data_type: VARCHAR
+    external_column: productname
+  - name: producttype
+    id: d6fdf5ce-4524-4755-a258-dcf87a624182
+    data_type: VARCHAR
+    external_column: producttype

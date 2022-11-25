@@ -1,0 +1,35 @@
+guid: 7fd39fdb-9dfe-4954-b5dd-9a5d846085b0
+table:
+  name: dim_retapp_products
+  db: PMMDB
+  schema: RETAILAPPAREL
+  db_table: dim_retapp_products
+  connection:
+    name: Retail - Apparel
+  columns:
+  - name: productid
+    db_column_name: productid
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+    db_column_properties:
+      data_type: INT64
+  - name: productname
+    db_column_name: productname
+    properties:
+      column_type: ATTRIBUTE
+    db_column_properties:
+      data_type: VARCHAR
+  - name: producttype
+    db_column_name: producttype
+    properties:
+      column_type: ATTRIBUTE
+    db_column_properties:
+      data_type: VARCHAR
+  joins_with:
+  - name: SALES_TO_FACT
+    destination:
+      name: (Sample) Retail - Apparel
+    "on": "[dim_retapp_products::productid] = [(Sample) Retail - Apparel::City]"
+    type: INNER

@@ -1,0 +1,49 @@
+guid: d00f3754-15a9-4a7a-a3d5-3248ad19aa9d
+answer:
+  name: How many items purchased by state?
+  tables:
+  - id: (Sample) Retail - Apparel
+    name: (Sample) Retail - Apparel
+  formulas:
+  - id: Constatnt
+    name: Constatnt
+    expr: '''ok'''
+    was_auto_generated: false
+  search_query: "[City] [State] [Zip Code] [Quantity Purchased]"
+  answer_columns:
+  - name: City
+  - name: Total Quantity Purchased
+  - name: State
+  - name: Zip Code
+  table:
+    table_columns:
+    - column_id: City
+      headline_aggregation: COUNT_DISTINCT
+    - column_id: State
+      headline_aggregation: COUNT_DISTINCT
+    - column_id: Zip Code
+      headline_aggregation: COUNT_DISTINCT
+    - column_id: Total Quantity Purchased
+      headline_aggregation: SUM
+    ordered_column_ids:
+    - City
+    - State
+    - Zip Code
+    - Total Quantity Purchased
+    client_state: ""
+    client_state_v2: "{\"tableVizPropVersion\": \"V1\"}"
+  chart:
+    type: GEO_AREA
+    chart_columns:
+    - column_id: City
+    - column_id: State
+    - column_id: Zip Code
+    - column_id: Total Quantity Purchased
+    axis_configs:
+    - x:
+      - State
+      "y":
+      - Total Quantity Purchased
+    client_state: ""
+    client_state_v2: "{\"version\": \"V4DOT2\",\"chartProperties\": {\"mapviewport\": {\"center\": [-1.0815372462017208E7,4944187.994859374],\"zoomLevel\": 5.2702518193745425},\"chartSpecific\": {}},\"axisProperties\": [{\"id\": \"83b2368b-7f97-4e38-9460-2ef7ab614fe6\",\"properties\": {\"axisType\": \"Y\",\"linkedColumns\": [\"Total Quantity Purchased\"],\"isOpposite\": false}},{\"id\": \"5af7038c-21ef-4f49-a975-6e37570cecb7\",\"properties\": {\"axisType\": \"X\",\"linkedColumns\": [\"State\"]}}],\"systemMultiColorSeriesColors\": [{\"serieName\": \"Total Quantity Purchased\",\"colorMap\": [{\"serieName\": \"State\",\"color\": [\"#ffffb2\",\"#fddd87\",\"#fba35d\",\"#f75534\",\"#f9140a\",\"#d70315\",\"#b10026\"]}]}]}"
+  display_mode: CHART_MODE

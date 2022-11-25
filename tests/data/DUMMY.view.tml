@@ -1,0 +1,44 @@
+guid: 4b0034ad-b6ee-45c7-8989-0621008de785
+view:
+  name: How many items purchased by state?
+  tables:
+  - id: (Sample) Retail - Apparel
+    name: (Sample) Retail - Apparel
+  formulas:
+  - id: Constatnt
+    name: Constatnt
+    expr: '''ok'''
+    was_auto_generated: false
+  search_query: "[City] [State] [Zip Code] [Quantity Purchased]"
+  view_columns:
+  - name: City
+    search_output_column: City
+    properties:
+      column_type: ATTRIBUTE
+  - name: State
+    search_output_column: State
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: UNITED STATES
+          region_name: state
+  - name: Zip Code
+    search_output_column: Zip Code
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: UNITED STATES
+          region_name: zip code
+  - name: Total Quantity Purchased
+    search_output_column: Total Quantity Purchased
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+  joins_with:
+  - name: SALES_TO_FACT
+    destination:
+      name: (Sample) Retail - Apparel
+    "on": "[How many items purchased by state?::City] = [(Sample) Retail - Apparel::City]"
+    type: INNER

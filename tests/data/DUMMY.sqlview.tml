@@ -1,0 +1,30 @@
+guid: 6338e45d-b1ff-4bd3-8898-8112768bdf46
+sql_view:
+  name: VW_STATE_PURCHASED_ITEMS
+  connection:
+    name: Retail - Apparel
+  sql_query: "SELECT \r\n  \"ta_1\".\"city\" \"ca_1\", \r\n  \"ta_1\".\"state\" \"ca_2\", \r\n  \"ta_1\".\"zipcode\" \"ca_3\", \r\n  CASE\r\n    WHEN sum(\"ta_2\".\"quantitypurchased\") IS NOT NULL THEN sum(\"ta_2\".\"quantitypurchased\")\r\n    ELSE 0\r\n  END \"ca_4\"\r\nFROM \"PMMDB\".\"RETAILAPPAREL\".\"fact_retapp_sales\" \"ta_2\"\r\n  JOIN \"PMMDB\".\"RETAILAPPAREL\".\"dim_retapp_stores\" \"ta_1\"\r\n    ON \"ta_2\".\"storeid\" = \"ta_1\".\"storeid\"\r\nGROUP BY \r\n  \"ca_1\", \r\n  \"ca_2\", \r\n  \"ca_3\""
+  sql_view_columns:
+  - name: ca_1
+    sql_output_column: ca_1
+    properties:
+      column_type: ATTRIBUTE
+  - name: ca_2
+    sql_output_column: ca_2
+    properties:
+      column_type: ATTRIBUTE
+  - name: ca_3
+    sql_output_column: ca_3
+    properties:
+      column_type: ATTRIBUTE
+  - name: ca_4
+    sql_output_column: ca_4
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+  joins_with:
+  - name: SALES_TO_FACT
+    destination:
+      name: (Sample) Retail - Apparel
+    "on": "[VW_STATE_PURCHASED_ITEMS::ca_1] = [(Sample) Retail - Apparel::City]"
+    type: INNER

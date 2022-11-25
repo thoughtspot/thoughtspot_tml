@@ -1,0 +1,134 @@
+guid: 2ea7add9-0ccb-4ac1-90bb-231794ebb377
+worksheet:
+  name: (Sample) Retail - Apparel
+  tables:
+  - name: dim_retapp_products
+  - name: dim_retapp_stores
+  - name: fact_retapp_sales
+  joins:
+  - name: c_dim_retapp_products
+    source: fact_retapp_sales
+    destination: dim_retapp_products
+    type: INNER
+    is_one_to_one: false
+  - name: c_dim_retapp_stores
+    source: fact_retapp_sales
+    destination: dim_retapp_stores
+    type: INNER
+    is_one_to_one: false
+  table_paths:
+  - id: dim_retapp_products_1
+    table: dim_retapp_products
+    join_path:
+    - join:
+      - c_dim_retapp_products
+  - id: dim_retapp_stores_1
+    table: dim_retapp_stores
+    join_path:
+    - join:
+      - c_dim_retapp_stores
+  - id: fact_retapp_sales_1
+    table: fact_retapp_sales
+    join_path:
+    - {}
+  formulas:
+  - name: '# of Products'
+    expr: "count ( [dim_retapp_products_1::productid] )"
+    was_auto_generated: false
+  worksheet_columns:
+  - name: Product
+    column_id: dim_retapp_products_1::productname
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Item
+  - name: Product Type
+    column_id: dim_retapp_products_1::producttype
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Category
+  - name: Store
+    column_id: dim_retapp_stores_1::storename
+    properties:
+      column_type: ATTRIBUTE
+  - name: City
+    column_id: dim_retapp_stores_1::city
+    properties:
+      column_type: ATTRIBUTE
+  - name: State
+    column_id: dim_retapp_stores_1::state
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: UNITED STATES
+          region_name: state
+  - name: Zip Code
+    column_id: dim_retapp_stores_1::zipcode
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: UNITED STATES
+          region_name: zip code
+  - name: County
+    column_id: dim_retapp_stores_1::county
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: UNITED STATES
+          region_name: county
+  - name: Latitude
+    column_id: dim_retapp_stores_1::latitude
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        latitude: true
+      spotiq_preference: EXCLUDE
+  - name: Longitude
+    column_id: dim_retapp_stores_1::longitude
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        longitude: true
+      spotiq_preference: EXCLUDE
+  - name: Region
+    column_id: dim_retapp_stores_1::region
+    properties:
+      column_type: ATTRIBUTE
+  - name: Quantity Purchased
+    column_id: fact_retapp_sales_1::quantitypurchased
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+  - name: Sales
+    column_id: fact_retapp_sales_1::sales
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      synonyms:
+      - Revenue
+      currency_type:
+        iso_code: USD
+  - name: SKU
+    description: unique identifier for product
+    column_id: dim_retapp_products_1::productid
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+  - name: '# of Products'
+    formula_id: '# of Products'
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+  properties:
+    is_bypass_rls: false
+    join_progressive: true
+  lesson_plans:
+  - lesson_id: 0
+    lesson_plan_string: "What were [Sales] by [Product Type] in [Date].'today' ?"
+  - lesson_id: 2
+    lesson_plan_string: "What is the [Sales] of [Product Type].'jackets' per [Date].'day of week' by [Region] ?"
