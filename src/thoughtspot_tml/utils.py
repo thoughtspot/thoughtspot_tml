@@ -38,6 +38,6 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
         tml_type = info["type"]
 
     if tml_type not in types:
-        raise TMLError("could not parse TML type from 'info' or 'path', got '{tml_type}'")
+        raise TMLError(f"could not parse TML type from 'info' or 'path', got '{tml_type}'")
 
     return types[tml_type]

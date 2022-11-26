@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Optional
-import pathlib
 import zipfile
 import typing
 import json
@@ -52,7 +51,7 @@ class SpotApp:
 
     @property
     def liveboards(self) -> List[Liveboard]:
-        return [tml for tml in self.tml if isinstance(tml, Liveboard)]
+        return [tml for tml in self.tml if isinstance(tml, (Liveboard, Pinboard))]
 
     @classmethod
     def from_api(cls, payload: "EDocExportResponse") -> "TSpotApp":
@@ -93,7 +92,7 @@ class SpotApp:
                     info["manifest"] = Manifest(**document)
                     continue
 
-                tml_cls = determine_tml_type(filepath=member.filename)
+                tml_cls = determine_tml_type(path=member.filename)
                 # @boonhapus, 2022/11/25
                 # SCAL-1234 - SpotApp export_associated uses `pinboard` for Liveboard edoc
                 if tml_cls is Pinboard:
