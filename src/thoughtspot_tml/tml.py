@@ -194,6 +194,10 @@ class Table(TML):
     guid: GUID
     table: _scriptability.LogicalTableEDocProto
 
+    @property
+    def name(self) -> str:
+        return self.table.name
+
 
 @dataclass
 class View(TML):
@@ -203,6 +207,10 @@ class View(TML):
 
     guid: GUID
     view: _scriptability.ViewEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.view.name
 
 
 @dataclass
@@ -214,6 +222,10 @@ class SQLView(TML):
     guid: GUID
     sql_view: _scriptability.SqlViewEDocProto
 
+    @property
+    def name(self) -> str:
+        return self.sql_view.name
+
 
 @dataclass
 class Worksheet(TML):
@@ -223,6 +235,10 @@ class Worksheet(TML):
 
     guid: GUID
     worksheet: _scriptability.WorksheetEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.worksheet.name
 
 
 @dataclass
@@ -234,6 +250,10 @@ class Answer(TML):
     guid: GUID
     answer: _scriptability.AnswerEDocProto
 
+    @property
+    def name(self) -> str:
+        return self.answer.name
+
 
 @dataclass
 class Liveboard(TML):
@@ -244,12 +264,23 @@ class Liveboard(TML):
     guid: GUID
     liveboard: _scriptability.PinboardEDocProto
 
+    @property
+    def name(self) -> str:
+        return self.liveboard.name
+
 
 @dataclass
 class Pinboard(TML):
     """
     Representation of a ThoughtSpot Pinboard TML.
+
+    DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
+      As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.
     """
 
     guid: GUID
     pinboard: _scriptability.PinboardEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.pinboard.name
