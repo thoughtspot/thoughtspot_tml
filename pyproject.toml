@@ -38,7 +38,8 @@ dependencies = [
     "PyYAML",
 
     # version specific
-    "typing_extensions==4.4.0; python_version < '3.8.0'"
+    "typing_extensions==4.4.0; python_version < '3.8.0'",
+    "zipp==3.11.0; python_version < '3.8.0'"
 ]
 
 [project.urls]
@@ -67,7 +68,6 @@ exclude = '''
 
 [tool.ward]
 path = "tests/"
-order = "random"
 
 [tool.coverage.run]
 branch = true
@@ -76,4 +76,15 @@ include = [
 ]
 omit = [
     "src/thoughtspot_tml/_scriptability.py",
+    "src/thoughtspot_tml/_compat.py",
+    "__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "# pragma: peephole optimzer",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:",
 ]

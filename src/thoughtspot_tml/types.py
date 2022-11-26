@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
+from typing import Dict, List, Union
 from uuid import UUID
-import typing
+import pathlib
 import os
 
-from thoughtspot_tml._compat import Literal, TypedDict
+from thoughtspot_tml._compat import Literal, TypedDict, ZipPath
 
 if TYPE_CHECKING:
     from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
@@ -11,21 +12,28 @@ if TYPE_CHECKING:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PathLike = typing.Union[str, bytes, os.PathLike]
-TMLTypes = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard"]
+PathLike = Union[str, bytes, os.PathLike, pathlib.Path, ZipPath]
+TMLObject = Union["Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard"]
+TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard"]
 GUID = UUID
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /metadata/tml/export Response Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-class EDocInfo(TypedDict):
+class FileInfo(TypedDict):
     name: str
     filename: str
-    status: typing.Dict[str, str]
+
+
+class TMLDocInfo(TypedDict):
+    name: str
+    filename: str
+    status: Dict[Literal["status"], str]
     type: str
     id: GUID
+    dependency: List[FileInfo]
 
 
 class EDocExportResponse(TypedDict):
-    info: EDocInfo
-    edoc: typing.Union["Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard"]
+    info: TMLDocInfo
+    edoc: TMLObject

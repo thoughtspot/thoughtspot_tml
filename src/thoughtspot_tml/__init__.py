@@ -1,6 +1,7 @@
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
+from thoughtspot_tml.spotapp import SpotApp
 
 # aliases
 from thoughtspot_tml.tml import Connection as EmbraceConnection
