@@ -4,25 +4,15 @@
   <i>a Python package for working with</i> <b>ThoughtSpot</b> <i>Modeling Language (TML) files programmatically.</i>
 
   <h3>
-    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#installation">
-      Installation
-    </a>
+    <a href="#installation">Installation</a>
     <span> | </span>
-    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#a-simple-functional-example">
-      Simple Example
-    </a>
+    <a href="#a-simple-functional-example">Simple Example</a>
     <span> | </span>
-    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#migration-to-v1.3.0">
-      Migration to v1.3.0
-    </a>
+    <a href="#migration-to-v130">Migration to v1.3.0</a>
     <span> | </span>
-    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#thoughtspot_tml-reference">
-      Reference
-    </a>
+    <a href="#thoughtspot_tml-reference">Reference</a>
     <span> | </span>
-    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#notes-on-thoughtspot-modeling-language">
-      Notes
-    </a>
+    <a href="#notes-on-thoughtspot-modeling-language">Notes</a>
   </h3>
 </div>
 
@@ -118,25 +108,15 @@ More examples can be found in our [/examples directory][examples] in this reposi
 ## `thoughtspot_tml` Reference
 
 <h5>
-  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#tml-objects">
-    TML Objects
-  </a>
+  <a href="#tml-objects">TML Objects</a>
   <span> | </span>
-  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#deserialization">
-    Deserialization
-  </a>
+  <a href="#deserialization">Deserialization</a>
   <span> | </span>
-  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#serialization">
-    Serialization
-  </a>
+  <a href="#serialization">Serialization</a>
   <span> | </span>
-  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#spotapp">
-    SpotApp
-  </a>
+  <a href="#spotapp">SpotApp</a>
   <span> | </span>
-  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#utilities">
-    Utilities
-  </a>
+  <a href="#utilities">Utilities</a>
 </h5>
 
 ### TML Objects
@@ -294,7 +274,7 @@ TML is implemented in the YAML 1.1 spec.
 
 ## Want to contribute?
 
-We welcome all contributions! :heart: For guidance on setting up a development environment, see our [Contributing Guide][contrib].
+We welcome all help! :heart: For guidance on setting up a development environment, see our [Contributing Guide][contrib].
 
 [examples]: examples/README.md
 [contrib]: .github/CONTRIBUTING.md
