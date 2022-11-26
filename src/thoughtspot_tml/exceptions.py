@@ -10,7 +10,6 @@ class TMLError(Exception):
     """
     All errors in thoughtspot_tml derive from this Exception.
     """
-    pass
 
 
 class TMLDecodeError(TMLError):
@@ -25,7 +24,7 @@ class TMLDecodeError(TMLError):
         data: Dict[str, Any] = None,
         path: Path = None,
         problem_mark: error.Mark = None
-    ):
+    ):  # pragma: no cover
         self.tml_cls = tml_cls
         self.data = data
         self.path = path
