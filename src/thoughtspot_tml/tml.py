@@ -113,15 +113,28 @@ class TML:
         Deserialize a TML document to a Python object.
         """
         document = _yaml.load(tml_document)
-        return cls(**document)
+
+        try:
+            instance = cls(**document)
+        except TypeError:
+            raise TMLDecodeError(cls, data=document) from None
+
+        return instance
 
     @classmethod
-    def load(cls, fp: "PathLike") -> "TTML":
+    def load(cls, path: "PathLike") -> "TTML":
         """
         Deserialize a TML document located at filepath to a Python object.
         """
-        path = pathlib.Path(fp)
-        return cls.loads(path.read_text())
+        if isinstance(path, str):
+            path = pathlib.Path(path)
+
+        try:
+            instance = cls.loads(path.read_text())
+        except yaml.scanner.ScannerError as e:
+            raise TMLDecodeError(cls, path=path, problem_mark=e.problem_mark) from None
+
+        return instance
 
     def to_dict(self) -> typing.Dict[str, typing.Any]:
         """
