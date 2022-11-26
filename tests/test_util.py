@@ -1,7 +1,8 @@
+from thoughtspot_tml.exceptions import TMLError
+from thoughtspot_tml.utils import determine_tml_type
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
-from thoughtspot_tml.utils import determine_tml_type
 from ward import test, raises
 
 from . import _const
@@ -23,10 +24,20 @@ for file, tml_type in (
         assert t is intended_type
 
 
-@test("Object utility requires one of: 'info' or 'filepath'")
+@test("Object errors on unknown type")
+def _():
+    bad_type = "dashboard"
+
+    with raises(TMLError) as exc:
+        determine_tml_type(info={"type": bad_type})
+
+    assert str(exc.raised) == f"could not parse TML type from 'info' or 'path', got '{bad_type}'"
+
+
+@test("Object utility requires one of: 'info' or 'path'")
 def _():
 
     with raises(TypeError) as exc:
         determine_tml_type()
 
-    assert str(exc.raised) == "determine_tml_type() missing at least 1 required keyword-only argument: 'info' or 'filepath'"
+    assert str(exc.raised) == "determine_tml_type() missing at least 1 required keyword-only argument: 'info' or 'path'"
