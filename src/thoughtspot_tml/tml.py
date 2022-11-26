@@ -5,7 +5,10 @@ import pathlib
 import typing
 import json
 
+import yaml
+
 from thoughtspot_tml._compat import get_origin, get_args
+from thoughtspot_tml.exceptions import TMLDecodeError
 from thoughtspot_tml.types import GUID
 from thoughtspot_tml import _scriptability
 from thoughtspot_tml import _yaml
@@ -38,11 +41,6 @@ def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
         if value is None:
             continue
 
-        # python-betterproto doesn't support optional map_fields
-        if value == {}:
-            setattr(instance, field.name, None)
-            continue
-
         # it's a dataclass
         if is_dataclass(field.type) and isinstance(value, dict):
             new_value = field.type(**value)
@@ -69,7 +67,11 @@ def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
                 if is_dataclass(field_type):
                     _recursive_complex_attrs_to_dataclasses(item)
 
-        else:
+        # it's an empty mapping, python-betterproto doesn't support optional map_fields
+        elif get_origin(field.type) is dict and not value:
+            new_value = None
+
+        else:  # pragma: peephole optimizer
             continue
 
         setattr(instance, field.name, new_value)
@@ -90,7 +92,7 @@ def _recursive_remove_null(mapping: typing.Dict[str, typing.Any]) -> typing.Dict
             v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
 
         # if v is an empty collection, discard it
-        if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):
+        if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):  # pragma: peephole optimizer
             continue
 
         new[k] = v
@@ -156,11 +158,13 @@ class TML:
 
         return document
 
-    def dump(self, fp: "PathLike") -> None:
+    def dump(self, path: "PathLike") -> None:
         """
         Serialize this object as a YAML-formatted stream to a filepath.
         """
-        path = pathlib.Path(fp)
+        if isinstance(path, str):
+            path = pathlib.Path(path)
+
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
         path.write_text(document)
 
