@@ -1,6 +1,30 @@
-# thoughtspot_tml
+<div align="center">
+  <h2><b>ThoughtSpot TML</b></h2>
 
-__ThoughtSpot TML__ is a Python package for working with ThoughtSpot Modeling Language (TML) files programmatically.
+  <i>a Python package for working with</i> <b>ThoughtSpot</b> <i>Modeling Language (TML) files programmatically.</i>
+
+  <h3>
+    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#installation">
+      Installation
+    </a>
+    <span> | </span>
+    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#a-simple-functional-example">
+      Simple Example
+    </a>
+    <span> | </span>
+    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#migration-to-v1.3.0">
+      Migration to v1.3.0
+    </a>
+    <span> | </span>
+    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#thoughtspot_tml-reference">
+      Reference
+    </a>
+    <span> | </span>
+    <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#notes-on-thoughtspot-modeling-language">
+      Notes
+    </a>
+  </h3>
+</div>
 
 ## Features
 
@@ -91,6 +115,183 @@ options:
 
 More examples can be found in our [/examples directory][examples] in this repository.
 
+## `thoughtspot_tml` Reference
+
+<h5>
+  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#tml-objects">
+    TML Objects
+  </a>
+  <span> | </span>
+  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#deserialization">
+    Deserialization
+  </a>
+  <span> | </span>
+  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#serialization">
+    Serialization
+  </a>
+  <span> | </span>
+  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#spotapp">
+    SpotApp
+  </a>
+  <span> | </span>
+  <a href="https://github.com/thoughtspot/thoughtspot_tml/README.md#utilities">
+    Utilities
+  </a>
+</h5>
+
+### TML Objects
+```python
+from thoughtspot_tml import Table, View, SQLView, Worksheet
+from thoughtspot_tml import Answer, Liveboard, Pinboard
+
+# aliases
+from thoughtspot_tml import ThoughtSpotView    # View
+from thoughtspot_tml import SavedAnswer        # Answer
+from thoughtspot_tml import SystemTable        # Table
+```
+
+Each TML object takes the form of a top-level attribute for the globally unique identifier, or GUID, as well as the document form of the object it represents. This identically mirrors the TML specification you can find [in the __ThoughtSpot__ documentation][syntax-tml]. In addition, the `name` attribute of the TML document itself has been pulled into the top-level namespace.
+
+```python
+@dataclass
+class Worksheet(TML):
+    """
+    Representation of a ThoughtSpot Worksheet TML.
+    """
+
+    guid: GUID
+    worksheet: WorksheetEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.worksheet.name
+```
+
+---
+
+The `Connection` is a special type of TML object. Connections (also known as "Embrace" Connections), were implemented prior to the TML spec being officially released. The `remapping.yaml` obtained from your platform (`Data > Connections > (...) in the top right > Remapping > Download`) defines how __ThoughtSpot__ table objects relate to the external data source.
+
+```python
+from thoughtspot_tml import Connection
+
+# aliases
+from thoughtspot_tml import EmbraceConnection  # Connection
+```
+
+The connection takes on a different form, but still contains other common TML methods.
+
+```python
+@dataclass
+class Connection(TML):
+    """
+    Representation of a ThoughtSpot Connection YAML.
+    """
+
+    name: str
+    type: str
+    authentication_type: str
+    properties: list[KeyValueStr]
+    table: list[ConnectionDocTableDoc]
+```
+
+Each object contains multiple methods for serialization and deserialization.
+
+### __Deserialization__
+
+For deserialization of a TML document into a python object.
+
+```python
+ws = Worksheet.load(path: PathLike = "tests/data/DUMMY.worksheet.tml")
+ws = Worksheet.loads(tml_document: str = ...)  # can be obtained from the ThoughtSpot REST API
+
+ws.guid == "2ea7add9-0ccb-4ac1-90bb-231794ebb377"
+```
+
+`.load` a worksheet from a `.worksheet.tml` file, or as a string directly from the [`metadata/tml/export`][rest-api-export] API with `.loads`.
+
+---
+
+### __Serialization__
+
+For serialization of a TML python object back into data.
+
+```python
+data = ws.to_dict()
+data["guid"] == "2ea7add9-0ccb-4ac1-90bb-231794ebb377"
+
+ws.dump(path="tests/data/DUMMY.worksheet.tml")
+# DUMMY.worksheet.tml
+#
+# guid: 2ea7add9-0ccb-4ac1-90bb-231794ebb377
+# worksheet:
+#   ...
+
+data_s = ws.dumps(format_type="YAML")
+data = yaml.load(data_s)
+data["guid"] == "2ea7add9-0ccb-4ac1-90bb-231794ebb377"
+
+# -or-
+
+data = ws.dumps(format_type="JSON")
+data_s = json.loads(data_s)
+data["guid"] == "2ea7add9-0ccb-4ac1-90bb-231794ebb377"
+```
+
+`.to_dict` to convert the entire object tree into python native types, or write back to a file with `.dump` as a TML-formatted string. The formatting can be overriden to JSON if the JSON file type is used (`.worksheet.json`). `.dumps` allows access to the formatted string directly, typically used as input for the [`metadata/tml/import`][rest-api-import] API.
+
+### SpotApp
+
+```python
+from thoughtspot_tml import SpotApp
+```
+
+SpotApps are bundles of TML which can be obtained directly from the __ThoughtSpot__ user interace as a zip file archive, or from the `/metadata/tml/export` API endpoint using the `export_associated = true` query parameter.
+
+
+```python
+export_response = ...  # /metadata/tml/export
+s = SpotApp.from_api(export_response)
+print(s.tml)
+
+# -or-
+
+s = SpotApp.read("tests/data/DUMMY.worksheet.tml")
+print(s.tml)  # => [Worksheet(...), Table(...), Table(...)]
+print(s.manifest)  # => Manifest(...)
+```
+
+SpotApps can also be saved to a new zipfile archive through the `.save` method.
+
+```python
+s = SpotApp.read("tests/data/DUMMY.worksheet.tml")
+s.save("tests/data/NEW_DUMMY.worksheet.tml")
+```
+
+### Utilities
+
+```python
+from thoughtspot_tml.utils import determine_tml_type
+
+tml_type = determine_tml_type(path="/tests/data/DUMMY.worksheet.tml")
+tml = tml_type.load(path="/tests/data/DUMMY.worksheet.tml")
+type(tml) is Worksheet
+
+# -or-
+
+export_response = ...  # /metadata/tml/export
+tml_type = determine_tml_type(info=export_response["object"][0]["info"])
+tml = tml_type.loads(tml_document=export_response["object"][0]["edoc"])
+type(tml) is Worksheet
+```
+
+## Migration to v1.3.0
+
+**Lorem ipsum**
+
+## Notes on __ThoughtSpot Modeling Language__
+
+TML is implemented in the YAML 1.1 spec.
+
 ## Want to contribute?
 
 We welcome all contributions! :heart: For guidance on setting up a development environment, see our [Contributing Guide][contrib].
@@ -98,6 +299,9 @@ We welcome all contributions! :heart: For guidance on setting up a development e
 [examples]: examples/README.md
 [contrib]: .github/CONTRIBUTING.md
 [rest-api]: https://developers.thoughtspot.com/docs/?pageid=rest-apis
+[rest-api-import]: https://developers.thoughtspot.com/docs/?pageid=tml-api#import
+[rest-api-export]: https://developers.thoughtspot.com/docs/?pageid=tml-api#export
+[syntax-tml]: https://docs.thoughtspot.com/cloud/latest/tml
 [syntax-table]: https://docs.thoughtspot.com/cloud/latest/tml#syntax-tables
 [syntax-view]: https://docs.thoughtspot.com/cloud/latest/tml#syntax-views
 [syntax-sqlview]: https://docs.thoughtspot.com/cloud/latest/tml#syntax-sqlviews
