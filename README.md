@@ -6,7 +6,7 @@
   <h3>
     <a href="#installation">Installation</a>
     <span> | </span>
-    <a href="#a-simple-functional-example">Simple Example</a>
+    <a href="#a-basic-example">Example</a>
     <span> | </span>
     <a href="#migration-to-v130">Migration to v1.3.0</a>
     <span> | </span>
@@ -35,7 +35,7 @@ __Installation is as simple as:__
 pip install thoughtspot-tml
 ```
 
-## A Simple Functional Example
+## A Basic Example
 
 ```python
 # worksheet_remapping.py
@@ -63,10 +63,10 @@ def main():
     # Create a command line application
     #   - argument for a WORKSHEET.worksheet.tml
     #   - options for the "before" and "after" tabling naming conventions
-    parser = argparse.ArgumentParser("worksheet")
+    parser = argparse.ArgumentParser()
     parser.add_argument("worksheet_tml", help="a worksheet.tml to remap", type=filepath)
     parser.add_argument("-s", "--src-prefix", metavar="SRC", default="DEV_", type=str, help="(default: %(default)s)")
-    parser.add_argument("-d", "--dst-prefix", metavar="DST", default="", type=str, help="(default: %(default)s)")
+    parser.add_argument("-d", "--dst-prefix", metavar="DST", default="TEST_", type=str, help="(default: %(default)s)")
 
     # Parse CLI input
     args = parser.parse_args()
@@ -74,11 +74,9 @@ def main():
     # Read from file
     tml = Worksheet.load(args.worksheet_tml)
     
-    # Replace instances of DEV_ with nothing
+    # Replace instances of DEV_ with TEST_
     for table in tml.worksheet.tables:
-        if table.name.startswith(args.source_prefix):
-            _, prefix, name = table.name.partition(args.source_prefix)
-            table.name = f'{args.target_prefix}{name}'
+        table.name = table.name.replace(args.src_prefix, args.dst_prefix)
 
     # Save to file
     tml.dump(args.worksheet_tml)
@@ -92,7 +90,7 @@ if __name__ == '__main__':
 ```shell
 >>> python worksheet_remapping.py -h
 
-usage: worksheet [-h] [-s SRC] [-d DST] worksheet_tml
+usage: [-h] [-s SRC] [-d DST] worksheet_tml
 
 positional arguments:
   worksheet_tml         a worksheet.tml to remap
@@ -100,10 +98,10 @@ positional arguments:
 options:
   -h, --help                show this help message and exit
   -s SRC, --src-prefix SRC  (default: DEV_)
-  -d DST, --dst-prefix DST  (default: )
+  -d DST, --dst-prefix DST  (default: TEST_)
 ```
 
-More examples can be found in our [/examples directory][examples] in this repository.
+A more complex version of this example, as well as more examples can be found in the [/examples directory][examples] in this repository.
 
 ## `thoughtspot_tml` Reference
 
@@ -130,7 +128,7 @@ from thoughtspot_tml import SavedAnswer        # Answer
 from thoughtspot_tml import SystemTable        # Table
 ```
 
-Each TML object takes the form of a top-level attribute for the globally unique identifier, or GUID, as well as the document form of the object it represents. This identically mirrors the TML specification you can find [in the __ThoughtSpot__ documentation][syntax-tml]. In addition, the `name` attribute of the TML document itself has been pulled into the top-level namespace.
+Each TML object takes the form of a top-level attribute for the globally unique identifier, or `GUID`, as well as the document form of the object it represents. This identically mirrors the TML specification you can find [in the __ThoughtSpot__ documentation][syntax-tml]. In addition, the `name` attribute of the TML document itself has been pulled into the top-level namespace.
 
 ```python
 @dataclass
@@ -270,7 +268,8 @@ type(tml) is Worksheet
 
 ## Notes on __ThoughtSpot Modeling Language__
 
-TML is implemented in the YAML 1.1 spec.
+- TML is implemented in the YAML 1.1 spec.
+- When importing a TML file, if the `guid` matches to an existing object, then that object will be updated. If the `guid` is missing or does not match an object, a new object is created with a new GUID.
 
 ## Want to contribute?
 
