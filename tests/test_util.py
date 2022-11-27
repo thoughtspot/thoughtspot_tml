@@ -18,6 +18,7 @@ for file, tml_type in (
     (_const.DUMMY_LIVEBOARD, Liveboard),
     (_const.DUMMY_PINBOARD, Pinboard),
 ):
+
     @test("Determine object utility for {intended_type.__name__}")
     def _(file=file, intended_type=tml_type):
         t = determine_tml_type(path=file)

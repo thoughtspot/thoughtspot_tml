@@ -9,8 +9,7 @@ from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 
 
 def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Union[Connection, TMLObject]:
-    """
-    """
+    """ """
     if info is None and path is None:
         raise TypeError("determine_tml_type() missing at least 1 required keyword-only argument: 'info' or 'path'")
 
@@ -23,9 +22,9 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
         "worksheet": Worksheet,
         "answer": Answer,
         "liveboard": Liveboard,
-        "pinboard": Pinboard
+        "pinboard": Pinboard,
     }
-    
+
     if path is not None:
         path = pathlib.Path(path)
 

@@ -24,8 +24,8 @@ class Manifest:
 
 @dataclass
 class SpotApp:
-    """
-    """
+    """ """
+
     tml: List["TMLType"]
     manifest: Optional[Manifest] = None
 
@@ -55,8 +55,7 @@ class SpotApp:
 
     @classmethod
     def from_api(cls, payload: "EDocExportResponse") -> "TSpotApp":
-        """
-        """
+        """ """
         info = {"tml": [], "manifest": None}
         manifest_data = {"object": []}
 
@@ -79,8 +78,7 @@ class SpotApp:
 
     @classmethod
     def read(cls, path: "PathLike") -> "TSpotApp":
-        """
-        """
+        """ """
         info = {"tml": [], "manifest": None}
 
         with zipfile.ZipFile(path, mode="r") as archive:
@@ -107,8 +105,7 @@ class SpotApp:
         return cls(**info)
 
     def save(self, path: "PathLike") -> None:
-        """
-        """
+        """ """
         with zipfile.ZipFile(path, mode="w") as archive:
             for edoc in self.tml:
                 edoc_type = type(edoc).__name__.lower()

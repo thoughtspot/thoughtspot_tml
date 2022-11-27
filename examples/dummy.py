@@ -32,16 +32,16 @@ def main():
 
     # Read from file
     tml = Worksheet.load(args.worksheet_tml)
-    
+
     # Replace instances of DEV_ with nothing
     for table in tml.worksheet.tables:
         if table.name.startswith(args.source_prefix):
             _, prefix, name = table.name.partition(args.source_prefix)
-            table.name = f'{args.target_prefix}{name}'
+            table.name = f"{args.target_prefix}{name}"
 
     # Save to file
     tml.dump(args.worksheet_tml)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())

@@ -18,12 +18,7 @@ class TMLDecodeError(TMLError):
     """
 
     def __init__(
-        self,
-        tml_cls: TMLObject,
-        *,
-        data: Dict[str, Any] = None,
-        path: Path = None,
-        problem_mark: error.Mark = None
+        self, tml_cls: TMLObject, *, data: Dict[str, Any] = None, path: Path = None, problem_mark: error.Mark = None
     ):  # pragma: no cover
         self.tml_cls = tml_cls
         self.data = data
