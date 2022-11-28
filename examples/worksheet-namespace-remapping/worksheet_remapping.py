@@ -35,13 +35,13 @@ def main():
     tml = Worksheet.load(args.worksheet_tml)
     
     # Build a regular expression which matches the source prefix at the beginning of a string
-    RE_SRC_NAMESPACE = re.compile(fr"^{args.source_prefix}.*")
+    RE_SRC_NAMESPACE = re.compile(fr"^{args.src_prefix}.*")
 
     # Replace instances of DEV_ with TEST_
-    tml.worksheet.name = RE_SRC_NAMESPACE.sub(args.target_prefix, tml.worksheet.name)
+    tml.worksheet.name = RE_SRC_NAMESPACE.sub(args.dst_prefix, tml.worksheet.name)
 
     for table in tml.worksheet.tables:
-        table.name = RE_SRC_NAMESPACE.sub(args.target_prefix, table.name)
+        table.name = RE_SRC_NAMESPACE.sub(args.dst_prefix, table.name)
 
     # Save to file
     tml.dump(args.worksheet_tml)

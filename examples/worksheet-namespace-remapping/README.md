@@ -1,8 +1,8 @@
-# Worksheet Remapping
+# Worksheet Remapping (Namespace)
 
 Worksheets are __ThoughtSpot's__ logical or semantic layer; a collection of related tables with optional business logic added in the form of Formulas.
 
-In this example, we leverage the pattern outlined in [Development and Deployment][guide-deploy] which outlines a standard pattern for between environments.
+In this example, we leverage the pattern outlined in [Development and Deployment][guide-deploy] which helps in maintaining changes across development environments.
 
 The core idea revolves around having content names that are structured for disambiguation. All objects in __ThoughtSpot__ have a globally unique id or GUID, but historically, default parameters in the APIs do not include underlying objects' guid in the output. TML offers a way to disambiguate objects which share a core type and have the same name through the use of the `fqn` key on each object.
 
@@ -10,6 +10,7 @@ This concept is called [namespacing][wiki-namespace].
 
 | __TS Object__  | <b>DEV</b>elopment | __TEST__            | <b>PROD</b>uction |
 | :---           | :---               | :---                | :---              |
+| `Connection`   | Analytics (Dev)    | Analytics (Test)    | Analytics         |
 | `System Table` | DEV_FCT_SALES      | TEST_FCT_SALES      | FCT_SALES         |
 | `System Table` | DEV_DIM_CUSTOMERS  | TEST_DIM_CUSTOMERS  | DIM_CUSTOMERS     |
 | `System Table` | DEV_DIM_PRODUCTS   | TEST_DIM_PRODUCTS   | DIM_PRODUCTS      |
