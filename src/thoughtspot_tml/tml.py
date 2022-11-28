@@ -113,6 +113,14 @@ class TML:
     def loads(cls, tml_document: str) -> "TTML":
         """
         Deserialize a TML document to a Python object.
+
+        Parameters
+        ----------
+        tml_document : str
+          text to parse into a TML object
+
+        Raises
+        ------
         """
         document = _yaml.load(tml_document)
 
@@ -127,6 +135,11 @@ class TML:
     def load(cls, path: "PathLike") -> "TTML":
         """
         Deserialize a TML document located at filepath to a Python object.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to load the TML document from
         """
         if isinstance(path, str):
             path = pathlib.Path(path)
@@ -147,6 +160,11 @@ class TML:
     def dumps(self, format_type: str = "YAML") -> str:
         """
         Serialize this object as a YAML- or JSON-formatted str.
+
+        Parameters
+        ----------
+        format_type : str
+          data format to save in .. one of, 'YAML' or 'JSON'
         """
         data = _recursive_remove_null(self.to_dict())
 
@@ -161,6 +179,11 @@ class TML:
     def dump(self, path: "PathLike") -> None:
         """
         Serialize this object as a YAML-formatted stream to a filepath.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to save the TML document to
         """
         if isinstance(path, str):
             path = pathlib.Path(path)

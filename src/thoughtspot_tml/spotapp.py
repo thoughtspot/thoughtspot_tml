@@ -24,7 +24,11 @@ class Manifest:
 
 @dataclass
 class SpotApp:
-    """ """
+    """
+    A collection of Tables, Views, Worksheets, Answers, and Liveboards.
+
+    This object is usually packaged together as a zip file.
+    """
 
     tml: List["TMLType"]
     manifest: Optional[Manifest] = None
@@ -55,7 +59,14 @@ class SpotApp:
 
     @classmethod
     def from_api(cls, payload: "EDocExportResponse") -> "TSpotApp":
-        """ """
+        """
+        Load the SpotApp from file.
+
+        Parameters
+        ----------
+        payload : EDocExportResponse
+          api response data to parse
+        """
         info = {"tml": [], "manifest": None}
         manifest_data = {"object": []}
 
@@ -78,7 +89,14 @@ class SpotApp:
 
     @classmethod
     def read(cls, path: "PathLike") -> "TSpotApp":
-        """ """
+        """
+        Load the SpotApp from file.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to read the SpotApp from
+        """
         info = {"tml": [], "manifest": None}
 
         with zipfile.ZipFile(path, mode="r") as archive:
@@ -105,7 +123,14 @@ class SpotApp:
         return cls(**info)
 
     def save(self, path: "PathLike") -> None:
-        """ """
+        """
+        Save the SpotApp to file.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to save the zip file to
+        """
         with zipfile.ZipFile(path, mode="w") as archive:
             for edoc in self.tml:
                 edoc_type = type(edoc).__name__.lower()
