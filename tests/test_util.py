@@ -32,7 +32,7 @@ def _():
     with raises(TMLError) as exc:
         determine_tml_type(info={"type": bad_type})
 
-    assert str(exc.raised) == f"could not parse TML type from 'info' or 'path', got '{bad_type}'"
+    assert f"could not parse TML type from 'info' or 'path', got '{bad_type}'" in str(exc.raised)
 
 
 @test("Object utility requires one of: 'info' or 'path'")
