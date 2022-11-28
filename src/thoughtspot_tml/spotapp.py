@@ -76,7 +76,7 @@ class SpotApp:
             manifest_data["object"].append(edoc_info["info"])
 
             # @boonhapus, 2022/11/25
-            # SCAL-1234 - SpotApp export_associated uses `pinboard` for Liveboard edoc
+            # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
             if tml_cls is Pinboard:
                 document["pinboard"] = document.pop("liveboard", document["pinboard"])
             # {END}
@@ -110,7 +110,7 @@ class SpotApp:
 
                 tml_cls = determine_tml_type(path=member.filename)
                 # @boonhapus, 2022/11/25
-                # SCAL-1234 - SpotApp export_associated uses `pinboard` for Liveboard edoc
+                # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
                 if tml_cls is Pinboard:
                     document = path.read_text()
                     document = document.replace("liveboard:", "pinboard:")
