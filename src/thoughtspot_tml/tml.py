@@ -295,6 +295,20 @@ class Liveboard(TML):
     def name(self) -> str:
         return self.liveboard.name
 
+    @classmethod
+    def loads(cls, tml_document: str) -> "TTML":
+        # @boonhapus, 2022/11/25
+        # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
+        document = _yaml.load(tml_document)
+        document["liveboard"] = document.pop("pinboard", document["liveboard"])
+
+        try:
+            instance = cls(**document)
+        except TypeError:
+            raise TMLDecodeError(cls, data=document) from None
+
+        return instance
+
 
 @dataclass
 class Pinboard(TML):
@@ -311,3 +325,17 @@ class Pinboard(TML):
     @property
     def name(self) -> str:
         return self.pinboard.name
+
+    @classmethod
+    def loads(cls, tml_document: str) -> "TTML":
+        # @boonhapus, 2022/11/25
+        # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
+        document = _yaml.load(tml_document)
+        document["pinboard"] = document.pop("liveboard", document["pinboard"])
+
+        try:
+            instance = cls(**document)
+        except TypeError:
+            raise TMLDecodeError(cls, data=document) from None
+
+        return instance
