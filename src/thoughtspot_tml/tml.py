@@ -146,7 +146,7 @@ class TML:
 
         try:
             instance = cls.loads(path.read_text())
-        except yaml.scanner.ScannerError as e:
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
             raise TMLDecodeError(cls, path=path, problem_mark=e.problem_mark) from None
 
         return instance
