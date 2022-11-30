@@ -106,6 +106,11 @@ class TML:
     Base object for ThoughtSpot TML.
     """
 
+    @property
+    def tml_type_name(self) -> str:
+        """ Return the type name of the TML object. """
+        return type(self).__name__.lower()
+
     def __post_init__(self):
         _recursive_complex_attrs_to_dataclasses(self)
 
