@@ -302,10 +302,12 @@ class Liveboard(TML):
 
     @classmethod
     def loads(cls, tml_document: str) -> "TTML":
+        document = _yaml.load(tml_document)
+
         # @boonhapus, 2022/11/25
         # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
-        document = _yaml.load(tml_document)
-        document["liveboard"] = document.pop("pinboard", document["liveboard"])
+        if "pinboard" in document:
+            document["liveboard"] = document.pop("pinboard")
 
         try:
             instance = cls(**document)
@@ -333,10 +335,12 @@ class Pinboard(TML):
 
     @classmethod
     def loads(cls, tml_document: str) -> "TTML":
+        document = _yaml.load(tml_document)
+
         # @boonhapus, 2022/11/25
         # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
-        document = _yaml.load(tml_document)
-        document["pinboard"] = document.pop("liveboard", document["pinboard"])
+        if "liveboard" in document:
+            document["pinboard"] = document.pop("liveboard")
 
         try:
             instance = cls(**document)
