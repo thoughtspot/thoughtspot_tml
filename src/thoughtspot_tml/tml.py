@@ -131,8 +131,8 @@ class TML:
 
         try:
             instance = cls(**document)
-        except TypeError:
-            raise TMLDecodeError(cls, data=document) from None
+        except TypeError as e:
+            raise TMLDecodeError(cls, data=document, message=str(e)) from None
 
         return instance
 
@@ -311,8 +311,8 @@ class Liveboard(TML):
 
         try:
             instance = cls(**document)
-        except TypeError:
-            raise TMLDecodeError(cls, data=document) from None
+        except TypeError as e:
+            raise TMLDecodeError(cls, data=document, message=str(e)) from None
 
         return instance
 
@@ -344,7 +344,7 @@ class Pinboard(TML):
 
         try:
             instance = cls(**document)
-        except TypeError:
-            raise TMLDecodeError(cls, data=document) from None
+        except TypeError as e:
+            raise TMLDecodeError(cls, data=document, message=str(e)) from None
 
         return instance

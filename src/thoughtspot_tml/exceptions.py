@@ -18,9 +18,15 @@ class TMLDecodeError(TMLError):
     """
 
     def __init__(
-        self, tml_cls: TMLObject, *, data: Dict[str, Any] = None, path: Path = None, problem_mark: error.Mark = None
+        self, tml_cls: TMLObject,
+        *,
+        message: str = None,
+        data: Dict[str, Any] = None,
+        path: Path = None,
+        problem_mark: error.Mark = None
     ):  # pragma: no cover
         self.tml_cls = tml_cls
+        self.message = message
         self.data = data
         self.path = path
         self.problem_mark = problem_mark
@@ -28,6 +34,9 @@ class TMLDecodeError(TMLError):
     def __str__(self) -> str:
         lines = []
         class_name = self.tml_cls.__name__
+
+        if self.message is not None:
+            lines.append(self.message)
 
         if self.data is not None:
             lines.append(f"supplied data does not produce a valid TML ({class_name}) document")
