@@ -8,7 +8,7 @@
     <span> | </span>
     <a href="#a-basic-example">Example</a>
     <span> | </span>
-    <a href="#migration-to-v130">Migration to v1.3.0</a>
+    <a href="#migration-to-v200">Migration to v2.0.0</a>
     <span> | </span>
     <a href="#thoughtspot_tml-reference">Reference</a>
     <span> | </span>
@@ -262,9 +262,16 @@ tml = tml_type.loads(tml_document=export_response["object"][0]["edoc"])
 type(tml) is Worksheet
 ```
 
-## Migration to v1.3.0
+## Migration to v2.0.0
 
+- YAMLTML.load / YAMLTML.dump
+- YAMLTML.get_tml_object / get_tml_type
+
+- .remove_guid()
+- .map_guids()
+- .add_fqns_*()
 **Lorem ipsum**
+
 
 ## Notes on __ThoughtSpot Modeling Language__
 
