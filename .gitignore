@@ -42,3 +42,4 @@ _generate/*.json
 _generate/*.yaml
 _generate/*.proto
 _generate/*.toml
+_generate/archive/*
