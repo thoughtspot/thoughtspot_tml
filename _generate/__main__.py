@@ -56,6 +56,9 @@ def _clean_edoc_proto():
     #
     text = EDOC_PROTO.read_text()
 
+    # comment out unnecessary import
+    text = re.sub(r'^(?!// )(import "a3/monitor/public/monitor_rule.proto")', r"// \1", text, flags=re.M)
+
     # strip all comments except ones starting with `import`
     text = re.sub(r"//(?! import).*", r"", text)
 
@@ -83,9 +86,11 @@ def _clean_edoc_proto():
 
     # strip out useless stuff that exists only for internal validation or historical reasons
     text = re.sub(r"(?<=destination.{4};\s)  .*on.*;(?=\n)", r"", text)  # black magic
-    text = re.sub(r"(?<=j.{13}\s{4}).*col.*(?=\s})", r"", text)  # blue magic
+    # text = re.sub(r"(?<=j.{13}\s{4}).*col.*(?=\s})", r"", text)  # blue magic
     text = re.sub(r"message ObjectPermissions {[\s\S]+?}", r"", text)
     text = re.sub(r"message ObjectEDocProto {[\s\S]+?}", r"", text)
+    text = re.sub(r"message User {[\s\S]+?}", r"", text)
+    text = re.sub(r"message MonitorAlertEDocProto {[\s\S]+?}", r"", text)
     text = re.sub(r"message Token {[\s\S]+?}", r"", text)
     text = re.sub(r"^  .*(generation).*;$", r"", text, flags=re.M)
     text = re.sub(r"^  .*(generic).*;$", r"", text, flags=re.M)

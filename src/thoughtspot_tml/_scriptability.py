@@ -114,6 +114,7 @@ class ColumnPropertiesGeoConfigProto(betterproto.Message):
     longitude: bool = betterproto.bool_field(2, optional=True)
     country: bool = betterproto.bool_field(3, optional=True)
     region_name: "ColumnPropertiesGeoConfigProtoSubRegion" = betterproto.message_field(4, optional=True)
+    custom_file_guid: str = betterproto.string_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -202,6 +203,7 @@ class TablePath(betterproto.Message):
     id: str = betterproto.string_field(1, optional=True)
     table: str = betterproto.string_field(2, optional=True)
     join_path: List["TablePathJoinPath"] = betterproto.message_field(3, optional=True)
+    column: List[str] = betterproto.string_field(4, optional=True)
 
 
 @dataclass(eq=False, repr=False)
