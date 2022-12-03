@@ -12,6 +12,12 @@ class TMLError(Exception):
     """
 
 
+class TMLExtensionWarning(UserWarning):
+    """
+    Alerts when a user saves a TML file without the proper extension.
+    """
+
+
 class TMLDecodeError(TMLError):
     """
     Raised when a TML object cannot be instantiated from input data.

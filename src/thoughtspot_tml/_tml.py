@@ -8,6 +8,7 @@ import json
 
 import yaml
 
+from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 from thoughtspot_tml._compat import get_origin, get_args
 from thoughtspot_tml import _scriptability, _yaml
 
@@ -205,6 +206,9 @@ class TML:
         """
         if isinstance(path, str):
             path = pathlib.Path(path)
+
+        if not path.name.endswith(f"{self.tml_type_name}.tml"):
+            warnings.warn(f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning)
 
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
         path.write_text(document)
