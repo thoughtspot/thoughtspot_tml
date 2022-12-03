@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 from uuid import UUID
 import pathlib
 import os
@@ -37,3 +37,45 @@ class TMLDocInfo(TypedDict):
 class EDocExportResponse(TypedDict):
     info: TMLDocInfo
     edoc: TMLObject
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /connection/* Metadata Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+class ExternalColumn(TypedDict):
+    name: str
+    type: str
+    canImport: bool
+    selected: bool
+    isLinkedActive: bool
+    isImported: bool
+    tableName: str
+    schemaName: str
+    dbName: str
+
+
+class ExternalTable(TypedDict):
+    name: str
+    type: str
+    description: str
+    selected: bool
+    linked: bool
+    columns: List[ExternalColumn]
+
+
+class ExternalSchema(TypedDict):
+    name: str
+    tables: List[ExternalTable]
+
+
+class ExternalDatabase(TypedDict):
+    name: str
+    isAutoCreated: bool
+    schemas: List[ExternalSchema]
+
+
+class ConnectionMetadata(TypedDict):
+    # for a full list of connection configurations
+    #  https://developers.thoughtspot.com/docs/?pageid=connections-api#connection-metadata
+    configuration: Dict[str, Any]
+    externalDatabases: List[ExternalDatabase]
