@@ -9,7 +9,7 @@ from . import _const
 def _():
 
     with raises(TMLDecodeError) as exc:
-        Answer.loads(tml_document="INVALID")
+        Answer.loads(tml_document="😅: INVALID")
 
     assert "supplied data does not produce a valid TML (Answer) document" in str(exc.raised)
 
