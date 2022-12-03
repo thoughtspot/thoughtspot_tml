@@ -1,224 +1,88 @@
-from collections.abc import Collection
-from dataclasses import dataclass, fields, is_dataclass, asdict
-from typing import TYPE_CHECKING
-import pathlib
+from dataclasses import dataclass, asdict
 import typing
-import json
+import copy
 
-import yaml
-
-from thoughtspot_tml._compat import get_origin, get_args
-from thoughtspot_tml.exceptions import TMLDecodeError
-from thoughtspot_tml.types import GUID
-from thoughtspot_tml import _scriptability
-from thoughtspot_tml import _yaml
-
-
-if TYPE_CHECKING:
-    from thoughtspot.types import PathLike
-
-    TTML = typing.TypeVar("TTML", bound="TML")
-
-
-def _recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
-    """
-    Convert all fields of type `dataclass` into an instance of the
-    specified data class if the current value is of type dict.
-
-    Types will always be one of:
-      - dataclass
-      - basic type
-      - dataclass annotation (aka, a str) - to be gathered from _scriptability
-      - list of basic types
-      - list of dataclass annotation
-    """
-    cls = type(instance)
-
-    for field in fields(cls):
-        value = getattr(instance, field.name)
-
-        # ignore nulls, they get dropped to support optionality
-        if value is None:
-            continue
-
-        # it's a dataclass
-        if is_dataclass(field.type) and isinstance(value, dict):
-            new_value = field.type(**value)
-            _recursive_complex_attrs_to_dataclasses(new_value)
-
-        # it's an Annotation that needs resolution
-        elif isinstance(field.type, str) and isinstance(value, dict):
-            type_ = getattr(_scriptability, field.type)
-            new_value = type_(**value)
-            _recursive_complex_attrs_to_dataclasses(new_value)
-
-        # it's a List of basic types or ForwardRefs
-        elif get_origin(field.type) is list:
-            new_value = []
-            args = get_args(field.type)
-            field_type = args[0].__forward_value__ if isinstance(args[0], typing.ForwardRef) else args[0]
-
-            for item in value:
-                if is_dataclass(field_type) and isinstance(item, dict):
-                    item = field_type(**item)
-
-                new_value.append(item)
-
-                if is_dataclass(field_type):
-                    _recursive_complex_attrs_to_dataclasses(item)
-
-        # it's an empty mapping, python-betterproto doesn't support optional map_fields
-        elif get_origin(field.type) is dict and not value:
-            new_value = None
-
-        else:  # pragma: peephole optimizer
-            continue
-
-        setattr(instance, field.name, new_value)
-
-
-def _recursive_remove_null(mapping: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
-    """
-    Drop all keys with null values, they're optional.
-    """
-    new = {}
-
-    for k, v in mapping.items():
-
-        if isinstance(v, dict):
-            v = _recursive_remove_null(v)
-
-        if isinstance(v, list):
-            v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
-
-        # if v is an empty collection, discard it
-        if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):  # pragma: peephole optimizer
-            continue
-
-        new[k] = v
-
-    return new
+from thoughtspot_tml.types import ConnectionMetadata, GUID
+from thoughtspot_tml import _tml, _scriptability, _yaml
 
 
 @dataclass
-class TML:
-    """
-    Base object for ThoughtSpot TML.
-    """
+class Connection(_tml.TML):
 
-    @property
-    def tml_type_name(self) -> str:
-        """ Return the type name of the TML object. """
-        return type(self).__name__.lower()
-
-    def __post_init__(self):
-        _recursive_complex_attrs_to_dataclasses(self)
+    guid: typing.Optional[GUID]
+    connection: _scriptability.ConnectionDoc
 
     @classmethod
-    def loads(cls, tml_document: str) -> "TTML":
-        """
-        Deserialize a TML document to a Python object.
-
-        Parameters
-        ----------
-        tml_document : str
-          text to parse into a TML object
-
-        Raises
-        ------
-        """
+    def _loads(cls, tml_document):
         document = _yaml.load(tml_document)
 
-        try:
-            instance = cls(**document)
-        except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None
-
-        return instance
-
-    @classmethod
-    def load(cls, path: "PathLike") -> "TTML":
-        """
-        Deserialize a TML document located at filepath to a Python object.
-
-        Parameters
-        ----------
-        path : PathLike
-          filepath to load the TML document from
-        """
-        if isinstance(path, str):
-            path = pathlib.Path(path)
-
-        try:
-            instance = cls.loads(path.read_text())
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
-            raise TMLDecodeError(cls, path=path, problem_mark=e.problem_mark) from None
-
-        return instance
-
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
-        """
-        Serialize this object to native python data types.
-        """
-        return asdict(self)
-
-    def dumps(self, format_type: str = "YAML") -> str:
-        """
-        Serialize this object as a YAML- or JSON-formatted str.
-
-        Parameters
-        ----------
-        format_type : str
-          data format to save in .. one of, 'YAML' or 'JSON'
-        """
-        data = _recursive_remove_null(self.to_dict())
-
-        if format_type.upper() == "YAML":
-            document = _yaml.dump(data)
-
-        if format_type.upper() == "JSON":
-            document = json.dumps(data, indent=4, sort_keys=False)  # to match the yaml semantic
+        if "guid" not in document:
+            document = {"guid": None, "connection": document}
 
         return document
 
-    def dump(self, path: "PathLike") -> None:
-        """
-        Serialize this object as a YAML-formatted stream to a filepath.
+    def _to_dict(self):
+        data = asdict(self)
+        return data["connection"]
 
-        Parameters
-        ----------
-        path : PathLike
-          filepath to save the TML document to
+    def to_rest_api_v1_metadata(self) -> ConnectionMetadata:
         """
-        if isinstance(path, str):
-            path = pathlib.Path(path)
+        """
+        data = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
+        this_database = {"name": None, "isAutoCreated": False, "schemas": []}
+        this_schema = {"name": None, "tables": []}
 
-        document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
-        path.write_text(document)
+        # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
+        # if we sort first, we can guarantee the insertion order with simple iteration
+        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: off
+
+            # if it's a new schema, append it this database's schema and reset
+            if table.external_table.schema_name != this_schema["name"]:
+                if this_schema["name"] is not None:
+                    this_database["schemas"].append(copy.deepcopy(this_schema))
+
+                this_schema["name"] = table.external_table.schema_name
+                this_schema["tables"] = []
+
+            # if it's a new database, append it to response and reset
+            if table.external_table.db_name != this_database["name"]:
+                if this_database["name"] is not None:
+                    data["externalDatabases"].append(copy.deepcopy(this_database))
+
+                this_database["name"] = table.external_table.db_name
+                this_database["schemas"] = []
+
+            this_schema["tables"].append({
+                "name": table.external_table.table_name,
+                "type": "TABLE",
+                "description": "",
+                "selected": True,
+                "linked": True,
+                "columns": [
+                    {
+                        "name": column.external_column,
+                        "type": column.data_type,
+                        "canImport": True,
+                        "selected": True,
+                        "isLinkedActive": True,
+                        "isImported": False,
+                        "dbName": table.external_table.db_name,
+                        "schemaName": table.external_table.schema_name,
+                        "tableName": table.external_table.table_name,
+                    }
+                    for column in table.column
+                ]
+            })
+
+        # stick the last known data into the response object
+        this_database["schemas"].append(copy.deepcopy(this_schema))
+        data["externalDatabases"].append(copy.deepcopy(this_database))
+
+        return data
 
 
 @dataclass
-class Connection(TML):
-    """
-    Representation of a ThoughtSpot Connection YAML.
-    """
-
-    # @boonhapus, 2022/11/20
-    #
-    # "Why is this one different?"
-    # Connections do not yet have a TML representation. The TML data format is simply
-    # the YAML 1.1 spec. Connections were the first text representation of metadata in
-    # ThoughtSpot and leveraged the YAML extension.
-    #
-    name: str
-    type: str
-    authentication_type: str
-    properties: typing.List[_scriptability.KeyValueStr]
-    table: typing.List[_scriptability.ConnectionDocTableDoc]
-
-
-@dataclass
-class Table(TML):
+class Table(_tml.TML):
     """
     Representation of a ThoughtSpot System Table TML.
     """
@@ -232,7 +96,7 @@ class Table(TML):
 
 
 @dataclass
-class View(TML):
+class View(_tml.TML):
     """
     Representation of a ThoughtSpot View TML.
     """
@@ -246,7 +110,7 @@ class View(TML):
 
 
 @dataclass
-class SQLView(TML):
+class SQLView(_tml.TML):
     """
     Representation of a ThoughtSpot SQLView TML.
     """
@@ -260,7 +124,7 @@ class SQLView(TML):
 
 
 @dataclass
-class Worksheet(TML):
+class Worksheet(_tml.TML):
     """
     Representation of a ThoughtSpot Worksheet TML.
     """
@@ -274,7 +138,7 @@ class Worksheet(TML):
 
 
 @dataclass
-class Answer(TML):
+class Answer(_tml.TML):
     """
     Representation of a ThoughtSpot Answer TML.
     """
@@ -288,7 +152,7 @@ class Answer(TML):
 
 
 @dataclass
-class Liveboard(TML):
+class Liveboard(_tml.TML):
     """
     Representation of a ThoughtSpot Liveboard TML.
     """
@@ -301,7 +165,7 @@ class Liveboard(TML):
         return self.liveboard.name
 
     @classmethod
-    def loads(cls, tml_document: str) -> "TTML":
+    def _loads(cls, tml_document):
         document = _yaml.load(tml_document)
 
         # @boonhapus, 2022/11/25
@@ -309,16 +173,11 @@ class Liveboard(TML):
         if "pinboard" in document:
             document["liveboard"] = document.pop("pinboard")
 
-        try:
-            instance = cls(**document)
-        except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None
-
-        return instance
+        return document
 
 
 @dataclass
-class Pinboard(TML):
+class Pinboard(_tml.TML):
     """
     Representation of a ThoughtSpot Pinboard TML.
 
@@ -334,7 +193,7 @@ class Pinboard(TML):
         return self.pinboard.name
 
     @classmethod
-    def loads(cls, tml_document: str) -> "TTML":
+    def _loads(cls, tml_document):
         document = _yaml.load(tml_document)
 
         # @boonhapus, 2022/11/25
@@ -342,9 +201,4 @@ class Pinboard(TML):
         if "liveboard" in document:
             document["pinboard"] = document.pop("liveboard")
 
-        try:
-            instance = cls(**document)
-        except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None
-
-        return instance
+        return document
