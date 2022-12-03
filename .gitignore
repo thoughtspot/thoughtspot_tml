@@ -31,6 +31,7 @@ ENV/
 env.bak/
 venv.bak/
 
+
 # ignore virtualization
 .python-version
 
@@ -43,3 +44,9 @@ _generate/*.yaml
 _generate/*.proto
 _generate/*.toml
 _generate/archive/*
+
+# ignore test temp directory
+tests/data/_temp/*
+
+# keep mandatory empty directories
+!.gitdontignore
