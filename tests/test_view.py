@@ -22,15 +22,3 @@ def _():
     t.view.joins_with
     t.view.joins_with[0].destination
     t.view.joins_with[0].destination.name
-
-
-@test("View roundtrips")
-def _():
-    before_t = _const.DUMMY_VIEW.read_text()
-    t = View.loads(before_t)
-    after_t = t.dumps()
-
-    assert type(before_t) is str
-    assert type(t) is View
-    assert type(after_t) is str
-    assert before_t == after_t

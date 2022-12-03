@@ -27,15 +27,3 @@ def _():
     t.worksheet.worksheet_columns[0].properties.index_type
     t.worksheet.properties
     t.worksheet.properties.is_bypass_rls
-
-
-@test("Worksheet roundtrips")
-def _():
-    before_t = _const.DUMMY_WORKSHEET.read_text()
-    t = Worksheet.loads(before_t)
-    after_t = t.dumps()
-
-    assert type(before_t) is str
-    assert type(t) is Worksheet
-    assert type(after_t) is str
-    assert before_t == after_t

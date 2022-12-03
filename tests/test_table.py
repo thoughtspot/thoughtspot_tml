@@ -19,15 +19,3 @@ def _():
     t.table.joins_with
     t.table.joins_with[0].destination
     t.table.joins_with[0].destination.name
-
-
-@test("Table roundtrips")
-def _():
-    before_t = _const.DUMMY_TABLE.read_text()
-    t = Table.loads(before_t)
-    after_t = t.dumps()
-
-    assert type(before_t) is str
-    assert type(t) is Table
-    assert type(after_t) is str
-    assert before_t == after_t
