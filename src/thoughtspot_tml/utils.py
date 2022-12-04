@@ -10,6 +10,8 @@ from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 from thoughtspot_tml import _scriptability, _compat
 
+_UNDEFINED = object()
+
 
 def _recursive_scan(scriptability_object: Any, check: Callable[Any, bool] = None) -> List[Any]:
     collect = []
@@ -89,6 +91,142 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
         raise TMLError("\n".join(lines))
 
     return types[tml_type]
+
+
+class EnvironmentGUIDMapper:
+    """
+    A dict-like container which maps guids from one environment to another.
+
+    This can be a helpful way to track objects across environments.
+
+    Produces a mapping file which takes the form below..
+
+    {
+        "guid1__guid2": {
+            "ENVT_NAME_A": "guid1",
+            "ENVT_NAME_B": "guid2",
+            ...
+        },
+        ...
+    }
+
+    Usage of this object is as simple as..
+
+    # create a new mapper
+    mapper = EnvironmentGUIDMapper()  # or EnvironmentGUIDMapper.read(path=...)
+
+    # add a brand brand new guid into the mapper
+    mapper["guid1"] = ("PROD", "guid1")
+
+    # map guid1 to a guid in another environment
+    mapper["guid1"] = ("TEST", "guid2")
+
+    # map a new guid3 to any of existing guid
+    # this means all 3 guids represent the same object across environments
+    mapper["guid2"] = ("PROD", "guid3")
+
+    # persist the mapping file to disk
+    mapper.save(path="marketing_thoughtspot_guid_mapping.json")
+
+    Attributes
+    ----------
+    environment_transformer : Callable(str) -> str
+      a function which transforms the ENV name before adding it to the mapping
+    """
+
+    def __init__(self, environment_transformer: Callable[[str], str] = str.upper):
+        self.environment_transformer = environment_transformer
+        self._mapping = {}
+
+    def __setitem__(self, guid: GUID, value: Tuple[str, GUID]) -> None:
+        environment, guid_to_add = value
+        environment = self.environment_transformer(environment)
+
+        try:
+            envts = self[guid]
+        except KeyError:
+            new_key = guid_to_add
+            envts = {environment: guid_to_add}
+        else:
+            old_key = "__".join(envts.values())
+            self._mapping.pop(old_key)
+
+            envts[environment] = guid_to_add
+            new_key = "__".join(envts.values())
+
+        self._mapping.setdefault(new_key, {}).update(envts)
+
+    def __getitem__(self, guid: GUID) -> Dict[str, GUID]:
+        for guids_across_envts, envts in self._mapping.items():
+            if guid in guids_across_envts.split("__"):
+                return envts
+        raise KeyError(f"no environment matches guid, got '{guid}'")
+
+    def __contains__(self, guid: GUID) -> bool:
+        return bool(self.get(guid, default=False))
+
+    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:
+        """
+        Insert a new GUID into the mapping.
+
+        Equivalent to..
+
+        d = EnvironmentGUIDMapper()
+        d[src_guid] = (environment, guid)
+        """
+        self[src_guid] = (environment, guid)
+
+    def get(self, guid: GUID, *, default: Any = _UNDEFINED) -> Dict[str, GUID]:
+        """
+        Retrieve a GUID mapping.
+
+        Equivalent to..
+
+        d = EnvironmentGUIDMapper()
+        d[src_guid]
+        """
+        try:
+            retval = self[guid]
+        except KeyError as e:
+            if default is _UNDEFINED:
+                raise e from None
+            retval = default
+
+        return retval
+
+    @classmethod
+    def read(cls, path: "PathLike", environment_transformer: Callable[[str], str]):
+        """
+        Load the guid mapping from file.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to read the mapping from
+
+        environment_transformer : Callable(str) -> str
+          a function which transforms the ENV name before adding it to the mapping
+        """
+        instance = cls(environment_transformer=environment_transformer)
+        data = json.load(path)
+        data.pop("__INFO_for_comments_only")
+        instance._mapping = data
+        return instance
+
+    def save(self, path: "PathLike", *, info: Dict[str, Any]) -> None:
+        """
+        Save the guid mapping to file.
+
+        Parameters
+        ----------
+        path : PathLike
+          filepath to save the mapping to
+        """
+        data = {"__INFO_for_comments_only": info, **self._mapping}
+        json.dump(path, data, indent=4)
+
+    def __str__(self) -> str:
+        return json.dumps(self._mapping, indent=4)
 
 
 def disambiguate(tml: TMLObject, *, guid_mapping: Dict[str, GUID], delete_unmapped_guid: bool = False) -> TMLObject:
