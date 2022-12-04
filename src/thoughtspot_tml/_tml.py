@@ -5,6 +5,7 @@ import warnings
 import pathlib
 import typing
 import json
+import re
 
 import yaml
 
@@ -17,6 +18,8 @@ if TYPE_CHECKING:
     from thoughtspot.types import PathLike
 
     TTML = typing.TypeVar("TTML", bound="TML")
+
+RE_CAMEL_CASE = re.compile(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+')
 
 
 def recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
@@ -108,7 +111,10 @@ class TML:
     @property
     def tml_type_name(self) -> str:
         """ Return the type name of the TML object. """
-        return type(self).__name__.lower()
+        cls_name = type(self).__name__
+        camels = RE_CAMEL_CASE.findall(cls_name)
+        snakes = "_".join(camels)
+        return snakes.lower()
 
     def __post_init__(self):
         recursive_complex_attrs_to_dataclasses(self)
@@ -136,6 +142,7 @@ class TML:
 
         Raises
         ------
+        TMLDecodeError, when the document string cannot be parsed or receives extra data
         """
         try:
             document = cls._loads(tml_document)
@@ -158,6 +165,10 @@ class TML:
         ----------
         path : PathLike
           filepath to load the TML document from
+
+        Raises
+        ------
+        TMLDecodeError, when the document string cannot be parsed or receives extra data
         """
         if isinstance(path, str):
             path = pathlib.Path(path)

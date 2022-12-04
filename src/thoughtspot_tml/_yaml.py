@@ -2,7 +2,7 @@ from typing import Any, Dict, Union
 from math import inf as INFINITY
 import re
 
-import yaml as yaml
+import yaml
 
 
 # TML column ids typically take the form..

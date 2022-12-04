@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 import typing
 import copy
+import uuid
 
 from thoughtspot_tml.types import ConnectionMetadata, GUID
 from thoughtspot_tml import _tml, _scriptability, _yaml
@@ -8,6 +9,9 @@ from thoughtspot_tml import _tml, _scriptability, _yaml
 
 @dataclass
 class Connection(_tml.TML):
+    """
+    Representation of a ThoughtSpot System Table TML.
+    """
 
     guid: typing.Optional[GUID]
     connection: _scriptability.ConnectionDoc
@@ -21,12 +25,26 @@ class Connection(_tml.TML):
 
         return document
 
+    @classmethod
+    def load(cls, path):
+        instance = super().load(path)
+
+        try:
+            instance.guid = str(uuid.UUID(path.stem, version=4))
+        except ValueError:
+            pass
+
+        return instance
+
     def _to_dict(self):
         data = asdict(self)
         return data["connection"]
 
     def to_rest_api_v1_metadata(self) -> ConnectionMetadata:
         """
+        Return a mapping of configuration attributes, as well as database, schema, and table objects.
+
+        The `connection/update` REST API endpoint requires a `metadata` parameter.
         """
         data = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
         this_database = {"name": None, "isAutoCreated": False, "schemas": []}
