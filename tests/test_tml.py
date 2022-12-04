@@ -10,11 +10,11 @@ from . import _const
 
 for tml_cls, tml_type_name in (
     (Connection, "connection"),
-    (Table, "table"), 
-    (View, "view"), 
-    (SQLView, "sql_view"), 
-    (Worksheet, "worksheet"), 
-    (Answer, "answer"), 
+    (Table, "table"),
+    (View, "view"),
+    (SQLView, "sql_view"),
+    (Worksheet, "worksheet"),
+    (Answer, "answer"),
     (Liveboard, "liveboard"),
     (Pinboard, "pinboard"),
 ):

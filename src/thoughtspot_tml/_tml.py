@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     TTML = typing.TypeVar("TTML", bound="TML")
 
-RE_CAMEL_CASE = re.compile(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+')
+RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
 def recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
@@ -110,7 +110,7 @@ class TML:
 
     @property
     def tml_type_name(self) -> str:
-        """ Return the type name of the TML object. """
+        """Return the type name of the TML object."""
         cls_name = type(self).__name__
         camels = RE_CAMEL_CASE.findall(cls_name)
         snakes = "_".join(camels)

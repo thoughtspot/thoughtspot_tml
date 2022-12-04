@@ -52,7 +52,7 @@ class Connection(_tml.TML):
 
         # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
         # if we sort first, we can guarantee the insertion order with simple iteration
-        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: off
+        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: skip
 
             # if it's a new schema, append it this database's schema and reset
             if table.external_table.schema_name != this_schema["name"]:
@@ -70,27 +70,29 @@ class Connection(_tml.TML):
                 this_database["name"] = table.external_table.db_name
                 this_database["schemas"] = []
 
-            this_schema["tables"].append({
-                "name": table.external_table.table_name,
-                "type": "TABLE",
-                "description": "",
-                "selected": True,
-                "linked": True,
-                "columns": [
-                    {
-                        "name": column.external_column,
-                        "type": column.data_type,
-                        "canImport": True,
-                        "selected": True,
-                        "isLinkedActive": True,
-                        "isImported": False,
-                        "dbName": table.external_table.db_name,
-                        "schemaName": table.external_table.schema_name,
-                        "tableName": table.external_table.table_name,
-                    }
-                    for column in table.column
-                ]
-            })
+            this_schema["tables"].append(
+                {
+                    "name": table.external_table.table_name,
+                    "type": "TABLE",
+                    "description": "",
+                    "selected": True,
+                    "linked": True,
+                    "columns": [
+                        {
+                            "name": column.external_column,
+                            "type": column.data_type,
+                            "canImport": True,
+                            "selected": True,
+                            "isLinkedActive": True,
+                            "isImported": False,
+                            "dbName": table.external_table.db_name,
+                            "schemaName": table.external_table.schema_name,
+                            "tableName": table.external_table.table_name,
+                        }
+                        for column in table.column
+                    ],
+                }
+            )
 
         # stick the last known data into the response object
         this_database["schemas"].append(copy.deepcopy(this_schema))

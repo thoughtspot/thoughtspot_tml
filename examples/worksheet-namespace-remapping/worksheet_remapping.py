@@ -33,9 +33,9 @@ def main():
 
     # Read from file
     tml = Worksheet.load(args.worksheet_tml)
-    
+
     # Build a regular expression which matches the source prefix at the beginning of a string
-    RE_SRC_NAMESPACE = re.compile(fr"^{args.src_prefix}.*")
+    RE_SRC_NAMESPACE = re.compile(rf"^{args.src_prefix}.*")
 
     # Replace instances of DEV_ with TEST_
     tml.worksheet.name = RE_SRC_NAMESPACE.sub(args.dst_prefix, tml.worksheet.name)
@@ -47,5 +47,5 @@ def main():
     tml.dump(args.worksheet_tml)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())

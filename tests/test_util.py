@@ -66,11 +66,14 @@ for method, envt in (
         assert len(d.get("d00f3754-15a9-4a7a-a3d5-3248ad19aa9d", default={})) == 1
         assert ("d00f3754-15a9-4a7a-a3d5-3248ad19aa9d" in d) is True
 
-        assert str(d) == json.dumps({
-            "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d": {
-                envt: "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
+        assert str(d) == json.dumps(
+            {
+                "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d": {
+                    envt: "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
+                },
             },
-        }, indent=4)
+            indent=4,
+        )
 
 
 @test("mapper single guid")
@@ -85,11 +88,14 @@ def _():
     assert len(d.get("d00f3754-15a9-4a7a-a3d5-3248ad19aa9d", default={})) == 1
     assert ("d00f3754-15a9-4a7a-a3d5-3248ad19aa9d" in d) is True
 
-    assert str(d) == json.dumps({
-        "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d": {
-            "DEV": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
+    assert str(d) == json.dumps(
+        {
+            "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d": {
+                "DEV": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
+            },
         },
-    }, indent=4)
+        indent=4,
+    )
 
 
 @test("mapper multiple guids")
@@ -122,13 +128,16 @@ def _():
     assert ("d00f3754-15a9-4a7a-a3d5-3248ad19aa9e" in d) is True
     assert ("d00f3754-15a9-4a7a-a3d5-3248ad19aa9f" in d) is True
 
-    assert str(d) == json.dumps({
-        "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d__d00f3754-15a9-4a7a-a3d5-3248ad19aa9e__d00f3754-15a9-4a7a-a3d5-3248ad19aa9f": {
-            "DEV": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
-            "TEST": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9e",
-            "PROD": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9f",
+    assert str(d) == json.dumps(
+        {
+            "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d__d00f3754-15a9-4a7a-a3d5-3248ad19aa9e__d00f3754-15a9-4a7a-a3d5-3248ad19aa9f": {
+                "DEV": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
+                "TEST": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9e",
+                "PROD": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9f",
+            },
         },
-    }, indent=4)
+        indent=4,
+    )
 
 
 for file, replace_type, to_replace, n_replacements, tml_cls in (

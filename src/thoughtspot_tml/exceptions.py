@@ -24,12 +24,13 @@ class TMLDecodeError(TMLError):
     """
 
     def __init__(
-        self, tml_cls: TMLObject,
+        self,
+        tml_cls: TMLObject,
         *,
         message: str = None,
         data: Dict[str, Any] = None,
         path: Path = None,
-        problem_mark: error.Mark = None
+        problem_mark: error.Mark = None,
     ):  # pragma: no cover
         self.tml_cls = tml_cls
         self.message = message

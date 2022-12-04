@@ -45,7 +45,7 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
       API edoc info response
 
     path : PathLike
-      filepath to parse 
+      filepath to parse
 
     Raises
     ------

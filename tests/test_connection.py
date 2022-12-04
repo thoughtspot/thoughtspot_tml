@@ -62,7 +62,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "productid",
@@ -73,7 +73,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "storeid",
@@ -84,7 +84,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "quantitypurchased",
@@ -95,7 +95,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "itemprice",
@@ -106,7 +106,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "sales",
@@ -117,7 +117,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                     {
                                         "name": "recorddate",
@@ -128,7 +128,7 @@ def _():
                                         "isImported": False,
                                         "dbName": "PMMDB",
                                         "schemaName": "RETAILAPPAREL",
-                                        "tableName": "fact_retapp_sales"
+                                        "tableName": "fact_retapp_sales",
                                     },
                                 ],
                             },
@@ -281,10 +281,10 @@ def _():
                                         "tableName": "dim_retapp_products",
                                     },
                                 ],
-                            }
-                        ]
+                            },
+                        ],
                     }
-                ]
+                ],
             }
-        ]
+        ],
     }
