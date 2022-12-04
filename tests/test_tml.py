@@ -8,20 +8,34 @@ import warnings
 from . import _const
 
 
-for tml_cls in (Connection, Table, View, SQLView, Worksheet, Answer, Liveboard, Pinboard):
-    tml_type = tml_cls.__name__.lower()
+for tml_cls, tml_type_name in (
+    (Connection, "connection"),
+    (Table, "table"), 
+    (View, "view"), 
+    (SQLView, "sql_view"), 
+    (Worksheet, "worksheet"), 
+    (Answer, "answer"), 
+    (Liveboard, "liveboard"),
+    (Pinboard, "pinboard"),
+):
 
-    @test("{tml_cls.__name__} rountrips")
-    def _(tml_cls=tml_cls, tml_type=tml_type):
-        path = _const.DATA_DIR / f"DUMMY.{tml_type}.tml"
-        temp = _const.TEMP_DIR / f"DUMMY.{tml_type}.tml"
+    @test("{tml_cls.__name__} roundtrips")
+    def _(tml_cls=tml_cls, tml_type_name=tml_type_name):
+        path = _const.DATA_DIR / f"DUMMY.{tml_type_name}.tml"
+        temp = _const.TEMP_DIR / f"DUMMY.{tml_type_name}.tml"
         tml_cls.load(path).dump(temp)
         assert path.read_text() == temp.read_text()
 
-    @test("{tml_cls.__name__}.dump warns on non-standard extension (.{tml_type}.tml)")
-    def _(tml_cls=tml_cls, tml_type=tml_type):
-        path = _const.DATA_DIR / f"DUMMY.{tml_type}.tml"
-        temp = _const.TEMP_DIR / f"DUMMY.{tml_type}.yaml"
+    @test("{tml_cls.__name__} type name is '{tml_type_name}'")
+    def _(tml_cls=tml_cls, tml_type_name=tml_type_name):
+        path = _const.DATA_DIR / f"DUMMY.{tml_type_name}.tml"
+        tml = tml_cls.load(path)
+        assert tml.tml_type_name == tml_type_name
+
+    @test("{tml_cls.__name__}.dump warns on non-standard extension (.{tml_type_name}.tml)")
+    def _(tml_cls=tml_cls, tml_type_name=tml_type_name):
+        path = _const.DATA_DIR / f"DUMMY.{tml_type_name}.tml"
+        temp = _const.TEMP_DIR / f"DUMMY.{tml_type_name}.yaml"
         tml = tml_cls.load(path)
 
         with warnings.catch_warnings(record=True) as w:
