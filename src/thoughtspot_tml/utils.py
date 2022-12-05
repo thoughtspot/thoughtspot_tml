@@ -244,7 +244,10 @@ class EnvironmentGUIDMapper:
           a function which transforms the ENV name before adding it to the mapping
         """
         instance = cls(environment_transformer=environment_transformer)
-        data = json.load(path)
+
+        with pathlib.Path(path).open(mode="r", encoding="UTF-8") as j:
+            data = json.load(j)
+
         data.pop("__INFO_for_comments_only", None)
         instance._mapping = data
         return instance
@@ -264,7 +267,9 @@ class EnvironmentGUIDMapper:
             data["__INFO_for_comments_only"] = info
 
         data = {**data, **self._mapping}
-        json.dump(path, data, indent=4)
+
+        with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
+            json.dump(j, data, indent=4)
 
     def __str__(self) -> str:
         return json.dumps(self._mapping, indent=4)
