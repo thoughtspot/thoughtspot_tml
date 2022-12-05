@@ -231,7 +231,7 @@ class EnvironmentGUIDMapper:
         return mapping
 
     @classmethod
-    def read(cls, path: "PathLike", environment_transformer: Callable[[str], str]):
+    def read(cls, path: "PathLike", environment_transformer: Callable[[str], str] = str.upper):
         """
         Load the guid mapping from file.
 
@@ -245,11 +245,11 @@ class EnvironmentGUIDMapper:
         """
         instance = cls(environment_transformer=environment_transformer)
         data = json.load(path)
-        data.pop("__INFO_for_comments_only")
+        data.pop("__INFO_for_comments_only", None)
         instance._mapping = data
         return instance
 
-    def save(self, path: "PathLike", *, info: Dict[str, Any]) -> None:
+    def save(self, path: "PathLike", *, info: Dict[str, Any] = None) -> None:
         """
         Save the guid mapping to file.
 
@@ -258,7 +258,12 @@ class EnvironmentGUIDMapper:
         path : PathLike
           filepath to save the mapping to
         """
-        data = {"__INFO_for_comments_only": info, **self._mapping}
+        data = {}
+
+        if info is not None:
+            data["__INFO_for_comments_only"] = info
+
+        data = {**data, **self._mapping}
         json.dump(path, data, indent=4)
 
     def __str__(self) -> str:
