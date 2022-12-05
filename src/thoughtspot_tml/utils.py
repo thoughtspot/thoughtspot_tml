@@ -1,9 +1,10 @@
 from dataclasses import fields, is_dataclass
 from typing import Any, Callable, Dict, List, Tuple, Union
+import warnings
 import pathlib
 import json
 
-from thoughtspot_tml.exceptions import TMLError
+from thoughtspot_tml.exceptions import TMLError, MissingGUIDMappedValueWarning
 from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo, PathLike
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
@@ -193,6 +194,41 @@ class EnvironmentGUIDMapper:
             retval = default
 
         return retval
+
+    def generate_mapping(self, from_environment: str, to_environment: str) -> Dict[GUID, GUID]:
+        """
+        Create a mapping of GUIDs between two environments.
+
+        Parameters
+        ----------
+        from_environment : str
+          the source environment to map TML objects from
+
+        to_environment : str
+          the target environment to map TML objects to
+        """
+        from_environment = self.environment_transformer(from_environment)
+        to_environment = self.environment_transformer(to_environment)
+        mapping = {}
+
+        for envts in self._mapping.values():
+            envt_a = envts.get(from_environment, None)
+            envt_b = envts.get(to_environment, None)
+
+            if None in (envt_a, envt_b):
+                message = [f"an incomplete mapping has been detected between {from_environment} and {to_environment}"]
+
+                if envt_a is None:
+                    message.append(f"no GUID found for '{from_environment}', setting to None")
+
+                if envt_b is None:
+                    message.append(f"no GUID found for '{to_environment}', setting to None")
+
+                warnings.warn("\n".join(message), MissingGUIDMappedValueWarning)
+
+            mapping[envt_a] = envt_b
+
+        return mapping
 
     @classmethod
     def read(cls, path: "PathLike", environment_transformer: Callable[[str], str]):

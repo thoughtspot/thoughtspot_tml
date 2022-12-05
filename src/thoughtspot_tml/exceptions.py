@@ -18,6 +18,12 @@ class TMLExtensionWarning(UserWarning):
     """
 
 
+class MissingGUIDMappedValueWarning(UserWarning):
+    """
+    Alerts when a GUID mapping is generated, but is missing across environments.
+    """
+
+
 class TMLDecodeError(TMLError):
     """
     Raised when a TML object cannot be instantiated from input data.
