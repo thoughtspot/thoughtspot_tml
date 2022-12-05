@@ -16,6 +16,10 @@ class Connection(_tml.TML):
     guid: typing.Optional[GUID]
     connection: _scriptability.ConnectionDoc
 
+    @property
+    def name(self) -> str:
+        return self.connection.name
+
     @classmethod
     def _loads(cls, tml_document):
         document = _yaml.load(tml_document)
