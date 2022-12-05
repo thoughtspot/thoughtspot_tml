@@ -269,7 +269,7 @@ class EnvironmentGUIDMapper:
         data = {**data, **self._mapping}
 
         with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
-            json.dump(j, data, indent=4)
+            json.dump(data, j, indent=4)
 
     def __str__(self) -> str:
         return json.dumps(self._mapping, indent=4)
