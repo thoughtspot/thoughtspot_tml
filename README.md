@@ -147,7 +147,7 @@ class Worksheet(TML):
 
 ---
 
-The `Connection` is a special type of TML object. Connections (also known as "Embrace" Connections), were implemented prior to the TML spec being officially released. The `remapping.yaml` obtained from your platform (`Data > Connections > (...) in the top right > Remapping > Download`) defines how __ThoughtSpot__ table objects relate to the external data source.
+The `Connection` is a special type of TML object. Connections (also known as "Embrace" Connections), were implemented prior to the TML spec being officially released. The remapping file (`connection.yaml`), obtained from your platform at `Data > Connections > (...) in the top right > Remapping > Download` defines how __ThoughtSpot__ table objects relate to their external counterparts.
 
 ```python
 from thoughtspot_tml import Connection
@@ -156,7 +156,13 @@ from thoughtspot_tml import Connection
 from thoughtspot_tml import EmbraceConnection  # Connection
 ```
 
-The connection takes on a different form, but still contains other common TML methods.
+Even though the resulting file is different, we've implemented the Connection with an identical form.
+
+The Connection GUID, while optional in `thoughtspot_tml`, is required when modifying or removing an existing connection via the REST API. A Connection's GUID can be obtained by calling the [`connection/list`][rest-api-cnxn-list] endpoint.
+
+When loading from a file, if `thoughtspot_tml` identifies the filename contains a valid GUID, then the property will be set on the resulting object.
+
+<sub>\*__ThoughtSpot__ <i>plans to release Connection TML in a future release.</i></sub>
 
 ```python
 @dataclass
@@ -165,11 +171,18 @@ class Connection(TML):
     Representation of a ThoughtSpot Connection YAML.
     """
 
-    name: str
-    type: str
-    authentication_type: str
-    properties: list[KeyValueStr]
-    table: list[ConnectionDocTableDoc]
+    guid: Optional[GUID]
+    connection: ConnectionDoc
+
+    def to_rest_api_v1_metadata(self) -> ConnectionMetadata:
+        ...
+```
+
+The [`connection/update`][rest-api-cnxn-update] REST API endpoint requires connections to formatted in a different way. For this, we provide a method to generate the metadata parameter, which is a mapping of configuration attributes, as well as database, schema, and table objects.
+
+```python
+@dataclass
+class Connection(TML):
 ```
 
 Each object contains multiple methods for serialization and deserialization.
@@ -229,11 +242,12 @@ SpotApps are bundles of TML which can be obtained directly from the __ThoughtSpo
 ```python
 export_response = ...  # /metadata/tml/export
 s = SpotApp.from_api(export_response)
-print(s.tml)
+print(s.tml)  # => [Worksheet(...), Table(...), Table(...)]
+print(s.manifest)  # => Manifest(...)
 
 # -or-
 
-s = SpotApp.read("tests/data/DUMMY.worksheet.tml")
+s = SpotApp.read("tests/data/DUMMY_spot_app.zip")
 print(s.tml)  # => [Worksheet(...), Table(...), Table(...)]
 print(s.manifest)  # => Manifest(...)
 ```
@@ -241,8 +255,8 @@ print(s.manifest)  # => Manifest(...)
 SpotApps can also be saved to a new zipfile archive through the `.save` method.
 
 ```python
-s = SpotApp.read("tests/data/DUMMY.worksheet.tml")
-s.save("tests/data/NEW_DUMMY.worksheet.tml")
+s = SpotApp.read("tests/data/DUMMY_spot_app.zip")
+s.save("tests/data/NEW_DUMMY_spot_app.zip")
 ```
 
 ### Utilities
@@ -250,27 +264,97 @@ s.save("tests/data/NEW_DUMMY.worksheet.tml")
 ```python
 from thoughtspot_tml.utils import determine_tml_type
 
-tml_type = determine_tml_type(path="/tests/data/DUMMY.worksheet.tml")
-tml = tml_type.load(path="/tests/data/DUMMY.worksheet.tml")
+tml_cls = determine_tml_type(path="/tests/data/DUMMY.worksheet.tml")
+tml = tml_cls.load(path="/tests/data/DUMMY.worksheet.tml")
 type(tml) is Worksheet
 
 # -or-
 
 export_response = ...  # /metadata/tml/export
-tml_type = determine_tml_type(info=export_response["object"][0]["info"])
-tml = tml_type.loads(tml_document=export_response["object"][0]["edoc"])
+tml_cls = determine_tml_type(info=export_response["object"][0]["info"])
+tml = tml_cls.loads(tml_document=export_response["object"][0]["edoc"])
 type(tml) is Worksheet
+```
+
+TODO: Environment GUID Mapper
+
+```python
+from thoughtspot_tml.utils import EnvironmentGUIDMapper
+
+# create a new mapper
+mapper = EnvironmentGUIDMapper()  # or EnvironmentGUIDMapper.read(path=...)
+
+# add a brand brand new guid into the mapper
+mapper["guid1"] = ("PROD", "guid1")
+
+# map guid1 to a guid in another environment
+mapper["guid1"] = ("TEST", "guid2")
+
+# map a new guid3 to any of existing guid
+# this means all 3 guids represent the same object across environments
+mapper["guid2"] = ("PROD", "guid3")
+
+# persist the mapping file to disk
+mapper.save(path="marketing_thoughtspot_guid_mapping.json")
+```
+
+TODO: Environment GUID Mapper
+
+```python
+from thoughtspot_tml.utils import disambiguate
+
+tml = disambiguate(tml, guid_mapping={to_replace: FAKE_GUID})
 ```
 
 ## Migration to v2.0.0
 
-- YAMLTML.load / YAMLTML.dump
-- YAMLTML.get_tml_object / get_tml_type
+With __V2.0.0__, we now programmatically build the TML spec from the underlying microservice's data structure. The largest benefit of this move is that we can now 
 
-- .remove_guid()
-- .map_guids()
-- .add_fqns_*()
-**Lorem ipsum**
+The utility class `YAMLTML` has been replaced with `utils.determine_tml_type` and a private base class `TML`, which all public metadata objects inherit from. The TML type which is returned has the appropriate [de]serialization methods.
+
+Both of the following patterns represent roundtripping.
+
+```python
+import pathlib
+
+worksheet_fp = "tests/data/DUMMY.worksheet.tml"
+worksheet_tml_str = pathlib.Path(worksheet_fp).read_text()
+
+# V1.2.0
+from thoughtspot_tml import YAMLTML
+
+tml = YAMLTML.get_tml_object(worksheet_tml_str)
+YAMLTML.dump_tml_object(tml)
+
+
+# V2.0.0
+from thoughtspot_tml.utils import determine_tml_type
+from thoughtspot_tml import Worksheet
+
+tml_cls = determine_tml_type(path=worksheet_fp)
+tml = tml_cls.loads(worksheet_tml_str)
+# any one of these methods..
+# tml = tml_cls.load(worksheet_fp)
+# tml = Worksheet.loads(worksheet_tml_str)
+# tml = Worksheet.load(worksheet_fp)
+tml.dumps(worksheet_fp)
+```
+
+To identify the type of TML object you are working with, in __V1.2.0__ you would use `.content_type`, now you can now use `.tml_type_name`.
+
+### GUID Handling
+
+In __V1.2.0__, GUIDs were deleted from the underlying data structure with `.remove_guid()` in order to ensure the REST API created new objects. With __V2.0.0__, you simply set the `.guid` member (on the object itself) to `None`.
+
+
+TODO: `disambiguate`
+TODO: `.map_guids()` & `.add_fqns_*()`
+
+```python
+from thoughtspot_tml.utils import disambiguate
+
+tml = disambiguate(tml, guid_mapping={to_replace: FAKE_GUID})
+```
 
 
 ## Notes on __ThoughtSpot Modeling Language__
@@ -287,6 +371,8 @@ We welcome all help! :heart: For guidance on setting up a development environmen
 [rest-api]: https://developers.thoughtspot.com/docs/?pageid=rest-apis
 [rest-api-import]: https://developers.thoughtspot.com/docs/?pageid=tml-api#import
 [rest-api-export]: https://developers.thoughtspot.com/docs/?pageid=tml-api#export
+[rest-api-cnxn-list]: https://developers.thoughtspot.com/docs/?pageid=connections-api#live-query-connections
+[rest-api-cnxn-update]: https://developers.thoughtspot.com/docs/?pageid=connections-api#edit-connection
 [syntax-tml]: https://docs.thoughtspot.com/cloud/latest/tml
 [syntax-table]: https://docs.thoughtspot.com/cloud/latest/tml#syntax-tables
 [syntax-view]: https://docs.thoughtspot.com/cloud/latest/tml#syntax-views
