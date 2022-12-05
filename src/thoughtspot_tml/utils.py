@@ -14,7 +14,7 @@ from thoughtspot_tml import _scriptability, _compat
 _UNDEFINED = object()
 
 
-def _recursive_scan(scriptability_object: Any, check: Callable[Any, bool] = None) -> List[Any]:
+def _recursive_scan(scriptability_object: Any, check: Callable[[Any], bool] = None) -> List[Any]:
     collect = []
     is_container_type = lambda t: len(_compat.get_args(t)) > 0
 
