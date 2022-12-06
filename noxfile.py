@@ -14,3 +14,9 @@ def tests(session: nox.Session) -> None:
     """
     session.install("-e", ".[dev]")
     session.run("ward", "test", "--test-output-style=dots-global", "--order=standard")
+
+
+@nox.session(reuse_venv=not ON_GITHUB)
+def black(session: nox.Session) -> None:
+    """ """
+    session.run("black", ".", "--config", "pyproject.toml")

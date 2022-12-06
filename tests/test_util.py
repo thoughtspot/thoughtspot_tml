@@ -151,7 +151,7 @@ for file, replace_type, to_replace, n_replacements, tml_cls in (
     (_const.DUMMY_PINBOARD, "name", "(Sample) Retail - Apparel", 1, Pinboard),
 ):
 
-    @test("disambiguate {tml_cls.__name__} by {replace_type} ({n_replacements} times)", tags=["current"])
+    @test("disambiguate {tml_cls.__name__} by {replace_type} ({n_replacements} times)")
     def _(file=file, replace_type=replace_type, to_replace=to_replace, n_replacements=n_replacements, tml_cls=tml_cls):
         FAKE_GUID = "99999999-9999-4999-9999-999999999999"
         tml = tml_cls.load(file)
