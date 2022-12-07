@@ -21,6 +21,7 @@
  - __Supports__: Connections, [Tables][syntax-table], [Views][syntax-view], [SQLViews][syntax-sqlview], [Worksheets][syntax-worksheet], [Answers][syntax-answer], [Liveboards][syntax-liveboard]
  - Deep attribute access
  - Roundtripping from text or file
+ - Utilities for [disambiguation workflows][docs-fqn]
 
 *This package will not perform validation of the constructed TML files or interact with your* __ThoughtSpot__ *cluster!*
 
@@ -162,6 +163,8 @@ The Connection GUID, while optional in `thoughtspot_tml`, is required when modif
 
 When loading from a file, if `thoughtspot_tml` identifies the filename contains a valid GUID, then the property will be set on the resulting object.
 
+The [`connection/update`][rest-api-cnxn-update] REST API endpoint requires connections to formatted in a different way. For this, we provide a method to generate the metadata parameter, which is a mapping of configuration attributes, as well as database, schema, and table objects.
+
 <sub>\*__ThoughtSpot__ <i>plans to release Connection TML in a future release.</i></sub>
 
 ```python
@@ -176,13 +179,6 @@ class Connection(TML):
 
     def to_rest_api_v1_metadata(self) -> ConnectionMetadata:
         ...
-```
-
-The [`connection/update`][rest-api-cnxn-update] REST API endpoint requires connections to formatted in a different way. For this, we provide a method to generate the metadata parameter, which is a mapping of configuration attributes, as well as database, schema, and table objects.
-
-```python
-@dataclass
-class Connection(TML):
 ```
 
 Each object contains multiple methods for serialization and deserialization.
@@ -298,12 +294,12 @@ mapper["guid2"] = ("PROD", "guid3")
 mapper.save(path="marketing_thoughtspot_guid_mapping.json")
 ```
 
-TODO: Environment GUID Mapper
+TODO: disambiguation
 
 ```python
 from thoughtspot_tml.utils import disambiguate
 
-tml = disambiguate(tml, guid_mapping={to_replace: FAKE_GUID})
+tml = disambiguate(tml, guid_mapping={SRC_GUID: TAR_GUID})
 ```
 
 ## Migration to v2.0.0
@@ -353,7 +349,7 @@ TODO: `.map_guids()` & `.add_fqns_*()`
 ```python
 from thoughtspot_tml.utils import disambiguate
 
-tml = disambiguate(tml, guid_mapping={to_replace: FAKE_GUID})
+tml = disambiguate(tml, guid_mapping={SRC_GUID: TAR_GUID})
 ```
 
 
@@ -368,6 +364,7 @@ We welcome all help! :heart: For guidance on setting up a development environmen
 
 [examples]: examples/README.md
 [contrib]: .github/CONTRIBUTING.md
+[docs-fqn]: https://developers.thoughtspot.com/docs/?pageid=development-and-deployment#_duplicate_object_names
 [rest-api]: https://developers.thoughtspot.com/docs/?pageid=rest-apis
 [rest-api-import]: https://developers.thoughtspot.com/docs/?pageid=tml-api#import
 [rest-api-export]: https://developers.thoughtspot.com/docs/?pageid=tml-api#export
