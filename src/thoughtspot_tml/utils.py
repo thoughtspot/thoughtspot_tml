@@ -1,6 +1,7 @@
 from dataclasses import fields, is_dataclass
 from typing import Any, Callable, Dict, List, Tuple, Union
 import warnings
+import logging
 import pathlib
 import json
 
@@ -12,6 +13,7 @@ from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 from thoughtspot_tml import _scriptability, _compat
 
 _UNDEFINED = object()
+log = logging.getLogger(__name__)
 
 
 def _recursive_scan(scriptability_object: Any, *, check: Callable[[Any], bool] = None) -> List[Any]:
@@ -296,7 +298,7 @@ def disambiguate(tml: TMLObject, *, guid_mapping: Dict[str, GUID], delete_unmapp
     attrs = _recursive_scan(tml, check=lambda attr: isinstance(attr, _scriptability.Identity))
 
     if not attrs:
-        raise TMLError("could not find any attributes to disambiguate")
+        log.debug(f"could not find any attributes to disambiguate on {tml}")
 
     for attribute in attrs:
         # NAME -> GUID
