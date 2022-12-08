@@ -277,24 +277,41 @@ class EnvironmentGUIDMapper:
         return json.dumps(self._mapping, indent=4)
 
 
-def disambiguate(tml: TMLObject, *, guid_mapping: Dict[str, GUID], delete_unmapped_guid: bool = False) -> TMLObject:
+def disambiguate(
+    tml: TMLObject,
+    *,
+    guid_mapping: Dict[str, GUID],
+    remap_object_guid: bool = True,
+    delete_unmapped_guids: bool = False
+) -> TMLObject:
     """
     Deep scan the TML looking for fields to add FQNs to.
 
-    This will explore all nested objects looking for Tables, Worksheets,
-    etc to disambiguate.
+    This will explore the top-level guid and all nested objects looking on
+    Tables, Worksheets, etc to disambiguate.
 
     Parameters
     ----------
     tml : TMLObject
       the tml to scan
 
-    guid_mapping : {str, GUID}
+    guid_mapping : {str: GUID}
       a mapping of names or guids, to the FQN to add to the object
 
-    delete_unmapped_guid : bool = False
-      if a match could not be found, set the FQN to None
+    remap_object_guid : bool = True
+      whether or not to remap the tml.guid
+
+    delete_unmapped_guids : bool = False
+      if a match could not be found, set the FQN and object guid to None
     """
+    if remap_object_guid:
+        if tml.guid in guid_mapping:
+            tml.guid = guid_mapping[tml.guid]
+        
+        elif delete_unmapped_guids:
+            tml.guid = None
+
+    # DEVNOTE: @boonhapus, might need to add another scan for PinnedVisualization.viz_guid
     attrs = _recursive_scan(tml, check=lambda attr: isinstance(attr, _scriptability.Identity))
 
     if not attrs:
@@ -304,14 +321,12 @@ def disambiguate(tml: TMLObject, *, guid_mapping: Dict[str, GUID], delete_unmapp
         # NAME -> GUID
         if attribute.name in guid_mapping:
             attribute.fqn = guid_mapping[attribute.name]
-            continue
 
         # ENVT_A.GUID -> ENVT_B.GUID
-        if attribute.fqn in guid_mapping:
+        elif attribute.fqn in guid_mapping:
             attribute.fqn = guid_mapping[attribute.fqn]
-            continue
 
-        if delete_unmapped_guid:
+        elif delete_unmapped_guids:
             attribute.fqn = None
 
     return tml
