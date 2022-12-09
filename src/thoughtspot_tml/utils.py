@@ -33,7 +33,7 @@ def _recursive_scan(scriptability_object: Any, *, check: Callable[[Any], bool] =
             if is_dataclass(element):
                 collect.extend(_recursive_scan(element, check=check))
 
-            if check(element):
+            if check is not None and check(element):
                 collect.append(element)
 
     return collect
