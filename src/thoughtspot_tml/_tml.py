@@ -197,6 +197,9 @@ class TML:
         format_type : str
           data format to save in .. one of, 'YAML' or 'JSON'
         """
+        if format_type.upper() not in ("YAML", "JSON"):
+            raise ValueError(f"format_type must be either 'YAML' or 'JSON' .. got, '{format_type}'")
+
         data = recursive_remove_null(self.to_dict())
 
         if format_type.upper() == "YAML":
@@ -219,7 +222,7 @@ class TML:
         if isinstance(path, str):
             path = pathlib.Path(path)
 
-        if not path.name.endswith(f"{self.tml_type_name}.tml"):
+        if not path.name.endswith(".json") and not path.name.endswith(f"{self.tml_type_name}.tml"):
             warnings.warn(f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning)
 
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")

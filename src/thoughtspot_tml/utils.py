@@ -82,15 +82,14 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
                 (
                     # 3. remove the trailing colon, unless it's a connection.yaml then remap
                     "connection" if line == "properties:" else line[:-1]
-
                     # 1. scan the file's text
-                    for line in path.read_text().split('\n')
+                    for line in path.read_text().split("\n")
                     # 2. look for top-level keys in the YAML
                     if line.endswith(":")
                     if not line.startswith(" ")
                 ),
                 # 4. if no matches found (eg. StopIteration is raised), use the default value
-                default="NOT_FOUND"
+                default="NOT_FOUND",
             )
 
     if info is not None:
@@ -297,7 +296,7 @@ def disambiguate(
     *,
     guid_mapping: Dict[str, GUID],
     remap_object_guid: bool = True,
-    delete_unmapped_guids: bool = False
+    delete_unmapped_guids: bool = False,
 ) -> TMLObject:
     """
     Deep scan the TML looking for fields to add FQNs to.
@@ -322,7 +321,7 @@ def disambiguate(
     if remap_object_guid:
         if tml.guid in guid_mapping:
             tml.guid = guid_mapping[tml.guid]
-        
+
         elif delete_unmapped_guids:
             tml.guid = None
 

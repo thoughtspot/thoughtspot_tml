@@ -38,4 +38,4 @@ def _():
     assert len(s.sql_views) == 0
     assert len(s.worksheets) == 1
     assert len(s.answers) == 0
-    assert len(s.liveboards) == 1
+    assert len(s.liveboards) == 0
