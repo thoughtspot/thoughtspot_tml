@@ -1,7 +1,7 @@
+from typing import Any, Dict
 import dataclasses
 
 from thoughtspot_tml.types import TMLObject
-from typing import Any, Dict
 from pathlib import Path
 from yaml import error
 

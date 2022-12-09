@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-import typing
+from typing import Optional
 import copy
 import uuid
 
@@ -13,7 +13,7 @@ class Connection(_tml.TML):
     Representation of a ThoughtSpot System Table TML.
     """
 
-    guid: typing.Optional[GUID]
+    guid: Optional[GUID]
     connection: _scriptability.ConnectionDoc
 
     @property

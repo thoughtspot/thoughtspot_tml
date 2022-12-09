@@ -1,20 +1,19 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
+from typing import TYPE_CHECKING
 import zipfile
-import typing
 import json
 
 from thoughtspot_tml._compat import ZipPath
 from thoughtspot_tml.utils import determine_tml_type
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard, Pinboard
+from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
 from thoughtspot_tml import _yaml
 
 if TYPE_CHECKING:
-    from thoughtspot.types import EDocExportResponse, TMLDocInfo
-    from thoughtspot.types import TMLType
-    from thoughtspot.types import PathLike
-
-    TSpotApp = typing.TypeVar("TSpotApp", bound="SpotApp")
+    from thoughtspot_tml.types import EDocExportResponse, TMLDocInfo
+    from thoughtspot_tml.types import TMLObject
+    from thoughtspot_tml.types import PathLike
 
 
 @dataclass
@@ -30,7 +29,7 @@ class SpotApp:
     This object is usually packaged together as a zip file.
     """
 
-    tml: List["TMLType"]
+    tml: List["TMLObject"]
     manifest: Optional[Manifest] = None
 
     @property
@@ -55,10 +54,10 @@ class SpotApp:
 
     @property
     def liveboards(self) -> List[Liveboard]:
-        return [tml for tml in self.tml if isinstance(tml, (Liveboard, Pinboard))]
+        return [tml for tml in self.tml if isinstance(tml, Liveboard)]
 
     @classmethod
-    def from_api(cls, payload: "EDocExportResponse") -> "TSpotApp":
+    def from_api(cls, payload: EDocExportResponse) -> SpotApp:
         """
         Load the SpotApp from file.
 
@@ -81,7 +80,7 @@ class SpotApp:
         return cls(**info)
 
     @classmethod
-    def read(cls, path: "PathLike") -> "TSpotApp":
+    def read(cls, path: PathLike) -> SpotApp:
         """
         Load the SpotApp from file.
 
@@ -107,7 +106,7 @@ class SpotApp:
 
         return cls(**info)
 
-    def save(self, path: "PathLike") -> None:
+    def save(self, path: PathLike) -> None:
         """
         Save the SpotApp to file.
 

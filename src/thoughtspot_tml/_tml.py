@@ -1,6 +1,8 @@
+from __future__ import annotations
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import TYPE_CHECKING
+from typing import Any, Dict
 import warnings
 import pathlib
 import typing
@@ -17,12 +19,11 @@ from thoughtspot_tml import _scriptability, _yaml
 if TYPE_CHECKING:
     from thoughtspot.types import PathLike
 
-    TTML = typing.TypeVar("TTML", bound="TML")
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
-def recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
+def recursive_complex_attrs_to_dataclasses(instance: Any) -> Any:
     """
     Convert all fields of type `dataclass` into an instance of the
     specified data class if the current value is of type dict.
@@ -79,7 +80,7 @@ def recursive_complex_attrs_to_dataclasses(instance: typing.Any) -> typing.Any:
         setattr(instance, field.name, new_value)
 
 
-def recursive_remove_null(mapping: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+def recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
     """
     Drop all keys with null values, they're optional.
     """
@@ -120,18 +121,18 @@ class TML:
         recursive_complex_attrs_to_dataclasses(self)
 
     @classmethod
-    def _loads(cls, tml_document: str) -> typing.Dict[str, typing.Any]:
+    def _loads(cls, tml_document: str) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
         #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
         return _yaml.load(tml_document)
 
-    def _to_dict(self) -> typing.Dict[str, typing.Any]:
+    def _to_dict(self) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
         #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
         return asdict(self)
 
     @classmethod
-    def loads(cls, tml_document: str) -> "TTML":
+    def loads(cls, tml_document: str) -> TML:
         """
         Deserialize a TML document to a Python object.
 
@@ -157,7 +158,7 @@ class TML:
         return instance
 
     @classmethod
-    def load(cls, path: "PathLike") -> "TTML":
+    def load(cls, path: PathLike) -> TML:
         """
         Deserialize a TML document located at filepath to a Python object.
 
@@ -181,7 +182,7 @@ class TML:
 
         return instance
 
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """
         Serialize this object to native python data types.
         """
@@ -206,7 +207,7 @@ class TML:
 
         return document
 
-    def dump(self, path: "PathLike") -> None:
+    def dump(self, path: PathLike) -> None:
         """
         Serialize this object as a YAML-formatted stream to a filepath.
 

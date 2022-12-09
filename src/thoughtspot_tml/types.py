@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
+from typing import TYPE_CHECKING, NewType
 from typing import Any, Dict, List, Union
-from uuid import UUID
 import pathlib
 import os
 
@@ -12,10 +12,10 @@ if TYPE_CHECKING:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PathLike = Union[str, bytes, os.PathLike, pathlib.Path, ZipPath]
+PathLike = Union[str, os.PathLike, pathlib.Path, ZipPath]
 TMLObject = Union["Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard"]
 TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard"]
-GUID = UUID
+GUID = NewType("GUID", str)  # UUID4
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /metadata/tml/export Response Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import fields, is_dataclass
 from typing import Any, Callable, Dict, List, Tuple, Union
 import warnings
@@ -139,14 +140,14 @@ class EnvironmentGUIDMapper:
 
     def __init__(self, environment_transformer: Callable[[str], str] = str.upper):
         self.environment_transformer = environment_transformer
-        self._mapping = {}
+        self._mapping: Dict[str, Dict[str, GUID]] = {}
 
     def __setitem__(self, guid: GUID, value: Tuple[str, GUID]) -> None:
         environment, guid_to_add = value
         environment = self.environment_transformer(environment)
 
         try:
-            envts = self[guid]
+            envts: Dict[str, GUID] = self[guid]
         except KeyError:
             new_key = guid_to_add
             envts = {environment: guid_to_add}
@@ -211,7 +212,7 @@ class EnvironmentGUIDMapper:
         """
         from_environment = self.environment_transformer(from_environment)
         to_environment = self.environment_transformer(to_environment)
-        mapping = {}
+        mapping: Dict[GUID, GUID] = {}
 
         for envts in self._mapping.values():
             envt_a = envts.get(from_environment, None)
@@ -233,7 +234,7 @@ class EnvironmentGUIDMapper:
         return mapping
 
     @classmethod
-    def read(cls, path: "PathLike", environment_transformer: Callable[[str], str] = str.upper):
+    def read(cls, path: PathLike, environment_transformer: Callable[[str], str] = str.upper):
         """
         Load the guid mapping from file.
 
@@ -254,7 +255,7 @@ class EnvironmentGUIDMapper:
         instance._mapping = data
         return instance
 
-    def save(self, path: "PathLike", *, info: Dict[str, Any] = None) -> None:
+    def save(self, path: PathLike, *, info: Dict[str, Any] = None) -> None:
         """
         Save the guid mapping to file.
 

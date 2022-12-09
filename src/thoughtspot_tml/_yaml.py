@@ -1,5 +1,5 @@
-from typing import Any, Dict, Union
 from math import inf as INFINITY
+from typing import Any, Dict
 import re
 
 import yaml
@@ -36,7 +36,7 @@ _RESERVED_WORDS = (
 # fmt: on
 
 
-def _double_quote_when_special_char(dumper: yaml.Dumper, data: Union[str, int, float]):
+def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.ScalarNode:
     """
     Double quote the string when any condition is met.
 
