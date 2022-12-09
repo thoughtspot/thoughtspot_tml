@@ -61,10 +61,13 @@ class SpotApp:
         """
         Load the SpotApp from file.
 
+        ThoughtSpot's TML Export API can be found here
+          https://developers.thoughtspot.com/docs/?pageid=tml-api#export
+
         Parameters
         ----------
         payload : EDocExportResponse
-          api response data to parse
+          metadata/tml/export response data to parse
         """
         info = {"tml": [], "manifest": None}
         manifest_data = {"object": []}
