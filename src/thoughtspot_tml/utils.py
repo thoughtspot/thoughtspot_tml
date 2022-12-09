@@ -235,12 +235,13 @@ class EnvironmentGUIDMapper:
                 message = [f"an incomplete mapping has been detected between {from_environment} and {to_environment}"]
 
                 if envt_a is None:
-                    message.append(f"no GUID found for '{from_environment}', setting to None")
+                    message.append(f"no GUID found for '{from_environment}' ({to_environment}='{envt_b}')")
 
                 if envt_b is None:
-                    message.append(f"no GUID found for '{to_environment}', setting to None")
+                    message.append(f"no GUID found for '{to_environment}' ({from_environment}='{envt_a}')")
 
                 warnings.warn("\n".join(message), MissingGUIDMappedValueWarning)
+                continue
 
             mapping[envt_a] = envt_b
 
