@@ -78,10 +78,23 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
         elif path.name.lower() == "connection.yaml":
             tml_type = "connection"
         else:
-            tml_type = ""
+            tml_type = next(
+                (
+                    # 3. remove the trailing colon, unless it's a connection.yaml then remap
+                    "connection" if line == "properties:" else line[:-1]
+
+                    # 1. scan the file's text
+                    for line in path.read_text().split('\n')
+                    # 2. look for top-level keys in the YAML
+                    if line.endswith(":")
+                    if not line.startswith(" ")
+                ),
+                # 4. if no matches found (eg. StopIteration is raised), use the default value
+                default="NOT_FOUND"
+            )
 
     if info is not None:
-        tml_type = info.get("type", "")
+        tml_type = info.get("type", "NOT_FOUND")
 
     if tml_type not in types:
         lines = [f"could not parse TML type from 'info' or 'path', got '{tml_type}'"]
