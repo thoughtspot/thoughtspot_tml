@@ -15,7 +15,7 @@
     <a href="#notes-on-thoughtspot-modeling-language">Notes</a>
   </h3>
 
-🚨 __If you have examples or scripts built with__ `thoughtspot_tml` __V1.3.0, please look at the [Migration to v2.0.0](#migration-to-v200) guide__. 🚨
+🚨 __If you have examples or scripts built with__ `thoughtspot_tml==1.3.0`__, please see the [Migration to v2.0.0](#migration-to-v200) guide__. 🚨
 </div>
 
 ## Features
