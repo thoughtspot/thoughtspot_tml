@@ -36,4 +36,4 @@ jobs:
       - run: |
           pip install --upgrade nox
       - run: |
-          nox --sessions ward
+          nox --sessions tests
