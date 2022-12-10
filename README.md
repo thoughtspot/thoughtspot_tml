@@ -15,7 +15,7 @@
     <a href="#notes-on-thoughtspot-modeling-language">Notes</a>
   </h3>
 
-🚨 __If you have examples or scripts built with__ `thoughtspot_tml==1.3.0`__, please see the [Migration to v2.0.0](#migration-to-v200) guide__. 🚨
+🚨 __If your examples or scripts are built on__ `thoughtspot_tml==1.3.0`__, see our [Migration to v2.0.0](#migration-to-v200) guide__. 🚨
 </div>
 
 ## Features
@@ -27,7 +27,7 @@
 
 *This package will not perform validation of the constructed TML files or interact with your* __ThoughtSpot__ *cluster!*
 
-Please leverage the [ThoughtSpot REST API][rest-api] for this purpose.
+Please leverage the [__ThoughtSpot__ REST API][rest-api] for this purpose.
 
 ## Installation
 
@@ -39,6 +39,8 @@ pip install thoughtspot-tml
 ```
 
 ## A Basic Example
+
+This example creates a command-line tool for changing the prefix in the names of the Table objects that a Worksheet object connects to.
 
 ```python
 # worksheet_remapping.py
@@ -131,7 +133,7 @@ from thoughtspot_tml import SavedAnswer        # Answer
 from thoughtspot_tml import SystemTable        # Table
 ```
 
-Each TML object takes the form of a top-level attribute for the globally unique identifier, or `GUID`, as well as the document form of the object it represents. This identically mirrors the TML specification you can find [in the __ThoughtSpot__ documentation][syntax-tml]. In addition, the `name` attribute of the TML document itself has been pulled into the top-level namespace.
+Each TML object has a top-level attribute for the globally unique identifier, or `GUID`, as well as the document form of the object it represents. This identically mirrors the TML specification you can find [in the __ThoughtSpot__ documentation][syntax-tml]. In addition, the `name` attribute of the TML document itself has been pulled into the top-level namespace.
 
 ```python
 @dataclass
@@ -146,6 +148,44 @@ class Worksheet(TML):
     @property
     def name(self) -> str:
         return self.worksheet.name
+```
+
+The full, composable TML specification can found in [`_scriptability.py`][py-scriptabilty]. Each piece of the spec is a python [`dataclasses.dataclass` field][py-dataclasses-field]. The internal `_scriptability.py` module is generated code from the __ThoughtSpot__'s internal architecture and allows for `thoughtspot_tml` to offer the deep attribute access experience in python.
+
+```python
+@dataclass
+class Table(TML):
+    """
+    Representation of a ThoughtSpot Table TML.
+    """
+
+    guid: GUID
+    table: LogicalTableEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.table.name
+```
+
+For example, interesting attributes about the Table TML spec are exposed via attributes which can, in turn expose their own attributes themselves. This functionality offers common pattersn to be expressed natively in Python, such as remapping a Table's connection details.
+
+```python
+tml = Table.load("tests/data/DUMMY.table.tml")
+
+# get the Table document object
+tml.table           # => LogicalTableEdocProto(...)
+
+# get the Table's underlying connected details
+tml.table.db        # => 'PMMDB'
+tml.table.schema    # => 'RETAILAPPAREL'
+tml.table.db_table  # => 'dim_retapp_products'
+
+# get the Table's columns
+tml.table.columns   # => [LogicalTableEDocProtoLogicalColumnEDocProto(...), ...]
+
+# repoint this ThoughtSpot Table to a new external table
+tml.table.schema = "RETAILAPPAREL_V2"
+tml.table.db_table = "DIM_RETAPP_PRODUCTS"
 ```
 
 ---
@@ -277,14 +317,14 @@ from thoughtspot_tml.utils import determine_tml_type
 
 tml_cls = determine_tml_type(path="/tests/data/DUMMY.worksheet.tml")
 tml = tml_cls.load(path="/tests/data/DUMMY.worksheet.tml")
-type(tml) is Worksheet
+type(tml) is Worksheet  # => True
 
 # -or-
 
 export_response = ...  # /metadata/tml/export
 tml_cls = determine_tml_type(info=export_response["object"][0]["info"])
 tml = tml_cls.loads(tml_document=export_response["object"][0]["edoc"])
-type(tml) is Worksheet
+type(tml) is Worksheet  # => True
 ```
 
 TML is both a data structure and file format, and these formats vary slightly across each document. `determine_tml_type` will return the appropriate TML class so that you can call [deserialization methods](#deserialization) directly. Pass either the `path` keyword with a filepath, or the file info directly from one of the objects returned in the [`/metadata/tml/export`][rest-api-export] response data.
@@ -340,7 +380,7 @@ print(new_mapper.generate_mapping(from_environment="DEV", to_environment="PROD")
 }
 ```
 
-The `EnvironmentGUIDMapper` is a dictionary-like data structure which can help you maintain references to objects across your ThoughtSpot environments. The underlying data structure is intended to clearly show the relationship of a given object between any number of environments. An "environment" can be any scope you consider separate from each other, be it 2 ThoughtSpot servers, 2 Connections on the same server, or even "Copy of" the same object within a single Connection.
+The `EnvironmentGUIDMapper` is a dictionary-like data structure which can help you maintain references to objects across your __ThoughtSpot__ environments. The underlying data structure is intended to clearly show the relationship of a given object between any number of environments. An "environment" can be any scope you consider separate from each other, be it 2 __ThoughtSpot__ servers, 2 Connections on the same server, or even "Copy of" the same object within a single Connection.
 
 
 ### `disambiguate`
@@ -357,13 +397,40 @@ To reduce ambiguity, you may need to add the `fqn` key to your TML document when
 
 __NOTE__: *Prior to __ThoughtSpot__ V8.7.0, TML does not export with the `fqn` automatically.*
 
+```python
+from thoughtspot_tml.utils import disambiguate
+from thoughtspot_tml import Worksheet
+
+# Load a Worksheet and check its data
+ws = Worksheet.load("tests/data/DUMMY.worksheet.tml")
+ws.guid == "2ea7add9-0ccb-4ac1-90bb-231794ebb377"     # => True
+ws.worksheet.tables[0].name == "dim_retapp_products"  # => True
+ws.worksheet.tables[0].fqn is None  # => True
+
+# Assign a Table an FQN. This information can be retrieved from ThoughtSpot REST API metadata/list.
+ws = disambiguate(ws, guid_mapping={"dim_retapp_products": "7fd39fdb-9dfe-4954-b5dd-9a5d846085b0"})
+ws.worksheet.tables[0].fqn is None  # => False
+ws.worksheet.tables[0].fqn == "7fd39fdb-9dfe-4954-b5dd-9a5d846085b0"  # => True
+
+# Re-assign the GUID to a new environment.
+ws = disambiguate(ws, guid_mapping={"7fd39fdb-9dfe-4954-b5dd-9a5d846085b0": "99999999-9999-4999-9999-999999999999"})
+ws.worksheet.tables[0].fqn == "7fd39fdb-9dfe-4954-b5dd-9a5d846085b0"  # => True
+ws.worksheet.tables[0].fqn == "99999999-9999-4999-9999-999999999999"  # => False
+
+# Remove GUIDs which aren't found in the mapping, including the top-level GUID.
+ws = disambiguate(ws, guid_mapping={}, delete_unmapped_guids=True)
+ws.worksheet.tables[0].name == "dim_retapp_products"  # => True
+ws.worksheet.tables[0].fqn is None  # => True
+ws.guid is None   # => True
+```
+
 The `disambiguate` function will walk through the `thoughtspot_tml` TML object specifying the `.fqn` based on keys in the `guid_mapping` dictionary.
 
 The `guid_mapping` will typically be a mapping of GUIDs between 2 environments, but the "before" environment can be any string. This can be helpful to quickly add `fqn` to any object which has yet to define it.
 
-The `remap_object_guid` (default: True) will consider the top-level `TML.guid` as a candidate for re-mapping.
+The `remap_object_guid` (__default__: `True`) will consider the top-level `TML.guid` as a candidate for re-mapping.
 
-The `delete_unmapped_guids` (default: False) will remove any `.fqn`s which are not found in the `guid_mapping`.
+The `delete_unmapped_guids` (__default__: `False`) will remove any `.fqn`s which are not found in the `guid_mapping`.
 
 ---
 
@@ -371,7 +438,7 @@ The `delete_unmapped_guids` (default: False) will remove any `.fqn`s which are n
 
 With __V2.0.0__, we now programmatically build the TML spec from the underlying microservice's data structure. The largest benefit of this move is that we can now 
 
-## Round-tripping to File
+### Round-tripping to File
 
 The utility class `YAMLTML` has been replaced with `utils.determine_tml_type` and a private base class `TML`, which all public metadata objects inherit from. The TML type which is returned has the appropriate [de]serialization methods.
 
@@ -436,6 +503,7 @@ tml.remap_table_to_new_fqn(name_to_fqn_map=name_guid_map)
 # - or -
 tml.change_table_by_fqn(original_table_name="Table 1", new_table_guid="0f814ce1-dba1-496a-b3de-38c4b9a288ed")
 
+
 # V2.0.0
 from thoughtspot_tml.utils import disambiguate
 
@@ -456,6 +524,8 @@ We welcome all help! :heart: For guidance on setting up a development environmen
 
 [examples]: examples/README.md
 [contrib]: .github/CONTRIBUTING.md
+[py-scriptability]: src/thoughtspot_tml/_scriptability.py
+[py-dataclasses-field]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 [docs-fqn]: https://developers.thoughtspot.com/docs/?pageid=development-and-deployment#_duplicate_object_names
 [rest-api]: https://developers.thoughtspot.com/docs/?pageid=rest-apis
 [rest-api-import]: https://developers.thoughtspot.com/docs/?pageid=tml-api#import

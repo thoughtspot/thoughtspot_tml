@@ -1,8 +1,11 @@
 # ThoughtSpot TML Examples
 
 - [Worksheet Namespace Remapping][eg-worksheet-remap-ns]
-- [Worksheet GUID Remapping][eg-worksheet-remap-guid]
-
+- 🚧 TODO 🚧 Worksheet GUID Remapping
+- 🚧 TODO 🚧 Repoint a Table to a new Connection
+- 🚧 TODO 🚧 Programmatically add a New Column to a Table
+- 🚧 TODO 🚧 Programmatically add a New Column to a Worksheet
+- 🚧 TODO 🚧 Programmatically add a New Visualization to a Liveboard
 
 ## Key Terms
 
