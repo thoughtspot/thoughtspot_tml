@@ -19,17 +19,23 @@ def filepath(fp: str) -> pathlib.Path:
     return path
 
 
-def main():
-    # Create a command line application
-    #   - argument for a WORKSHEET.worksheet.tml
-    #   - options for the "before" and "after" tabling naming conventions
+def generate_command_line_interface() -> argparse.Namespace:
+    """
+    Create a command line application
+      - argument for a WORKSHEET.worksheet.tml
+      - options for the "before" and "after" tabling naming conventions
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("worksheet_tml", help="a worksheet.tml to remap", type=filepath)
     parser.add_argument("-s", "--src-prefix", metavar="SRC", default="DEV_", type=str, help="(default: %(default)s)")
     parser.add_argument("-d", "--dst-prefix", metavar="DST", default="TEST_", type=str, help="(default: %(default)s)")
 
-    # Parse CLI input
-    args = parser.parse_args()
+    # Parse and return CLI input
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = generate_command_line_interface()
 
     # Read from file
     tml = Worksheet.load(args.worksheet_tml)
