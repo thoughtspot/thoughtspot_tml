@@ -40,5 +40,5 @@ jobs:
           pip install .[dev]
 
       - name: Run tests
-      - run: |
+        run: |
           ward test --test-output-style=dots-global --order=standard
