@@ -8,7 +8,7 @@ exclude = ["_generate*"]
 
 [project]
 name = "thoughtspot_tml"
-version = "2.0.0b6"
+version = "2.0.0b7"
 description = "Library for manipulating ThoughtSpot Modeling Language (TML) files"
 readme = "README.md"
 requires-python = ">=3.7"
