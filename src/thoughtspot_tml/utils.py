@@ -239,7 +239,7 @@ class EnvironmentGUIDMapper:
                 if envt_b is None:
                     message.append(f"no GUID found for '{to_environment}' ({from_environment}='{envt_a}')")
 
-                warnings.warn("\n".join(message), MissingGUIDMappedValueWarning)
+                warnings.warn("\n".join(message), MissingGUIDMappedValueWarning, stacklevel=2)
                 continue
 
             mapping[envt_a] = envt_b
