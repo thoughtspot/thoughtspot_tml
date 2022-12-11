@@ -34,7 +34,8 @@ class Connection(_tml.TML):
         instance = super().load(path)
 
         try:
-            instance.guid = str(uuid.UUID(path.stem, version=4))
+            name, dot, ext = path.name.partition(".")
+            instance.guid = str(uuid.UUID(name, version=4))
         except ValueError:
             pass
 
