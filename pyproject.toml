@@ -35,12 +35,12 @@ classifiers = [
 ]
 
 dependencies = [
-    "PyYAML == 6.0",
-    "betterproto[compiler] == 2.0.0b5",
+    "PyYAML >= 6.0",
+    "betterproto[compiler] >= 2.0.0b5",
 
     # version specific
-    "typing_extensions == 4.4.0; python_version < '3.8.0'",
-    "zipp == 3.11.0; python_version < '3.10.0'"
+    "typing_extensions >= 4.4.0; python_version < '3.8.0'",
+    "zipp >= 3.11.0; python_version < '3.10.0'"
 ]
 
 [project.urls]
