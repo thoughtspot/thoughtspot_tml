@@ -312,6 +312,31 @@ s.save("tests/data/NEW_DUMMY_spot_app.zip")
 
 ### `determine_tml_type`
 
+TML is both a data structure and file format, and these formats vary slightly across each document. `determine_tml_type` will return the appropriate TML class so that you can call [deserialization methods](#deserialization) directly. Pass either the `path` keyword with a filepath, or the file info directly from one of the objects returned in the [`/metadata/tml/export`][rest-api-export] response data.
+
+<b> &emsp; &emsp; signature</b>
+
+```python
+def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Union[Connection, TMLObject]:
+    """
+    Get the appropriate TML class based on input data.
+
+    Parameters
+    ----------
+    info : TMLDocInfo
+      API edoc info response
+
+    path : PathLike
+      filepath to parse
+
+    Raises
+    ------
+    TMLError, when a valid TML type could not be found based on input
+    """
+```
+
+<b> &emsp; &emsp; usage</b>
+
 ```python
 from thoughtspot_tml.utils import determine_tml_type
 
@@ -327,10 +352,26 @@ tml = tml_cls.loads(tml_document=export_response["object"][0]["edoc"])
 type(tml) is Worksheet  # => True
 ```
 
-TML is both a data structure and file format, and these formats vary slightly across each document. `determine_tml_type` will return the appropriate TML class so that you can call [deserialization methods](#deserialization) directly. Pass either the `path` keyword with a filepath, or the file info directly from one of the objects returned in the [`/metadata/tml/export`][rest-api-export] response data.
-
 
 ### `EnvironmentGUIDMapper`
+
+The `EnvironmentGUIDMapper` is a dictionary-like data structure which can help you maintain references to objects across your __ThoughtSpot__ environments. The underlying data structure is intended to clearly show the relationship of a given object between any number of environments. An "environment" can be any scope you consider separate from each other, be it 2 __ThoughtSpot__ servers, 2 Connections on the same server, or even "Copy of" the same object within a single Connection.
+
+<b> &emsp; &emsp; signature</b>
+
+```python
+class EnvironmentGUIDMapper:
+    """
+    Attributes
+    ----------
+    environment_transformer : Callable(str) -> str
+      a function which transforms the ENV name before adding it to the mapping
+    """
+
+    def __init__(self, environment_transformer: Callable[[str], str] = str.upper):
+```
+
+<b> &emsp; &emsp; usage</b>
 
 ```python
 from thoughtspot_tml.utils import EnvironmentGUIDMapper
@@ -380,22 +421,48 @@ print(new_mapper.generate_mapping(from_environment="DEV", to_environment="PROD")
 }
 ```
 
-The `EnvironmentGUIDMapper` is a dictionary-like data structure which can help you maintain references to objects across your __ThoughtSpot__ environments. The underlying data structure is intended to clearly show the relationship of a given object between any number of environments. An "environment" can be any scope you consider separate from each other, be it 2 __ThoughtSpot__ servers, 2 Connections on the same server, or even "Copy of" the same object within a single Connection.
-
 
 ### `disambiguate`
-
-```python
-from thoughtspot_tml.utils import disambiguate
-
-tml = disambiguate(tml, guid_mapping={"guid3": "guid1", "guid12": "guid10"})
-```
 
 In __ThoughtSpot__, the uniqueness constraint exists on the underlying object's `guid`. This means that there can be multiple objects of the same type with the same name. An example of this is maintaining both a DEV and PROD Connection. All the development work happens on one set of objects (that are not shared with any of the End User community), while the production connection contains objects with identical names that *are* shared with the End User community.
 
 To reduce ambiguity, you may need to add the `fqn` key to your TML document when you reference source tables or connections. If you do not add the `fqn` key, and the connection or table you reference does not have a unique name, the import will fail.
 
 __NOTE__: *Prior to __ThoughtSpot__ V8.7.0, TML does not export with the `fqn` automatically.*
+
+<b> &emsp; &emsp; signature</b>
+
+```python
+def disambiguate(
+    tml: TMLObject,
+    *,
+    guid_mapping: Dict[str, GUID],
+    remap_object_guid: bool = True,
+    delete_unmapped_guids: bool = False,
+) -> TMLObject:
+    """
+    Deep scan the TML looking for fields to add FQNs to.
+
+    This will explore the top-level guid and all nested objects looking on
+    Tables, Worksheets, etc to disambiguate.
+
+    Parameters
+    ----------
+    tml : TMLObject
+      the tml to scan
+
+    guid_mapping : {str: GUID}
+      a mapping of names or guids, to the FQN to add to the object
+
+    remap_object_guid : bool = True
+      whether or not to remap the tml.guid
+
+    delete_unmapped_guids : bool = False
+      if a match could not be found, set the FQN and object guid to None
+    """
+```
+
+<b> &emsp; &emsp; usage</b>
 
 ```python
 from thoughtspot_tml.utils import disambiguate
