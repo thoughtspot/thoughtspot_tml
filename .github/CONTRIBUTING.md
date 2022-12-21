@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to Ward are encouraged and very welcome!
+Contributions to `thoughtspot_tml` are encouraged and very welcome!
 
 Contributions can come in many forms: documentation enhancements, features, bug fixes, creating issues, and participating in the community.
 
