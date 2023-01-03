@@ -89,7 +89,7 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
                     if not line.startswith(" ")
                 ),
                 # 4. if no matches found (eg. StopIteration is raised), use the default value
-                default="NOT_FOUND",
+                "NOT_FOUND",
             )
 
     if info is not None:
