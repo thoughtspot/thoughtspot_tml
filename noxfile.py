@@ -18,5 +18,7 @@ def tests(session: nox.Session) -> None:
 
 @nox.session(reuse_venv=not ON_GITHUB)
 def black(session: nox.Session) -> None:
-    """ """
+    """
+    Lint.
+    """
     session.run("black", ".", "--config", "pyproject.toml")
