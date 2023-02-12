@@ -150,7 +150,7 @@ class Worksheet(TML):
         return self.worksheet.name
 ```
 
-The full, composable TML specification can found in [`_scriptability.py`][py-scriptabilty]. Each piece of the spec is a python [`dataclasses.dataclass` field][py-dataclasses-field]. The internal `_scriptability.py` module is generated code from the __ThoughtSpot__'s internal architecture and allows for `thoughtspot_tml` to offer the deep attribute access experience in python.
+The full, composable TML specification can found in [`_scriptability.py`][py-scriptability]. Each piece of the spec is a python [`dataclasses.dataclass` field][py-dataclasses-field]. The internal `_scriptability.py` module is generated code from the __ThoughtSpot__'s internal architecture and allows for `thoughtspot_tml` to offer the deep attribute access experience in python.
 
 ```python
 @dataclass
