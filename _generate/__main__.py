@@ -128,7 +128,9 @@ def _clean_scriptability():
     # As of right now, betterproto (v2.0.0b5) does not allow optionality.
     #
     class ThoughtSpotVisitor(ast.NodeVisitor):
-        # 👁️👄👁️ rules: rewrite Format.*Config dataclasses to have camelCase attributes
+        # RULES:
+        # - rewrite Format.*Config dataclasses to have camelCase attributes
+        # - rewrite plot_as_band to be a camelCase attribute again
 
         @staticmethod
         def snake_to_camel(snake_case: str) -> str:
@@ -142,6 +144,9 @@ def _clean_scriptability():
                 for attribute in node.body:
                     # if it's a Foramt.*Config, camelize its name
                     if node.name.startswith("Format") and node.name.endswith("Config"):
+                        attribute.target.id = self.snake_to_camel(attribute.target.id)
+
+                    if isinstance(attribute, ast.AnnAssign) and attribute.target.id == "plot_as_band":
                         attribute.target.id = self.snake_to_camel(attribute.target.id)
 
             self.generic_visit(node)
