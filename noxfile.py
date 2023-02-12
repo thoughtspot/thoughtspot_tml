@@ -1,3 +1,5 @@
+import pathlib
+import shutil
 import os
 
 import nox
@@ -22,3 +24,17 @@ def black(session: nox.Session) -> None:
     Lint.
     """
     session.run("black", ".", "--config", "pyproject.toml")
+
+
+@nox.session(reuse_venv=not ON_GITHUB)
+def build(session: nox.Session) -> None:
+    """
+    Deploy.
+    """
+    package_dir = pathlib.Path(__package__).resolve()
+
+    session.run("python", package_dir.joinpath("setup.py").as_posix(), "sdist", "bdist_wheel")
+    # session.run("twine", "upload", "-r", "pypi", package_dir.joinpath("build").as_posix())
+
+    shutil.rmtree(package_dir / "build")
+    shutil.rmtree(package_dir / "dist")
