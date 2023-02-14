@@ -55,6 +55,10 @@ class Connection(_tml.TML):
         this_database = {"name": None, "isAutoCreated": False, "schemas": []}
         this_schema = {"name": None, "tables": []}
 
+        # this connection has 0 tables (very popular "initial state" structure TS 9.0.0+)
+        if self.connection.table is None:
+            return data
+
         # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
         # if we sort first, we can guarantee the insertion order with simple iteration
         for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: skip
