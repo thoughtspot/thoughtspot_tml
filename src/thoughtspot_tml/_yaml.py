@@ -62,6 +62,9 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.Scal
 
 yaml.add_representer(str, _double_quote_when_special_char)
 
+# BUG: pyyaml #89 ==> resolved by #635
+yaml.Loader.yaml_implicit_resolvers.pop("=")
+
 
 def load(document: str) -> Dict[str, Any]:
     """
