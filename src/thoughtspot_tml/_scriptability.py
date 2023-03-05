@@ -114,6 +114,7 @@ class ColumnPropertiesGeoConfigProto(betterproto.Message):
     longitude: bool = betterproto.bool_field(2, optional=True)
     country: bool = betterproto.bool_field(3, optional=True)
     region_name: "ColumnPropertiesGeoConfigProtoSubRegion" = betterproto.message_field(4, optional=True)
+    custom_file_guid: str = betterproto.string_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -511,29 +512,6 @@ class LogicalTableEDocProtoLogicalColumnEDocProto(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class LogicalTableEDocProtoDbColumnProperties(betterproto.Message):
     data_type: str = betterproto.string_field(1, optional=True)
-
-
-@dataclass(eq=False, repr=False)
-class JoinEDocProto(betterproto.Message):
-    name: str = betterproto.string_field(1, optional=True)
-    description: str = betterproto.string_field(2, optional=True)
-    source_table: "Identity" = betterproto.message_field(3, optional=True)
-    destination_table: "Identity" = betterproto.message_field(4, optional=True)
-    column_pairs: List["JoinEDocProtoColumnPair"] = betterproto.message_field(5, optional=True)
-    type: str = betterproto.string_field(6, optional=True)
-    is_one_to_one: bool = betterproto.bool_field(8, optional=True)
-
-
-@dataclass(eq=False, repr=False)
-class JoinEDocProtoColumnPair(betterproto.Message):
-    source_column: str = betterproto.string_field(1, optional=True)
-    destination_column: str = betterproto.string_field(2, optional=True)
-
-
-@dataclass(eq=False, repr=False)
-class LogicalSchemaProto(betterproto.Message):
-    tables: List["LogicalTableEDocProto"] = betterproto.message_field(1, optional=True)
-    joins: List["JoinEDocProto"] = betterproto.message_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
