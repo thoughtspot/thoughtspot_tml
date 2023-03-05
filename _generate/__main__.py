@@ -193,6 +193,11 @@ def _clean_scriptability():
 
 
 if __name__ == "__main__":
+    import sys
+
+    if sys.version_info < (3, 8):
+        raise RuntimeError("The ThoughtSpot TML SDK must be generated from py38 or greater.")
+
     with console.status("Working..", spinner="smiley"):
         _clean_edoc_proto()
         _run_protoc()
