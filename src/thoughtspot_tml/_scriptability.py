@@ -29,6 +29,18 @@ class FormatConfigNegativeValueFormat(betterproto.Enum):
     BRACES_NODASH = 3
 
 
+class GeometryTypeEnumProtoE(betterproto.Enum):
+    POINT = 0
+    LINE_STRING = 1
+    LINEAR_RING = 2
+    POLYGON = 3
+    MULTI_POINT = 4
+    MULTI_LINE_STRING = 5
+    MULTI_POLYGON = 6
+    GEOMETRY_COLLECTION = 7
+    CIRCLE = 8
+
+
 @dataclass(eq=False, repr=False)
 class FormatConfig(betterproto.Message):
     category: "FormatConfigCategoryType" = betterproto.enum_field(1, optional=True)
@@ -83,6 +95,11 @@ class KeyValueStr(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class GeometryTypeEnumProto(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
 class ColumnProperties(betterproto.Message):
     column_type: str = betterproto.string_field(1, optional=True)
     aggregation: str = betterproto.string_field(2, optional=True)
@@ -115,6 +132,7 @@ class ColumnPropertiesGeoConfigProto(betterproto.Message):
     country: bool = betterproto.bool_field(3, optional=True)
     region_name: "ColumnPropertiesGeoConfigProtoSubRegion" = betterproto.message_field(4, optional=True)
     custom_file_guid: str = betterproto.string_field(5, optional=True)
+    geometry_type: "GeometryTypeEnumProtoE" = betterproto.enum_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -284,6 +302,7 @@ class ConnectionDoc(betterproto.Message):
     authentication_type: str = betterproto.string_field(3, optional=True)
     properties: List["KeyValueStr"] = betterproto.message_field(4, optional=True)
     table: List["ConnectionDocTableDoc"] = betterproto.message_field(5, optional=True)
+    description: str = betterproto.string_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -414,11 +433,17 @@ class AnswerEDocProtoAnswerColumn(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class NoteTileEDocProto(betterproto.Message):
+    html_parsed_string: str = betterproto.string_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class PinnedVisualization(betterproto.Message):
     id: str = betterproto.string_field(1, optional=True)
     answer: "AnswerEDocProto" = betterproto.message_field(2, optional=True)
     display_headline_column: str = betterproto.string_field(3, optional=True)
     viz_guid: str = betterproto.string_field(5, optional=True)
+    note_tile: "NoteTileEDocProto" = betterproto.message_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
