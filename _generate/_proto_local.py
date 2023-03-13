@@ -12,6 +12,20 @@ message KeyValueStr {
     optional string key = 1;                                                                           
     optional string value = 2;                                                                         
 }
+
+message GeometryTypeEnumProto {
+  enum E {
+    POINT = 0;
+    LINE_STRING = 1;
+    LINEAR_RING = 2;
+    POLYGON = 3;
+    MULTI_POINT = 4;
+    MULTI_LINE_STRING = 5;
+    MULTI_POLYGON = 6;
+    GEOMETRY_COLLECTION = 7;
+    CIRCLE = 8;
+  }
+}
 """
 
 # protos/number_format.proto
