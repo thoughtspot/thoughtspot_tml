@@ -1,6 +1,13 @@
 # thoughtspot_tml
 Python library for working with ThoughtSpot Modeling Language (TML) files programmatically
 
+# NOTE ON UPCOMING V2.0.0
+If you have code based on the 1.2.0 version of thoughtspot_tml, please set your requirements within your code packages to specify 
+
+    thoughtspot_tml==1.2.0
+
+The upcoming 2.0.0 release will break compatibility with the syntax of the 1.N.N. library, and will require porting work. 
+
 ## ThoughtSpot Modeling Language
 ThoughtSpot Modeling Language (TML) is a YAML based representation of objects in ThoughtSpot. The TML format for each object type is documente at https://cloud-docs.thoughtspot.com/admin/ts-cloud/tml.html . 
 
