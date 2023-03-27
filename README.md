@@ -8,6 +8,11 @@ If you have code based on the 1.2.0 version of thoughtspot_tml, please set your 
 
 The upcoming 2.0.0 release will break compatibility with the syntax of the 1.N.N. library, and will require porting work. 
 
+## NOTE ON V1.3.0
+To help those encountering encoding errors on 1.2.0, who aren't ready to move to 2.0.0 series yet, the serializer from 2.0.0 has been merged into the 1.N.N series as v.1.3.0.
+
+You are welcome to install v1.3.0 to see if it resolves any issues you currently have with outputting valid TML to disk. However, we'd appreciate you moving to v2.N.N. series when possible.
+
 ## ThoughtSpot Modeling Language
 ThoughtSpot Modeling Language (TML) is a YAML based representation of objects in ThoughtSpot. The TML format for each object type is documente at https://cloud-docs.thoughtspot.com/admin/ts-cloud/tml.html . 
 
