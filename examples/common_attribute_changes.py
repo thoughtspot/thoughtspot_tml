@@ -1,5 +1,5 @@
-from src.thoughtspot_tml import *
-from src.thoughtspot_tml.utils import *
+from thoughtspot_tml import *
+from thoughtspot_tml.utils import *
 
 # Examples of the common attribute changes that people do on the various TML object types
 
