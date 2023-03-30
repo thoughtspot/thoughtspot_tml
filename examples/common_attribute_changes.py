@@ -5,7 +5,8 @@ from thoughtspot_tml.utils import *
 
 # Not a fully functioning script, but a set of code snippets to be used in your own scripts
 
-# Each example assumes you've created the appropriate TML object using .load() or .loads() - see basic_input_output.py and the README
+# Each example assumes you've created the appropriate TML object using .load() or .loads()
+# see basic_input_output.py and the README for how to get the objects loaded from TML on disk or from API
 
 # Modifies the Table object passed in, returns False if no changes were made
 def change_table(t: Table) -> bool:

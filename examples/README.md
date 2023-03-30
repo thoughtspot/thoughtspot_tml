@@ -1,5 +1,12 @@
 # ThoughtSpot TML Examples
 
+## Basic examples 
+If writing your own scripts using thoughtspot_tml, look to these two examples along with the README to understand basic functionality and workflows:
+
+- *basic_input_output.py*: small sample functions showing the .load and .loads methods and the .dump and .dumps methods for going from TML files to library objects and back
+- *common_attribute_changes.py*: small sample functions on the most common TML objects showing the properties that are typically changed when doing TML manipulation, and the syntax for how to access any other properties
+
+## Complete workflow examples
 - [Worksheet Namespace Remapping][eg-worksheet-remap-ns]
 - 🚧 TODO 🚧 Worksheet GUID Remapping
 - 🚧 TODO 🚧 Repoint a Table to a new Connection
