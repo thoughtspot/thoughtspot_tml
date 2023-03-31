@@ -11,6 +11,8 @@ from thoughtspot_rest_api_v1 import *
 
 # 'Publishing' a TML file to a ThoughtSpot instance uses the REST API /metadata/tml/import endpoint (V1 or V2.0)
 # https://github.com/thoughtspot/thoughtspot_rest_api_v1_python library implements import in V1 or V2
+# https://github.com/thoughtspot/thoughtspot_rest_api_v1_python/blob/main/examples_v2/publish_tml.py
+
 # After publishing, you will want to retrieve the GUIDs from the response, for any newly created objects
 # /security/metadata/share endpoint (V2.0) can be used to give access to the newly created objects
 # For example, see https://github.com/thoughtspot/thoughtspot_rest_api_v1_python/blob/main/examples_v2/share_objects_access_control.py
