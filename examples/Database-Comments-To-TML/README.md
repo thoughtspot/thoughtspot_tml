@@ -36,6 +36,7 @@ from thoughtspot_rest_api_v1 import *
 import csv
 from typing import List
 from thoughtspot_tml import _scriptability
+import requests
 ```
 
 Let's set the connection details. We obtained the connection name and guid earlier. The database name, schema, and table are available from Databricks: 
