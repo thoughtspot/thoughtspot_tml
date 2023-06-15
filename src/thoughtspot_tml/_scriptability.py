@@ -116,6 +116,8 @@ class ColumnProperties(betterproto.Message):
     spotiq_preference: str = betterproto.string_field(13, optional=True)
     search_iq_preferred: bool = betterproto.bool_field(14, optional=True)
     hierarchical_column_name: str = betterproto.string_field(15, optional=True)
+    synonym_type: str = betterproto.string_field(16, optional=True)
+    value_casing: str = betterproto.string_field(17, optional=True)
 
 
 @dataclass(eq=False, repr=False)
