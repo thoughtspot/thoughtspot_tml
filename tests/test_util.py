@@ -1,6 +1,7 @@
 import json
 
 from thoughtspot_tml.exceptions import TMLError
+from thoughtspot_tml.types import GUID
 from thoughtspot_tml.utils import determine_tml_type, disambiguate, EnvironmentGUIDMapper
 from thoughtspot_tml.utils import _recursive_scan
 from thoughtspot_tml.tml import Connection
@@ -164,3 +165,27 @@ for file, replace_type, to_replace, n_replacements, tml_cls in (
         identities = _recursive_scan(tml, check=lambda x: isinstance(x, _scriptability.Identity))
         assert len(identities) >= n_replacements
         assert len([i for i in identities if i.fqn == FAKE_GUID]) == n_replacements
+
+@test("return a mapping iterator for two environements")
+def _():
+    mapper = EnvironmentGUIDMapper(str.upper)
+
+    guid_to_guid_mappings = {
+        GUID("123e4567-e89b-12d3-a456-426655440000"): GUID("234e5678-f9ab-12d3-b456-526665550000"),
+        GUID("345e6789-0abc-12d3-c456-626675560000"): GUID("456e789a-1bcd-12d3-d456-726685570000"),
+        GUID("567e89ab-2cde-12d3-e456-826695580000"): GUID("678e9abc-3def-12d3-f456-9266a5590000"),
+        GUID("789ea0bd-4f00-12d3-0456-a266b55a0000"): GUID("89ae0bcd-5f11-12d3-1456-b266c55b0000"),
+        GUID("9aae1bcd-6f22-12d3-2456-c266d55c0000"): GUID("aabf2bcd-7f33-12d3-3456-d266e55d0000"),
+        GUID("bac03bcd-8f44-12d3-4456-e266f55e0000"): GUID("cad14bcd-9f55-12d3-5456-f267055f0000"),
+        GUID("dae25bcd-af66-12d3-6456-026715600000"): GUID("eae36bcd-bf77-12d3-7456-126725610000"),
+        GUID("fae47bcd-cf88-12d3-8456-226735620000"): GUID("gae58bcd-df99-12d3-9456-326745630000"),
+    }
+
+    for source_guid, dest_guid in guid_to_guid_mappings.items():
+        mapper[source_guid] = ("source", source_guid)
+        mapper[source_guid] = ("dest", dest_guid)
+
+    mappings = mapper.generate_mapping("source", "dest")
+    assert(len(mappings) == 8)
+    for g1, g2 in mappings.items():
+        assert(g2 == guid_to_guid_mappings[g1])

@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from collections.abc import Iterator
 from dataclasses import fields, is_dataclass
 from typing import Any, Callable, Dict, List, Tuple, Union
 import warnings
@@ -286,6 +288,12 @@ class EnvironmentGUIDMapper:
 
         with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
             json.dump(data, j, indent=4)
+
+    def get_environment_guids(mapper, source, destination) -> Iterator[GUID, GUID]:
+        for key, environments in mapper._mapping.items():
+            guid_src = environments[source]
+            guid_dst = environments[destination]
+            yield guid_src, guid_dst
 
     def __str__(self) -> str:
         return json.dumps(self._mapping, indent=4)
