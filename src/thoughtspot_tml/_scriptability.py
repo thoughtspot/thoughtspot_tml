@@ -189,12 +189,38 @@ class ParameterRangeConfig(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class DateFilterProto(betterproto.Message):
+    type: str = betterproto.string_field(1, optional=True)
+    number: int = betterproto.int32_field(2, optional=True)
+    date: str = betterproto.string_field(3, optional=True)
+    oper: str = betterproto.string_field(4, optional=True)
+    date_range: "DateFilterProtoDateRange" = betterproto.message_field(5, optional=True)
+    date_period: str = betterproto.string_field(6, optional=True)
+    for_each_period: str = betterproto.string_field(7, optional=True)
+    year: int = betterproto.int32_field(8, optional=True)
+    quarter: str = betterproto.string_field(9, optional=True)
+    month: str = betterproto.string_field(10, optional=True)
+    week_day: str = betterproto.string_field(11, optional=True)
+    year_name: str = betterproto.string_field(12, optional=True)
+    quarter_name: str = betterproto.string_field(13, optional=True)
+    month_name: str = betterproto.string_field(14, optional=True)
+    week_day_name: str = betterproto.string_field(15, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class DateFilterProtoDateRange(betterproto.Message):
+    start_date: str = betterproto.string_field(1, optional=True)
+    end_date: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class Filter(betterproto.Message):
     column: List[str] = betterproto.string_field(1, optional=True)
     oper: str = betterproto.string_field(2, optional=True)
     values: List[str] = betterproto.string_field(3, optional=True)
     excluded_visualizations: List[str] = betterproto.string_field(4, optional=True)
     is_mandatory: bool = betterproto.bool_field(5, optional=True)
+    date_filter: "DateFilterProto" = betterproto.message_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -432,6 +458,22 @@ class AnswerEDocProtoAnswerColumn(betterproto.Message):
     name: str = betterproto.string_field(2, optional=True)
     custom_name: str = betterproto.string_field(3, optional=True)
     format: "FormatConfig" = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    answer: "AnswerEDocProto" = betterproto.message_field(3, optional=True)
+    cohort_config: "CohortEDocProtoCohortConfig" = betterproto.message_field(4, optional=True)
+    referenced_cohorts: List["Identity"] = betterproto.message_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoCohortConfig(betterproto.Message):
+    anchor_column: List["AnswerEDocProtoAnswerColumn"] = betterproto.message_field(1, optional=True)
+    return_column: "AnswerEDocProtoAnswerColumn" = betterproto.message_field(2, optional=True)
+    null_output_value: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
