@@ -105,6 +105,9 @@ def _run_protoc():
     #
     # /_generate/scriptability/__init__.py   -->   /src/thoughtspot_tml/_scriptability.py
     #
+    # Don't have protoc?
+    #   >>> brew install protobuf
+    #
     _subprocess_run(
         # fmt: off
         "protoc",
