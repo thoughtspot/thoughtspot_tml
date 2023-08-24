@@ -289,8 +289,19 @@ class EnvironmentGUIDMapper:
         with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
             json.dump(data, j, indent=4)
 
-    def get_environment_guids(mapper, source, destination) -> Iterator[GUID, GUID]:
-        for key, environments in mapper._mapping.items():
+    def get_environment_guids(self, *, source: str, destination: str) -> Iterator[GUID, GUID]:
+        """
+        Iterate through all guid pairs between source and destination.
+
+        Parameters
+        ----------
+        source : str
+          name of the environment to fetch the source guid from
+
+        destination : str
+          name of the environment to fetch the mapped guid from
+        """
+        for key, environments in self._mapping.items():
             guid_src = environments[source]
             guid_dst = environments[destination]
             yield guid_src, guid_dst
