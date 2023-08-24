@@ -118,6 +118,7 @@ class ColumnProperties(betterproto.Message):
     hierarchical_column_name: str = betterproto.string_field(15, optional=True)
     synonym_type: str = betterproto.string_field(16, optional=True)
     value_casing: str = betterproto.string_field(17, optional=True)
+    custom_order: List[str] = betterproto.string_field(18, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -221,6 +222,8 @@ class Filter(betterproto.Message):
     excluded_visualizations: List[str] = betterproto.string_field(4, optional=True)
     is_mandatory: bool = betterproto.bool_field(5, optional=True)
     date_filter: "DateFilterProto" = betterproto.message_field(6, optional=True)
+    is_single_value: bool = betterproto.bool_field(7, optional=True)
+    display_name: str = betterproto.string_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -265,6 +268,28 @@ class Identity(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class Schema(betterproto.Message):
+    tables: List["SchemaSchemaTable"] = betterproto.message_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class SchemaInPlaceJoin(betterproto.Message):
+    with_: str = betterproto.string_field(1, optional=True)
+    referencing_join: str = betterproto.string_field(2, optional=True)
+    on: str = betterproto.string_field(3, optional=True)
+    type: str = betterproto.string_field(4, optional=True)
+    cardinality: str = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class SchemaSchemaTable(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    alias: str = betterproto.string_field(2, optional=True)
+    fqn: str = betterproto.string_field(3, optional=True)
+    joins: List["SchemaInPlaceJoin"] = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class WorksheetEDocProto(betterproto.Message):
     name: str = betterproto.string_field(1, optional=True)
     description: str = betterproto.string_field(2, optional=True)
@@ -278,6 +303,7 @@ class WorksheetEDocProto(betterproto.Message):
     joins_with: List["RelationEDocProto"] = betterproto.message_field(10, optional=True)
     lesson_plans: List["LessonPlanEDocProto"] = betterproto.message_field(12, optional=True)
     parameters: List["Parameter"] = betterproto.message_field(13, optional=True)
+    schema: "Schema" = betterproto.message_field(14, optional=True)
 
 
 @dataclass(eq=False, repr=False)
