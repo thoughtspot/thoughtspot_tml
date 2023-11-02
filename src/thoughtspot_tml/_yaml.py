@@ -87,4 +87,4 @@ def dump(document: Any) -> str:
 
     We'll attempt to reproduce them in Python.
     """
-    return yaml.dump(document, width=INFINITY, default_flow_style=False, sort_keys=False)
+    return yaml.dump(document, width=INFINITY, default_flow_style=False, sort_keys=False, allow_unicode=True)
