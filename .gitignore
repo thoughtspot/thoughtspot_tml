@@ -31,6 +31,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# ignore workspace files
+*sublime*
+
 
 # ignore virtualization
 .python-version
