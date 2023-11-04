@@ -3,7 +3,7 @@ from typing import Optional
 import copy
 import uuid
 
-from thoughtspot_tml.types import ConnectionMetadata, GUID
+from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
 from thoughtspot_tml import _tml, _scriptability, _yaml
 
 
@@ -12,7 +12,6 @@ class Connection(_tml.TML):
     """
     Representation of a ThoughtSpot System Table TML.
     """
-
     guid: Optional[GUID]
     connection: _scriptability.ConnectionDoc
 
@@ -51,9 +50,9 @@ class Connection(_tml.TML):
 
         The `connection/update` REST API endpoint requires a `metadata` parameter.
         """
-        data = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
-        this_database = {"name": None, "isAutoCreated": False, "schemas": []}
-        this_schema = {"name": None, "tables": []}
+        data: ConnectionMetadata = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
+        this_database: ExternalDatabase = {"name": None, "isAutoCreated": False, "schemas": []}
+        this_schema: ExternalSchema = {"name": None, "tables": []}
 
         # this connection has 0 tables (very popular "initial state" structure TS 9.0.0+)
         if self.connection.table is None:
@@ -115,7 +114,6 @@ class Table(_tml.TML):
     """
     Representation of a ThoughtSpot System Table TML.
     """
-
     guid: GUID
     table: _scriptability.LogicalTableEDocProto
 
@@ -129,7 +127,6 @@ class View(_tml.TML):
     """
     Representation of a ThoughtSpot View TML.
     """
-
     guid: GUID
     view: _scriptability.ViewEDocProto
 
@@ -143,7 +140,6 @@ class SQLView(_tml.TML):
     """
     Representation of a ThoughtSpot SQLView TML.
     """
-
     guid: GUID
     sql_view: _scriptability.SqlViewEDocProto
 
@@ -157,7 +153,6 @@ class Worksheet(_tml.TML):
     """
     Representation of a ThoughtSpot Worksheet TML.
     """
-
     guid: GUID
     worksheet: _scriptability.WorksheetEDocProto
 
@@ -171,7 +166,6 @@ class Answer(_tml.TML):
     """
     Representation of a ThoughtSpot Answer TML.
     """
-
     guid: GUID
     answer: _scriptability.AnswerEDocProto
 
@@ -185,7 +179,6 @@ class Liveboard(_tml.TML):
     """
     Representation of a ThoughtSpot Liveboard TML.
     """
-
     guid: GUID
     liveboard: _scriptability.PinboardEDocProto
 
@@ -213,7 +206,6 @@ class Pinboard(_tml.TML):
     DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
       As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.
     """
-
     guid: GUID
     pinboard: _scriptability.PinboardEDocProto
 

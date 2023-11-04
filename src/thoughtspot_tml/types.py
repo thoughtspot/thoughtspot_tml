@@ -1,21 +1,23 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, NewType
-from typing import Any, Dict, List, Union
-import pathlib
-import os
+from typing import NewType
+from typing import Any, Dict, List, Union, Optional, Type
 
-from thoughtspot_tml._compat import Literal, TypedDict, ZipPath
-
-if TYPE_CHECKING:
-    from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
+from thoughtspot_tml._compat import Literal, TypedDict, Annotated
+from thoughtspot_tml.spotapp import Manifest
+from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PathLike = Union[str, os.PathLike, pathlib.Path, ZipPath]
-TMLObject = Union["Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard"]
+TMLObject = Union[Table, View, SQLView, Worksheet, Answer, Liveboard]
+TMLObjectType = Type[TMLObject]
+TMLDocument = Annotated[str, "a TMLObject represented as a YAML 1.1 document"]
 TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard"]
 GUID = NewType("GUID", str)  # UUID4
+
+class SpotAppInfo(TypedDict):
+    tml: List[TMLObject]
+    manifest: Optional[Manifest]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /metadata/tml/export Response Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -25,10 +27,14 @@ class FileInfo(TypedDict):
     filename: str
 
 
+class StatusCode(TypedDict):
+    status: str
+
+
 class TMLDocInfo(TypedDict):
     name: str
     filename: str
-    status: Dict[Literal["status"], str]
+    status: StatusCode
     type: str
     id: GUID
     dependency: List[FileInfo]
@@ -36,7 +42,11 @@ class TMLDocInfo(TypedDict):
 
 class EDocExportResponse(TypedDict):
     info: TMLDocInfo
-    edoc: TMLObject
+    edoc: TMLDocument
+
+
+class EDocExportResponses(TypedDict):
+    object: List[EDocExportResponse]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /connection/* Metadata Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,12 +74,12 @@ class ExternalTable(TypedDict):
 
 
 class ExternalSchema(TypedDict):
-    name: str
+    name: Optional[str]
     tables: List[ExternalTable]
 
 
 class ExternalDatabase(TypedDict):
-    name: str
+    name: Optional[str]
     isAutoCreated: bool
     schemas: List[ExternalSchema]
 

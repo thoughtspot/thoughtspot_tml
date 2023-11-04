@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Type
 import dataclasses
 
 from thoughtspot_tml.types import TMLObject
@@ -31,12 +31,12 @@ class TMLDecodeError(TMLError):
 
     def __init__(
         self,
-        tml_cls: TMLObject,
+        tml_cls: Type[TMLObject],
         *,
-        message: str = None,
-        data: Dict[str, Any] = None,
-        path: Path = None,
-        problem_mark: error.Mark = None,
+        message: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+        path: Optional[Path] = None,
+        problem_mark: Optional[error.Mark] = None,
     ):  # pragma: no cover
         self.tml_cls = tml_cls
         self.message = message
