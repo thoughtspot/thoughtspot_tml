@@ -11,12 +11,11 @@ from thoughtspot_tml.exceptions import TMLError, TMLDisambiguationError, Missing
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
-from thoughtspot_tml import _scriptability
+from thoughtspot_tml import _scriptability, _compat
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type
-    
+    from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type, Iterator
+
     from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo
 
 
@@ -26,7 +25,7 @@ log = logging.getLogger(__name__)
 
 def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     collect = []
-    is_container_type = lambda t: hasattr(t, "__contains__") # noqa: E731
+    is_container_type = lambda t: len(_compat.get_args(t)) > 0  # noqa: E731
 
     for field in fields(scriptability_object):
         child = getattr(scriptability_object, field.name)
@@ -34,7 +33,7 @@ def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any]
         if child is None:
             continue
 
-        elements = [child] if not is_container_type(field.type) else child
+        elements = child if is_container_type(field.type) else [child]
 
         for element in elements:
             if is_dataclass(element):

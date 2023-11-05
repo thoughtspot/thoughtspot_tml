@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, asdict
-from typing import Optional
+from typing import TYPE_CHECKING
 import copy
 import uuid
 
-from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
 from thoughtspot_tml import _tml, _scriptability, _yaml
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+    from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
 
 
 @dataclass

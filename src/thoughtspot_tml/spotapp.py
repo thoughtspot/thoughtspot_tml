@@ -1,19 +1,19 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional
 from typing import TYPE_CHECKING
 import pathlib
 import zipfile
 import json
 
 from thoughtspot_tml._compat import ZipPath
-from thoughtspot_tml.types import TMLObject
 from thoughtspot_tml.utils import determine_tml_type
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
 from thoughtspot_tml import _yaml
 
 if TYPE_CHECKING:
-    from thoughtspot_tml.types import EDocExportResponses, TMLDocInfo, SpotAppInfo
+    from thoughtspot_tml.types import EDocExportResponses, TMLObject, TMLDocInfo, SpotAppInfo
 
 
 @dataclass
@@ -77,7 +77,7 @@ class SpotApp:
             document = json.loads(edoc_info["edoc"])
             manifest_data["object"].append(edoc_info["info"])
             tml = tml_cls(**document)
-            info["tml"].append(cast(TMLObject, tml))
+            info["tml"].append(tml)  # type: ignore[arg-type]
 
         info["manifest"] = Manifest(**manifest_data)
         return cls(**info)
@@ -105,7 +105,7 @@ class SpotApp:
 
                 tml_cls = determine_tml_type(path=pathlib.Path(member.filename))
                 tml = tml_cls.load(path)
-                info["tml"].append(cast(TMLObject, tml))
+                info["tml"].append(tml)  # type: ignore[arg-type]
 
         return cls(**info)
 

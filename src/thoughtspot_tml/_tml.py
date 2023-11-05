@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from collections.abc import Collection
+from typing import TYPE_CHECKING
 from dataclasses import asdict, dataclass, fields, is_dataclass
-from typing import Any, Dict, cast
 import warnings
 import pathlib
 import typing
@@ -12,14 +13,16 @@ import yaml
 
 from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 from thoughtspot_tml._compat import get_origin, get_args
-from thoughtspot_tml.types import TMLObjectType
 from thoughtspot_tml import _scriptability, _yaml
+
+if TYPE_CHECKING:
+    from typing import Any, Dict
 
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
-def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
+def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:  # noqa: C901
     """
     Convert all fields of type `dataclass` into an instance of the
     specified dataclass if the current value is a dict.
@@ -47,7 +50,12 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
 
         # it's an _scriptability dataclass Annotation that needs resolution
         elif isinstance(field.type, str) and isinstance(value, dict):
-            type_ = getattr(_scriptability, field.type)
+            if field.type.startswith("_scriptability"):
+                _, _, field_type = field.type.partition(".")
+            else:
+                field_type = field.type
+
+            type_ = getattr(_scriptability, field_type)
             new_value = type_(**value)
             recursive_complex_attrs_to_dataclasses(new_value)
 
@@ -144,12 +152,12 @@ class TML:
         try:
             document = cls._loads(tml_document)
         except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
-            raise TMLDecodeError(cast(TMLObjectType, cls), problem_mark=cast(yaml.error.Mark, e.problem_mark)) from None
+            raise TMLDecodeError(cls, problem_mark=e.problem_mark) from None  # type: ignore[arg-type]
 
         try:
             instance = cls(**document)
         except TypeError as e:
-            raise TMLDecodeError(cast(TMLObjectType, cls), data=document, message=str(e)) from None
+            raise TMLDecodeError(cls, data=document, message=str(e)) from None  # type: ignore[arg-type]
 
         return instance
 

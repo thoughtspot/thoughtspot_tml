@@ -1,10 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union, Optional, Type
+from typing import TYPE_CHECKING
+from typing import Union, Type
 
 from thoughtspot_tml._compat import Literal, TypedDict, Annotated
-from thoughtspot_tml.spotapp import Manifest
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List, Optional
+
+    from thoughtspot_tml.spotapp import Manifest
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

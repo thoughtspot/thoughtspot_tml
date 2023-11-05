@@ -3,11 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import dataclasses
 
+from typing import Any, Dict, Optional, Type
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
-    from typing import Any, Dict, Optional, Type
-    
+
     from thoughtspot_tml.types import TMLObject, GUID
     from yaml import error
 
