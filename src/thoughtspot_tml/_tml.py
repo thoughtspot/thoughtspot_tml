@@ -220,7 +220,7 @@ class TML:
 
         if not path.name.endswith(".json") and not path.name.endswith(f"{self.tml_type_name}.tml"):
             warnings.warn(
-                f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning, stacklevel=2
+                f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning, stacklevel=2,
             )
 
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")

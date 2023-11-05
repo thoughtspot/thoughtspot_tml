@@ -1,20 +1,24 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from dataclasses import fields, is_dataclass
-from graphlib import TopologicalSorter, CycleError
-from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type
+from typing import TYPE_CHECKING
 import warnings
 import logging
 import pathlib
 import json
 
-from thoughtspot_tml.exceptions import TMLError, MissingGUIDMappedValueWarning
-from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo
+from thoughtspot_tml.exceptions import TMLError, TMLDisambiguationError, MissingGUIDMappedValueWarning
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
-from thoughtspot_tml import _scriptability, _compat
+from thoughtspot_tml import _scriptability
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type
+    
+    from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo
+
 
 _UNDEFINED = object()
 log = logging.getLogger(__name__)
@@ -22,7 +26,7 @@ log = logging.getLogger(__name__)
 
 def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     collect = []
-    is_container_type = lambda t: len(_compat.get_args(t)) > 0
+    is_container_type = lambda t: hasattr(t, "__contains__") # noqa: E731
 
     for field in fields(scriptability_object):
         child = getattr(scriptability_object, field.name)
@@ -42,7 +46,11 @@ def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any]
     return collect
 
 
-def determine_tml_type(*, info: Optional[TMLDocInfo] = None, path: Optional[pathlib.Path] = None) -> Union[Type[Connection], Type[TMLObject]]:
+def determine_tml_type(
+    *,
+    info: Optional[TMLDocInfo] = None,
+    path: Optional[pathlib.Path] = None,
+) -> Union[Type[Connection], Type[TMLObject]]:
     """
     Get the appropriate TML class based on input data.
 
@@ -184,7 +192,7 @@ class EnvironmentGUIDMapper:
     def __contains__(self, guid: GUID) -> bool:
         return bool(self.get(guid, default=False))
 
-    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:
+    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:  # noqa: A003
         """
         Insert a new GUID into the mapping.
 
@@ -302,7 +310,7 @@ class EnvironmentGUIDMapper:
         destination : str
           name of the environment to fetch the mapped guid from
         """
-        for key, environments in self._mapping.items():
+        for _, environments in self._mapping.items():
             guid_src = environments[source]
             guid_dst = environments[destination]
             yield guid_src, guid_dst

@@ -50,7 +50,7 @@ class Connection(_tml.TML):
 
         The `connection/update` REST API endpoint requires a `metadata` parameter.
         """
-        data: ConnectionMetadata = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
+        data: ConnectionMetadata = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}  # noqa: E501
         this_database: ExternalDatabase = {"name": None, "isAutoCreated": False, "schemas": []}
         this_schema: ExternalSchema = {"name": None, "tables": []}
 
@@ -60,7 +60,7 @@ class Connection(_tml.TML):
 
         # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
         # if we sort first, we can guarantee the insertion order with simple iteration
-        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: skip
+        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # noqa: E501
 
             # if it's a new schema, append it this database's schema and reset
             if table.external_table.schema_name != this_schema["name"]:
@@ -99,7 +99,7 @@ class Connection(_tml.TML):
                         }
                         for column in table.column
                     ],
-                }
+                },
             )
 
         # stick the last known data into the response object

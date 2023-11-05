@@ -7,18 +7,18 @@ import zipfile
 import json
 
 from thoughtspot_tml._compat import ZipPath
+from thoughtspot_tml.types import TMLObject
 from thoughtspot_tml.utils import determine_tml_type
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
 from thoughtspot_tml import _yaml
 
 if TYPE_CHECKING:
     from thoughtspot_tml.types import EDocExportResponses, TMLDocInfo, SpotAppInfo
-    from thoughtspot_tml.types import TMLObject
 
 
 @dataclass
 class Manifest:
-    object: List[TMLDocInfo]
+    object: List[TMLDocInfo]  # noqa: A003
 
 
 @dataclass

@@ -1,9 +1,15 @@
-from typing import Any, Dict, Optional, Type
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import dataclasses
 
-from thoughtspot_tml.types import TMLObject
-from pathlib import Path
-from yaml import error
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
+    from typing import Any, Dict, Optional, Type
+    
+    from thoughtspot_tml.types import TMLObject, GUID
+    from yaml import error
 
 
 class TMLError(Exception):
@@ -53,7 +59,7 @@ class TMLDecodeError(TMLError):
 
         if self.data is not None:
             lines.append(f"supplied data does not produce a valid TML ({class_name}) document")
-            fields = set(f.name for f in dataclasses.fields(self.tml_cls))
+            fields = {f.name for f in dataclasses.fields(self.tml_cls)}
             data = set(self.data)
 
             if data.difference(fields):
@@ -73,3 +79,16 @@ class TMLDecodeError(TMLError):
                 lines.append(snippet)
 
         return "\n".join(lines)
+
+
+class TMLDisambiguationError(TMLError):
+    """
+    Raised when a TML file (or files) does not have the FQN property.
+    """
+
+    def __init__(self, tml_guids: Iterable[GUID]):
+        self.tml_guids = tml_guids
+
+    def __str__(self) -> str:
+        guids = ", ".join(self.tml_guids)
+        return f"No FQN found on: {guids}, was metadata/tml/export ran with parameter: export_fqn = true ?"
