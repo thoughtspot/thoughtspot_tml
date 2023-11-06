@@ -3,6 +3,9 @@
 
   <i>a Python package for working with</i> <b>ThoughtSpot</b> <i>Modeling Language (TML) files programmatically</i>
 
+  ![Badge: Lint](https://github.com/thoughtspot/thoughtspot_tml/actions/workflows/lint.yml/badge.svg)
+  ![Badge: Test](https://github.com/thoughtspot/thoughtspot_tml/actions/workflows/test.yml/badge.svg)
+  
   <h3>
     <a href="#installation">Installation</a>
     <span> | </span>
