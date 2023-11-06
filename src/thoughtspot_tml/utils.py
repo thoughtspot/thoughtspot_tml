@@ -373,49 +373,61 @@ def disambiguate(
     return tml
 
 
-def import_sort_order(tmls: List[TMLObject], *, exclude_joins_on: Optional[Set[GUID]] = None) -> Dict[GUID, int]:
+def _import_sort_order(tmls: List[TMLObject], *, exclude_joins_on: Optional[Set[GUID]] = None) -> Dict[GUID, int]:
     """
     TopSort all of the objects found in tmls.
 
     If a cycle is found in the TML object graph, attempt to remove JOINs from the
     equation to create a proper DAG.
+
+    The input TMLs must have their FQNs defined.
     """
+    raise NotImplementedError
+
     if exclude_joins_on is None:
         exclude_joins_on = set()
 
-    import_order: Dict[GUID, int] = {}
-    sorter = TopologicalSorter()
-    import_level = 0
+    # Check that each TML defines the FQN property.
+    tmls_without_fqn = [tml.guid for tml in tmls if "fqn" not in tml.dumps()]
 
-    # helpers
-    has_tables = lambda attr: hasattr(attr, "tables") and all(t for t in attr.tables if t.fqn is not None)
-    is_a_join  = lambda attr: isinstance(attr, _scriptability.RelationEDocProto) and attr.destination is not None
+    if tmls_without_fqn:
+        raise TMLDisambiguationError(tml_guids=tmls_without_fqn)
 
-    for tml in tmls:
-        parents  = [t.fqn for tml in _recursive_scan(tml, check=has_tables) for t in tml.tables]
-        joins_to = [] if tml.guid in exclude_joins_on else [j.destination.fqn for j in _recursive_scan(tml, check=is_a_join)]  # noqa: E501
-        sorter.add(tml.guid, *parents, *joins_to)
+    return {}
 
-    try:
-        sorter.prepare()
-    except CycleError as e:
-        message, (parent_node, *cycles) = e.args
-        exclude_joins_on.add(parent_node)
-        log.debug(f"{message}, {parent_node} thru..\n{' -> '.join(cycles)}")
-        return import_sort_order(tmls, exclude_joins_on=exclude_joins_on)
+    # import_order: Dict[GUID, int] = {}
+    # sorter = TopologicalSorter()
+    # import_level = 0
 
-    if exclude_joins_on:
-        log.debug(
-            "The prior lines are related to the following cyclically dependent objects. If you are imlpementing a "
-            f"batched import process, then the GUIDs found below will need to be retried during a later import level."
-        )
-        log.warning(f"Cyclical dependency found on {len(exclude_joins_on)} objects, see log for details..")
+    # # helpers
+    # has_tables = lambda attr: hasattr(attr, "tables") and all(t for t in attr.tables if t.fqn is not None)
+    # is_a_join  = lambda attr: isinstance(attr, _scriptability.RelationEDocProto) and attr.destination is not None
 
-    while sorter.is_active():
-        import_level += 1
+    # for tml in tmls:
+    #     parents  = [t.fqn for tml in _recursive_scan(tml, check=has_tables) for t in tml.tables]
+    #     joins_to = [] if tml.guid in exclude_joins_on else [j.destination.fqn for j in _recursive_scan(tml, check=is_a_join)]  # noqa: E501
+    #     sorter.add(tml.guid, *parents, *joins_to)
 
-        for guid in sorter.get_ready():
-            import_order[guid] = import_level
-            sorter.done(guid)
+    # try:
+    #     sorter.prepare()
+    # except CycleError as e:
+    #     message, (parent_node, *cycles) = e.args
+    #     exclude_joins_on.add(parent_node)
+    #     log.debug(f"{message}, {parent_node} thru..\n{' -> '.join(cycles)}")
+    #     return import_sort_order(tmls, exclude_joins_on=exclude_joins_on)
 
-    return import_order
+    # if exclude_joins_on:
+    #     log.debug(
+    #         "The prior lines are related to the following cyclically dependent objects. If you are imlpementing a "
+    #         f"batched import process, then the GUIDs found below will need to be retried during a later import level."
+    #     )
+    #     log.warning(f"Cyclical dependency found on {len(exclude_joins_on)} objects, see log for details..")
+
+    # while sorter.is_active():
+    #     import_level += 1
+
+    #     for guid in sorter.get_ready():
+    #         import_order[guid] = import_level
+    #         sorter.done(guid)
+
+    # return import_order
