@@ -1,14 +1,12 @@
 name: Lint
 
-on: 
+on:
   pull_request:
   push:
-    branches:    
-      - main
-      - build-spec
+    branches:
+      - v2_main
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
 

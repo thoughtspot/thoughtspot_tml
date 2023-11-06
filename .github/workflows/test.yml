@@ -1,14 +1,12 @@
 name: Tests
 
-on: 
+on:
   pull_request:
   push:
-    branches:    
-      - main
-      - build-spec
+    branches:
+      - v2_main
 
 jobs:
-
   test:
     name: Testing on Python ${{ matrix.python-version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
