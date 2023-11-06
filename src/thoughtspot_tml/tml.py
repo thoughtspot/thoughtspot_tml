@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, asdict
-from typing import Optional
+from typing import TYPE_CHECKING
 import copy
 import uuid
 
-from thoughtspot_tml.types import ConnectionMetadata, GUID
 from thoughtspot_tml import _tml, _scriptability, _yaml
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+    from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
 
 
 @dataclass
@@ -12,7 +18,6 @@ class Connection(_tml.TML):
     """
     Representation of a ThoughtSpot System Table TML.
     """
-
     guid: Optional[GUID]
     connection: _scriptability.ConnectionDoc
 
@@ -51,9 +56,9 @@ class Connection(_tml.TML):
 
         The `connection/update` REST API endpoint requires a `metadata` parameter.
         """
-        data = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}
-        this_database = {"name": None, "isAutoCreated": False, "schemas": []}
-        this_schema = {"name": None, "tables": []}
+        data: ConnectionMetadata = {"configuration": {kv.key: kv.value for kv in self.connection.properties}, "externalDatabases": []}  # noqa: E501
+        this_database: ExternalDatabase = {"name": None, "isAutoCreated": False, "schemas": []}
+        this_schema: ExternalSchema = {"name": None, "tables": []}
 
         # this connection has 0 tables (very popular "initial state" structure TS 9.0.0+)
         if self.connection.table is None:
@@ -61,7 +66,7 @@ class Connection(_tml.TML):
 
         # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
         # if we sort first, we can guarantee the insertion order with simple iteration
-        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # fmt: skip
+        for table in sorted(self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name)):  # noqa: E501
 
             # if it's a new schema, append it this database's schema and reset
             if table.external_table.schema_name != this_schema["name"]:
@@ -100,7 +105,7 @@ class Connection(_tml.TML):
                         }
                         for column in table.column
                     ],
-                }
+                },
             )
 
         # stick the last known data into the response object
@@ -115,7 +120,6 @@ class Table(_tml.TML):
     """
     Representation of a ThoughtSpot System Table TML.
     """
-
     guid: GUID
     table: _scriptability.LogicalTableEDocProto
 
@@ -129,7 +133,6 @@ class View(_tml.TML):
     """
     Representation of a ThoughtSpot View TML.
     """
-
     guid: GUID
     view: _scriptability.ViewEDocProto
 
@@ -143,7 +146,6 @@ class SQLView(_tml.TML):
     """
     Representation of a ThoughtSpot SQLView TML.
     """
-
     guid: GUID
     sql_view: _scriptability.SqlViewEDocProto
 
@@ -157,7 +159,6 @@ class Worksheet(_tml.TML):
     """
     Representation of a ThoughtSpot Worksheet TML.
     """
-
     guid: GUID
     worksheet: _scriptability.WorksheetEDocProto
 
@@ -171,7 +172,6 @@ class Answer(_tml.TML):
     """
     Representation of a ThoughtSpot Answer TML.
     """
-
     guid: GUID
     answer: _scriptability.AnswerEDocProto
 
@@ -185,7 +185,6 @@ class Liveboard(_tml.TML):
     """
     Representation of a ThoughtSpot Liveboard TML.
     """
-
     guid: GUID
     liveboard: _scriptability.PinboardEDocProto
 
@@ -213,7 +212,6 @@ class Pinboard(_tml.TML):
     DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
       As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.
     """
-
     guid: GUID
     pinboard: _scriptability.PinboardEDocProto
 

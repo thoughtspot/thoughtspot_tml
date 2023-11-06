@@ -10,3 +10,9 @@ from thoughtspot_tml.tml import Connection as EmbraceConnection
 from thoughtspot_tml.tml import View as ThoughtSpotView
 from thoughtspot_tml.tml import Answer as SavedAnswer
 from thoughtspot_tml.tml import Table as SystemTable
+
+
+__all__ = (
+    "__version__", "Connection", "Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard", "Pinboard", "SpotApp",
+    "EmbraceConnection", "ThoughtSpotView", "SavedAnswer", "SystemTable",
+)

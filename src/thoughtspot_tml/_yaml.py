@@ -73,7 +73,7 @@ def load(document: str) -> Dict[str, Any]:
     return yaml.load(document, Loader=yaml.SafeLoader)
 
 
-def dump(document: Any) -> str:
+def dump(document: Dict[str, Any]) -> str:
     """
     Dump a TML object as YAML.
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
+
 from collections.abc import Collection
-from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import TYPE_CHECKING
-from typing import Any, Dict
+from dataclasses import asdict, dataclass, fields, is_dataclass
 import warnings
 import pathlib
 import typing
@@ -15,18 +15,17 @@ from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 from thoughtspot_tml._compat import get_origin, get_args
 from thoughtspot_tml import _scriptability, _yaml
 
-
 if TYPE_CHECKING:
-    from thoughtspot.types import PathLike
+    from typing import Any, Dict
 
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
-def recursive_complex_attrs_to_dataclasses(instance: Any) -> Any:
+def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:  # noqa: C901
     """
     Convert all fields of type `dataclass` into an instance of the
-    specified data class if the current value is of type dict.
+    specified dataclass if the current value is a dict.
 
     Types will always be one of:
       - dataclass
@@ -49,15 +48,20 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> Any:
             new_value = field.type(**value)
             recursive_complex_attrs_to_dataclasses(new_value)
 
-        # it's an Annotation that needs resolution
+        # it's an _scriptability dataclass Annotation that needs resolution
         elif isinstance(field.type, str) and isinstance(value, dict):
-            type_ = getattr(_scriptability, field.type)
+            if field.type.startswith("_scriptability"):
+                _, _, field_type = field.type.partition(".")
+            else:
+                field_type = field.type
+
+            type_ = getattr(_scriptability, field_type)
             new_value = type_(**value)
             recursive_complex_attrs_to_dataclasses(new_value)
 
         # it's a List of basic types or ForwardRefs
         elif get_origin(field.type) is list:
-            new_value = []
+            new_value = []  # type: ignore[assignment]
             args = get_args(field.type)
             field_type = args[0].__forward_value__ if isinstance(args[0], typing.ForwardRef) else args[0]
 
@@ -65,13 +69,13 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> Any:
                 if is_dataclass(field_type) and isinstance(item, dict):
                     item = field_type(**item)
 
-                new_value.append(item)
+                new_value.append(item)  # type: ignore[attr-defined]
 
                 if is_dataclass(field_type):
                     recursive_complex_attrs_to_dataclasses(item)
 
         # it's an empty mapping, python-betterproto doesn't support optional map_fields
-        elif get_origin(field.type) is dict and not value:
+        elif get_origin(field.type) is dict and value == {}:
             new_value = None
 
         else:  # pragma: peephole optimizer
@@ -80,7 +84,7 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> Any:
         setattr(instance, field.name, new_value)
 
 
-def recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
+def _recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
     """
     Drop all keys with null values, they're optional.
     """
@@ -89,10 +93,10 @@ def recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
     for k, v in mapping.items():
 
         if isinstance(v, dict):
-            v = recursive_remove_null(v)
+            v = _recursive_remove_null(v)
 
         if isinstance(v, list):
-            v = [recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
+            v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
 
         # if v is an empty collection, discard it
         if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):  # pragma: peephole optimizer
@@ -148,17 +152,17 @@ class TML:
         try:
             document = cls._loads(tml_document)
         except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
-            raise TMLDecodeError(cls, problem_mark=e.problem_mark) from None
+            raise TMLDecodeError(cls, problem_mark=e.problem_mark) from None  # type: ignore[arg-type]
 
         try:
             instance = cls(**document)
         except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None
+            raise TMLDecodeError(cls, data=document, message=str(e)) from None  # type: ignore[arg-type]
 
         return instance
 
     @classmethod
-    def load(cls, path: PathLike) -> TML:
+    def load(cls, path: pathlib.Path) -> TML:
         """
         Deserialize a TML document located at filepath to a Python object.
 
@@ -200,7 +204,7 @@ class TML:
         if format_type.upper() not in ("YAML", "JSON"):
             raise ValueError(f"format_type must be either 'YAML' or 'JSON' .. got, '{format_type}'")
 
-        data = recursive_remove_null(self.to_dict())
+        data = _recursive_remove_null(self.to_dict())
 
         if format_type.upper() == "YAML":
             document = _yaml.dump(data)
@@ -210,7 +214,7 @@ class TML:
 
         return document
 
-    def dump(self, path: PathLike) -> None:
+    def dump(self, path: pathlib.Path) -> None:
         """
         Serialize this object as a YAML-formatted stream to a filepath.
 
@@ -224,7 +228,7 @@ class TML:
 
         if not path.name.endswith(".json") and not path.name.endswith(f"{self.tml_type_name}.tml"):
             warnings.warn(
-                f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning, stacklevel=2
+                f"saving to '{path}', expected {path.stem}.{self.tml_type_name}.tml", TMLExtensionWarning, stacklevel=2,
             )
 
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
