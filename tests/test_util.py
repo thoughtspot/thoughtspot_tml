@@ -3,7 +3,7 @@ import json
 from thoughtspot_tml.exceptions import TMLError
 from thoughtspot_tml.types import GUID
 from thoughtspot_tml.utils import determine_tml_type, disambiguate, EnvironmentGUIDMapper
-from thoughtspot_tml.utils import _recursive_scan, import_sort_order
+from thoughtspot_tml.utils import _recursive_scan #, _import_sort_order
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
