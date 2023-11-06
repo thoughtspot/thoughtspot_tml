@@ -7,6 +7,23 @@ from typing import Dict, List
 import betterproto
 
 
+class Comparator(betterproto.Enum):
+    COMPARATOR_UNSPECIFIED = 0
+    COMPARATOR_LT = 1
+    COMPARATOR_GT = 2
+    COMPARATOR_LEQ = 3
+    COMPARATOR_GEQ = 4
+    COMPARATOR_EQ = 5
+    COMPARATOR_NEQ = 6
+
+
+class PercentageChangeComparator(betterproto.Enum):
+    PERCENTAGE_CHANGE_COMPARATOR_UNSPECIFIED = 0
+    PERCENTAGE_CHANGE_COMPARATOR_INCREASES_BY = 1
+    PERCENTAGE_CHANGE_COMPARATOR_DECREASES_BY = 2
+    PERCENTAGE_CHANGE_COMPARATOR_CHANGES_BY = 3
+
+
 class FormatConfigCategoryType(betterproto.Enum):
     NUMBER = 1
     PERCENTAGE = 2
@@ -39,6 +56,45 @@ class GeometryTypeEnumProtoE(betterproto.Enum):
     MULTI_POLYGON = 6
     GEOMETRY_COLLECTION = 7
     CIRCLE = 8
+
+
+class ActionContextE(betterproto.Enum):
+    NONE = 0
+    PRIMARY = 1
+    MENU = 2
+    CONTEXT_MENU = 3
+
+
+class ActionObjectApplicationTypeE(betterproto.Enum):
+    NONE = 0
+    SLACK = 1
+    SALESFORCE = 2
+    GOOGLE_SHEET = 3
+
+
+class FrequencySpecFrequencyGranularity(betterproto.Enum):
+    EVERY_MINUTE = 0
+    HOURLY = 1
+    DAILY = 2
+    WEEKLY = 3
+    MONTHLY = 4
+
+
+class ActionTypeE(betterproto.Enum):
+    CALLBACK = 1
+    URL = 2
+
+
+class AvailabilityContentTypeE(betterproto.Enum):
+    GLOBAL = 0
+    LOCAL = 1
+
+
+class UrlActionDetailsAuthenticationTypeE(betterproto.Enum):
+    NONE = 0
+    BASIC = 1
+    BEARER = 2
+    API_KEY = 3
 
 
 @dataclass(eq=False, repr=False)
@@ -100,6 +156,73 @@ class GeometryTypeEnumProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ActionContext(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class ActionObjectApplicationType(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class ConstantValue(betterproto.Message):
+    value: float = betterproto.double_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class FrequencySpec(betterproto.Message):
+    cron: "FrequencySpecCronFrequencySpec" = betterproto.message_field(1, optional=True)
+    time_zone: str = betterproto.string_field(2, optional=True)
+    start_time: int = betterproto.int64_field(3)
+    end_time: int = betterproto.int64_field(4)
+    frequency_granularity: "FrequencySpecFrequencyGranularity" = betterproto.enum_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class FrequencySpecCronFrequencySpec(betterproto.Message):
+    second: str = betterproto.string_field(1, optional=True)
+    minute: str = betterproto.string_field(2, optional=True)
+    hour: str = betterproto.string_field(3, optional=True)
+    day_of_month: str = betterproto.string_field(4, optional=True)
+    month: str = betterproto.string_field(5, optional=True)
+    day_of_week: str = betterproto.string_field(6, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MetricId(betterproto.Message):
+    pinboard_viz_id: "MetricIdPinboardVizId" = betterproto.message_field(1, group="id", optional=True)
+    answer_id: str = betterproto.string_field(2, group="id", optional=True)
+    personalised_view_id: str = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MetricIdPinboardVizId(betterproto.Message):
+    pinboard_id: str = betterproto.string_field(1, optional=True)
+    viz_id: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class SimpleConditionInfo(betterproto.Message):
+    comparator: "Comparator" = betterproto.enum_field(1, optional=True)
+    threshold: "ConstantValue" = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class PercentageChangeConditionInfo(betterproto.Message):
+    comparator: "PercentageChangeComparator" = betterproto.enum_field(1, optional=True)
+    threshold: "ConstantValue" = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ConditionInfo(betterproto.Message):
+    simple_condition: "SimpleConditionInfo" = betterproto.message_field(1, group="condition_info", optional=True)
+    percentage_change_condition: "PercentageChangeConditionInfo" = betterproto.message_field(
+        2, group="condition_info", optional=True
+    )
+
+
+@dataclass(eq=False, repr=False)
 class ColumnProperties(betterproto.Message):
     column_type: str = betterproto.string_field(1, optional=True)
     aggregation: str = betterproto.string_field(2, optional=True)
@@ -119,6 +242,7 @@ class ColumnProperties(betterproto.Message):
     synonym_type: str = betterproto.string_field(16, optional=True)
     value_casing: str = betterproto.string_field(17, optional=True)
     custom_order: List[str] = betterproto.string_field(18, optional=True)
+    use_cases: List[str] = betterproto.string_field(19, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -168,6 +292,8 @@ class Parameter(betterproto.Message):
     list_config: "ParameterListConfig" = betterproto.message_field(5, group="value_restrictions", optional=True)
     list_column_id: str = betterproto.string_field(6, group="value_restrictions", optional=True)
     range_config: "ParameterRangeConfig" = betterproto.message_field(7, group="value_restrictions", optional=True)
+    sap_parameter_name: str = betterproto.string_field(8, optional=True)
+    linked_parameters: List[str] = betterproto.string_field(9, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -232,6 +358,7 @@ class Join(betterproto.Message):
     name: str = betterproto.string_field(2, optional=True)
     source: str = betterproto.string_field(3, optional=True)
     destination: str = betterproto.string_field(4, optional=True)
+    on: List[str] = betterproto.string_field(5, optional=True)
     type: str = betterproto.string_field(6, optional=True)
     is_one_to_one: bool = betterproto.bool_field(7, optional=True)
 
@@ -268,6 +395,25 @@ class Identity(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ObjectEDocProto(betterproto.Message):
+    guid: str = betterproto.string_field(1, optional=True)
+    worksheet: "WorksheetEDocProto" = betterproto.message_field(2, optional=True)
+    view: "ViewEDocProto" = betterproto.message_field(3, optional=True)
+    answer: "AnswerEDocProto" = betterproto.message_field(4, optional=True)
+    pinboard: "PinboardEDocProto" = betterproto.message_field(5, optional=True)
+    table: "LogicalTableEDocProto" = betterproto.message_field(6, optional=True)
+    joins: List["RelationEDocProto"] = betterproto.message_field(7, optional=True)
+    permissions: List["ObjectPermissions"] = betterproto.message_field(8, optional=True)
+    sql_view: "SqlViewEDocProto" = betterproto.message_field(9, optional=True)
+    liveboard: "PinboardEDocProto" = betterproto.message_field(10, optional=True)
+    monitor_alert: List["MonitorAlertEDocProto"] = betterproto.message_field(11, optional=True)
+    connection: "ConnectionDoc" = betterproto.message_field(12, optional=True)
+    hidden: bool = betterproto.bool_field(13, optional=True)
+    cohort: "CohortEDocProto" = betterproto.message_field(14, optional=True)
+    action_object: "ActionObjectEDocProto" = betterproto.message_field(15, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class Schema(betterproto.Message):
     tables: List["SchemaSchemaTable"] = betterproto.message_field(1, optional=True)
 
@@ -295,15 +441,18 @@ class WorksheetEDocProto(betterproto.Message):
     description: str = betterproto.string_field(2, optional=True)
     tables: List["Identity"] = betterproto.message_field(3, optional=True)
     joins: List["Join"] = betterproto.message_field(4, optional=True)
-    table_paths: List["TablePath"] = betterproto.message_field(5, optional=True)
-    formulas: List["Formula"] = betterproto.message_field(6, optional=True)
-    filters: List["Filter"] = betterproto.message_field(7, optional=True)
-    worksheet_columns: List["WorksheetEDocProtoWorksheetColumn"] = betterproto.message_field(8, optional=True)
-    properties: "WorksheetEDocProtoQueryProperties" = betterproto.message_field(9, optional=True)
-    joins_with: List["RelationEDocProto"] = betterproto.message_field(10, optional=True)
-    lesson_plans: List["LessonPlanEDocProto"] = betterproto.message_field(12, optional=True)
-    parameters: List["Parameter"] = betterproto.message_field(13, optional=True)
-    schema: "Schema" = betterproto.message_field(14, optional=True)
+    schema: "Schema" = betterproto.message_field(5, optional=True)
+    table_paths: List["TablePath"] = betterproto.message_field(6, optional=True)
+    formulas: List["Formula"] = betterproto.message_field(7, optional=True)
+    filters: List["Filter"] = betterproto.message_field(8, optional=True)
+    worksheet_columns: List["WorksheetEDocProtoWorksheetColumn"] = betterproto.message_field(9, optional=True)
+    properties: "WorksheetEDocProtoQueryProperties" = betterproto.message_field(10, optional=True)
+    joins_with: List["RelationEDocProto"] = betterproto.message_field(11, optional=True)
+    generation_type: str = betterproto.string_field(12, optional=True)
+    lesson_plans: List["LessonPlanEDocProto"] = betterproto.message_field(13, optional=True)
+    parameters: List["Parameter"] = betterproto.message_field(14, optional=True)
+    action_object_associations: List["ActionObjectAssociationEdocProto"] = betterproto.message_field(15, optional=True)
+    use_cases: List["WorksheetEDocProtoUseCase"] = betterproto.message_field(16, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -319,6 +468,13 @@ class WorksheetEDocProtoWorksheetColumn(betterproto.Message):
     column_id: str = betterproto.string_field(3, optional=True)
     formula_id: str = betterproto.string_field(4, optional=True)
     properties: "ColumnProperties" = betterproto.message_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoUseCase(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    display_name: str = betterproto.string_field(2, optional=True)
+    description: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -471,6 +627,7 @@ class AnswerEDocProto(betterproto.Message):
     client_state: str = betterproto.string_field(12, optional=True)
     parameters: List["Parameter"] = betterproto.message_field(13, optional=True)
     parameter_values: Dict[str, str] = betterproto.map_field(14, betterproto.TYPE_STRING, betterproto.TYPE_STRING)
+    action_object_associations: List["ActionObjectAssociationEdocProto"] = betterproto.message_field(15, optional=True)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -508,12 +665,93 @@ class NoteTileEDocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ActionType(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class AvailabilityContentType(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetails(betterproto.Message):
+    url: str = betterproto.string_field(1, optional=True)
+    reference: str = betterproto.string_field(2, optional=True)
+    authentication: "UrlActionDetailsAuthentication" = betterproto.message_field(3, optional=True)
+    url_query_params: List["UrlActionDetailsUrlQueryParam"] = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsAuthenticationType(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsBasic(betterproto.Message):
+    username: str = betterproto.string_field(1, optional=True)
+    password: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsBearerToken(betterproto.Message):
+    token: str = betterproto.string_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsApiKey(betterproto.Message):
+    key: str = betterproto.string_field(1, optional=True)
+    value: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsAuthentication(betterproto.Message):
+    type: "UrlActionDetailsAuthenticationTypeE" = betterproto.enum_field(1, optional=True)
+    basic: "UrlActionDetailsBasic" = betterproto.message_field(2, optional=True)
+    bearer_token: "UrlActionDetailsBearerToken" = betterproto.message_field(3, optional=True)
+    api_key: "UrlActionDetailsApiKey" = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class UrlActionDetailsUrlQueryParam(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    key: str = betterproto.string_field(2, optional=True)
+    value: str = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CallbackActionDetails(betterproto.Message):
+    reference: str = betterproto.string_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ActionObjectEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    type: "ActionTypeE" = betterproto.enum_field(2, optional=True)
+    callback_action_details: "CallbackActionDetails" = betterproto.message_field(3, group="details", optional=True)
+    url_action_details: "UrlActionDetails" = betterproto.message_field(4, group="details", optional=True)
+    availability: "AvailabilityContentTypeE" = betterproto.enum_field(5, optional=True)
+    application: "ActionObjectApplicationTypeE" = betterproto.enum_field(6, optional=True)
+    user_groups: List[str] = betterproto.string_field(7, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ActionObjectAssociationEdocProto(betterproto.Message):
+    action_id: str = betterproto.string_field(1, optional=True)
+    action_name: str = betterproto.string_field(2, optional=True)
+    context: "ActionContextE" = betterproto.enum_field(3, optional=True)
+    enabled: bool = betterproto.bool_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class PinnedVisualization(betterproto.Message):
     id: str = betterproto.string_field(1, optional=True)
     answer: "AnswerEDocProto" = betterproto.message_field(2, optional=True)
     display_headline_column: str = betterproto.string_field(3, optional=True)
+    generic_viz_sub_type: str = betterproto.string_field(4, optional=True)
     viz_guid: str = betterproto.string_field(5, optional=True)
     note_tile: "NoteTileEDocProto" = betterproto.message_field(6, optional=True)
+    action_object_associations: List["ActionObjectAssociationEdocProto"] = betterproto.message_field(7, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -565,6 +803,16 @@ class PinboardEDocProto(betterproto.Message):
     parameter_overrides: Dict[str, "PinboardParameterOverrideEDoc"] = betterproto.map_field(
         8, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
     )
+    views: List["PersonalisedViewEDocProto"] = betterproto.message_field(9, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class PersonalisedViewEDocProto(betterproto.Message):
+    view_guid: str = betterproto.string_field(1, optional=True)
+    name: str = betterproto.string_field(2, optional=True)
+    view_filters: List["Filter"] = betterproto.message_field(3, optional=True)
+    is_public: bool = betterproto.bool_field(4, optional=True)
+    view_parameters: List["PinboardParameterOverrideEDoc"] = betterproto.message_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -578,6 +826,7 @@ class LogicalTableEDocProto(betterproto.Message):
     columns: List["LogicalTableEDocProtoLogicalColumnEDocProto"] = betterproto.message_field(7, optional=True)
     rls_rules: "LogicalTableEDocProtoRlsRule" = betterproto.message_field(8, optional=True)
     joins_with: List["RelationEDocProto"] = betterproto.message_field(9, optional=True)
+    parameters: List["Parameter"] = betterproto.message_field(10, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -610,6 +859,14 @@ class LogicalTableEDocProtoDbColumnProperties(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ObjectPermissions(betterproto.Message):
+    columns: List[str] = betterproto.string_field(1, optional=True)
+    access_type: str = betterproto.string_field(2, optional=True)
+    users: List[str] = betterproto.string_field(3, optional=True)
+    user_groups: List[str] = betterproto.string_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class SqlViewEDocProto(betterproto.Message):
     name: str = betterproto.string_field(1, optional=True)
     description: str = betterproto.string_field(2, optional=True)
@@ -625,3 +882,29 @@ class SqlViewEDocProtoSqlViewColumn(betterproto.Message):
     description: str = betterproto.string_field(2, optional=True)
     sql_output_column: str = betterproto.string_field(3, optional=True)
     properties: "ColumnProperties" = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MonitorAlertEDocProto(betterproto.Message):
+    guid: str = betterproto.string_field(1, optional=True)
+    name: str = betterproto.string_field(2, optional=True)
+    frequency_spec: "FrequencySpec" = betterproto.message_field(3, optional=True)
+    creator: "MonitorAlertEDocProtoUser" = betterproto.message_field(4, optional=True)
+    condition: "ConditionInfo" = betterproto.message_field(5, optional=True)
+    metric_id: "MetricId" = betterproto.message_field(6, optional=True)
+    subscribed_user: List["MonitorAlertEDocProtoUser"] = betterproto.message_field(7, optional=True)
+    custom_message: str = betterproto.string_field(8, optional=True)
+    personalised_view_info: "MonitorAlertEDocProtoPersonalisedViewInfo" = betterproto.message_field(9, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MonitorAlertEDocProtoUser(betterproto.Message):
+    username: str = betterproto.string_field(1, optional=True)
+    user_email: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MonitorAlertEDocProtoPersonalisedViewInfo(betterproto.Message):
+    tables: List["Identity"] = betterproto.message_field(1, optional=True)
+    filters: List["Filter"] = betterproto.message_field(2, optional=True)
+    parameter_overrides: List["PinboardParameterOverrideEDoc"] = betterproto.message_field(3, optional=True)
