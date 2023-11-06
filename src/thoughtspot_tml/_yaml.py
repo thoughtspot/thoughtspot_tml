@@ -73,7 +73,7 @@ def load(document: str) -> Dict[str, Any]:
     return yaml.load(document, Loader=yaml.SafeLoader)
 
 
-def dump(document: Any) -> str:
+def dump(document: Dict[str, Any]) -> str:
     """
     Dump a TML object as YAML.
 
@@ -87,4 +87,4 @@ def dump(document: Any) -> str:
 
     We'll attempt to reproduce them in Python.
     """
-    return yaml.dump(document, width=INFINITY, default_flow_style=False, sort_keys=False)
+    return yaml.dump(document, width=INFINITY, default_flow_style=False, sort_keys=False, allow_unicode=True)

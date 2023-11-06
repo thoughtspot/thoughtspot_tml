@@ -27,6 +27,15 @@ def black(session: nox.Session) -> None:
 
 
 @nox.session(reuse_venv=not ON_GITHUB)
+def mypy(session: nox.Session) -> None:
+    """
+    Lint.
+    """
+    session.run("mypy", "./src/thoughtspot_tml")
+    # session.run("mypy", "--install-types")
+
+
+@nox.session(reuse_venv=not ON_GITHUB)
 def build(session: nox.Session) -> None:
     """
     Deploy.

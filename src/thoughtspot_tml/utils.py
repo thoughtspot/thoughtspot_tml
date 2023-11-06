@@ -1,27 +1,31 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from dataclasses import fields, is_dataclass
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING
 import warnings
 import logging
 import pathlib
 import json
 
-from thoughtspot_tml.exceptions import TMLError, MissingGUIDMappedValueWarning
-from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo, PathLike
+from thoughtspot_tml.exceptions import TMLError, TMLDisambiguationError, MissingGUIDMappedValueWarning
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 from thoughtspot_tml import _scriptability, _compat
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type, Iterator
+
+    from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo
+
+
 _UNDEFINED = object()
 log = logging.getLogger(__name__)
 
 
-def _recursive_scan(scriptability_object: Any, *, check: Callable[[Any], bool] = None) -> List[Any]:
+def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     collect = []
-    is_container_type = lambda t: len(_compat.get_args(t)) > 0
+    is_container_type = lambda t: len(_compat.get_args(t)) > 0  # noqa: E731
 
     for field in fields(scriptability_object):
         child = getattr(scriptability_object, field.name)
@@ -29,7 +33,7 @@ def _recursive_scan(scriptability_object: Any, *, check: Callable[[Any], bool] =
         if child is None:
             continue
 
-        elements = [child] if not is_container_type(field.type) else child
+        elements = child if is_container_type(field.type) else [child]
 
         for element in elements:
             if is_dataclass(element):
@@ -41,7 +45,11 @@ def _recursive_scan(scriptability_object: Any, *, check: Callable[[Any], bool] =
     return collect
 
 
-def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Union[Connection, TMLObject]:
+def determine_tml_type(
+    *,
+    info: Optional[TMLDocInfo] = None,
+    path: Optional[pathlib.Path] = None,
+) -> Union[Type[Connection], Type[TMLObject]]:
     """
     Get the appropriate TML class based on input data.
 
@@ -50,7 +58,7 @@ def determine_tml_type(*, info: TMLDocInfo = None, path: PathLike = None) -> Uni
     info : TMLDocInfo
       API edoc info response
 
-    path : PathLike
+    path : pathlib.Path
       filepath to parse
 
     Raises
@@ -170,7 +178,7 @@ class EnvironmentGUIDMapper:
             self._mapping.pop(old_key)
 
             envts[environment] = guid_to_add
-            new_key = "__".join(envts.values())
+            new_key = "__".join(envts.values())  # type: ignore[assignment]
 
         self._mapping.setdefault(new_key, {}).update(envts)
 
@@ -183,7 +191,7 @@ class EnvironmentGUIDMapper:
     def __contains__(self, guid: GUID) -> bool:
         return bool(self.get(guid, default=False))
 
-    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:
+    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:  # noqa: A003
         """
         Insert a new GUID into the mapping.
 
@@ -244,18 +252,18 @@ class EnvironmentGUIDMapper:
                 warnings.warn("\n".join(message), MissingGUIDMappedValueWarning, stacklevel=2)
                 continue
 
-            mapping[envt_a] = envt_b
+            mapping[envt_a] = envt_b  # type: ignore[assignment, index]
 
         return mapping
 
     @classmethod
-    def read(cls, path: PathLike, environment_transformer: Callable[[str], str] = str.upper):
+    def read(cls, path: pathlib.Path, environment_transformer: Callable[[str], str] = str.upper):
         """
         Load the guid mapping from file.
 
         Parameters
         ----------
-        path : PathLike
+        path : pathlib.Path
           filepath to read the mapping from
 
         environment_transformer : Callable(str) -> str
@@ -270,13 +278,13 @@ class EnvironmentGUIDMapper:
         instance._mapping = data
         return instance
 
-    def save(self, path: PathLike, *, info: Dict[str, Any] = None) -> None:
+    def save(self, path: pathlib.Path, *, info: Optional[Dict[str, Any]] = None) -> None:
         """
         Save the guid mapping to file.
 
         Parameters
         ----------
-        path : PathLike
+        path : pathlib.Path
           filepath to save the mapping to
         """
         data = {}
@@ -289,7 +297,7 @@ class EnvironmentGUIDMapper:
         with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
             json.dump(data, j, indent=4)
 
-    def get_environment_guids(self, *, source: str, destination: str) -> Iterator[GUID, GUID]:
+    def get_environment_guids(self, *, source: str, destination: str) -> Iterator[Tuple[GUID, GUID]]:
         """
         Iterate through all guid pairs between source and destination.
 
@@ -301,7 +309,7 @@ class EnvironmentGUIDMapper:
         destination : str
           name of the environment to fetch the mapped guid from
         """
-        for key, environments in self._mapping.items():
+        for _, environments in self._mapping.items():
             guid_src = environments[source]
             guid_dst = environments[destination]
             yield guid_src, guid_dst
@@ -342,7 +350,7 @@ def disambiguate(
             tml.guid = guid_mapping[tml.guid]
 
         elif delete_unmapped_guids:
-            tml.guid = None
+            tml.guid = None  # type: ignore[assignment]
 
     # DEVNOTE: @boonhapus, might need to add another scan for PinnedVisualization.viz_guid
     attrs = _recursive_scan(tml, check=lambda attr: isinstance(attr, _scriptability.Identity))
@@ -363,3 +371,63 @@ def disambiguate(
             attribute.fqn = None
 
     return tml
+
+
+def _import_sort_order(tmls: List[TMLObject], *, exclude_joins_on: Optional[Set[GUID]] = None) -> Dict[GUID, int]:
+    """
+    TopSort all of the objects found in tmls.
+
+    If a cycle is found in the TML object graph, attempt to remove JOINs from the
+    equation to create a proper DAG.
+
+    The input TMLs must have their FQNs defined.
+    """
+    raise NotImplementedError
+
+    if exclude_joins_on is None:
+        exclude_joins_on = set()
+
+    # Check that each TML defines the FQN property.
+    tmls_without_fqn = [tml.guid for tml in tmls if "fqn" not in tml.dumps()]
+
+    if tmls_without_fqn:
+        raise TMLDisambiguationError(tml_guids=tmls_without_fqn)
+
+    return {}
+
+    # import_order: Dict[GUID, int] = {}
+    # sorter = TopologicalSorter()
+    # import_level = 0
+
+    # # helpers
+    # has_tables = lambda attr: hasattr(attr, "tables") and all(t for t in attr.tables if t.fqn is not None)
+    # is_a_join  = lambda attr: isinstance(attr, _scriptability.RelationEDocProto) and attr.destination is not None
+
+    # for tml in tmls:
+    #     parents  = [t.fqn for tml in _recursive_scan(tml, check=has_tables) for t in tml.tables]
+    #     joins_to = [] if tml.guid in exclude_joins_on else [j.destination.fqn for j in _recursive_scan(tml, check=is_a_join)]  # noqa: E501
+    #     sorter.add(tml.guid, *parents, *joins_to)
+
+    # try:
+    #     sorter.prepare()
+    # except CycleError as e:
+    #     message, (parent_node, *cycles) = e.args
+    #     exclude_joins_on.add(parent_node)
+    #     log.debug(f"{message}, {parent_node} thru..\n{' -> '.join(cycles)}")
+    #     return import_sort_order(tmls, exclude_joins_on=exclude_joins_on)
+
+    # if exclude_joins_on:
+    #     log.debug(
+    #         "The prior lines are related to the following cyclically dependent objects. If you are imlpementing a "
+    #         f"batched import process, then the GUIDs found below will need to be retried during a later import level."
+    #     )
+    #     log.warning(f"Cyclical dependency found on {len(exclude_joins_on)} objects, see log for details..")
+
+    # while sorter.is_active():
+    #     import_level += 1
+
+    #     for guid in sorter.get_ready():
+    #         import_order[guid] = import_level
+    #         sorter.done(guid)
+
+    # return import_order

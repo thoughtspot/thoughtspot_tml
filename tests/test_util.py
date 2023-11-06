@@ -3,7 +3,7 @@ import json
 from thoughtspot_tml.exceptions import TMLError
 from thoughtspot_tml.types import GUID
 from thoughtspot_tml.utils import determine_tml_type, disambiguate, EnvironmentGUIDMapper
-from thoughtspot_tml.utils import _recursive_scan
+from thoughtspot_tml.utils import _recursive_scan #, _import_sort_order
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
@@ -189,3 +189,26 @@ def _():
     assert(len(mappings) == 8)
     for g1, g2 in mappings.items():
         assert(g2 == guid_to_guid_mappings[g1])
+
+
+# @test("raise on ambiguous TML input")
+# def _():
+#     tmls = [
+#         determine_tml_type(path=_const.DUMMY_TABLE).load(path=_const.DUMMY_TABLE),
+#         determine_tml_type(path=_const.DUMMY_VIEW).load(path=_const.DUMMY_VIEW),
+#         determine_tml_type(path=_const.DUMMY_SQL_VIEW).load(path=_const.DUMMY_SQL_VIEW),
+#         determine_tml_type(path=_const.DUMMY_WORKSHEET).load(path=_const.DUMMY_WORKSHEET),
+#         determine_tml_type(path=_const.DUMMY_ANSWER).load(path=_const.DUMMY_ANSWER),
+#         determine_tml_type(path=_const.DUMMY_PINBOARD).load(path=_const.DUMMY_PINBOARD),
+#         determine_tml_type(path=_const.DUMMY_LIVEBOARD).load(path=_const.DUMMY_LIVEBOARD),
+#     ]
+
+#     # anonymize the embedded LOGICAL_TABLEs
+#     for tml in tmls:
+#         for identity in _recursive_scan(tml, check=lambda x: isinstance(x, _scriptability.Identity)):
+#             identity.fqn = None
+
+#     with raises(Exception) as exc:
+#         import_sort_order(tmls)
+
+#     assert "No FQN found on:" in str(exc.raised)

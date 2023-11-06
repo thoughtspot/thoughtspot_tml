@@ -8,6 +8,10 @@ else:
     from typing import get_origin, get_args
     from typing import Literal, TypedDict
 
+if sys.version_info < (3, 9):
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 if sys.version_info < (3, 10):
     # https://bugs.python.org/issue40564#msg377884

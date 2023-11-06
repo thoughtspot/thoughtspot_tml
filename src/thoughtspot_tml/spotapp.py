@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Dict, List, Optional
 from typing import TYPE_CHECKING
+import pathlib
 import zipfile
 import json
 
@@ -11,14 +13,12 @@ from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboa
 from thoughtspot_tml import _yaml
 
 if TYPE_CHECKING:
-    from thoughtspot_tml.types import EDocExportResponse, TMLDocInfo
-    from thoughtspot_tml.types import TMLObject
-    from thoughtspot_tml.types import PathLike
+    from thoughtspot_tml.types import EDocExportResponses, TMLObject, TMLDocInfo, SpotAppInfo
 
 
 @dataclass
 class Manifest:
-    object: List["TMLDocInfo"]
+    object: List[TMLDocInfo]  # noqa: A003
 
 
 @dataclass
@@ -29,7 +29,7 @@ class SpotApp:
     This object is usually packaged together as a zip file.
     """
 
-    tml: List["TMLObject"]
+    tml: List[TMLObject]
     manifest: Optional[Manifest] = None
 
     @property
@@ -57,7 +57,7 @@ class SpotApp:
         return [tml for tml in self.tml if isinstance(tml, Liveboard)]
 
     @classmethod
-    def from_api(cls, payload: EDocExportResponse) -> SpotApp:
+    def from_api(cls, payload: EDocExportResponses) -> SpotApp:
         """
         Load the SpotApp from file.
 
@@ -69,30 +69,30 @@ class SpotApp:
         payload : EDocExportResponse
           metadata/tml/export response data to parse
         """
-        info = {"tml": [], "manifest": None}
-        manifest_data = {"object": []}
+        info: SpotAppInfo = {"tml": [], "manifest": None}
+        manifest_data: Dict[str, List[TMLDocInfo]] = {"object": []}
 
         for edoc_info in payload["object"]:
             tml_cls = determine_tml_type(info=edoc_info["info"])
             document = json.loads(edoc_info["edoc"])
             manifest_data["object"].append(edoc_info["info"])
             tml = tml_cls(**document)
-            info["tml"].append(tml)
+            info["tml"].append(tml)  # type: ignore[arg-type]
 
         info["manifest"] = Manifest(**manifest_data)
         return cls(**info)
 
     @classmethod
-    def read(cls, path: PathLike) -> SpotApp:
+    def read(cls, path: pathlib.Path) -> SpotApp:
         """
         Load the SpotApp from file.
 
         Parameters
         ----------
-        path : PathLike
+        path : pathlib.Path
           filepath to read the SpotApp from
         """
-        info = {"tml": [], "manifest": None}
+        info: SpotAppInfo = {"tml": [], "manifest": None}
 
         with zipfile.ZipFile(path, mode="r") as archive:
             for member in archive.infolist():
@@ -103,19 +103,19 @@ class SpotApp:
                     info["manifest"] = Manifest(**document)
                     continue
 
-                tml_cls = determine_tml_type(path=member.filename)
+                tml_cls = determine_tml_type(path=pathlib.Path(member.filename))
                 tml = tml_cls.load(path)
-                info["tml"].append(tml)
+                info["tml"].append(tml)  # type: ignore[arg-type]
 
         return cls(**info)
 
-    def save(self, path: PathLike) -> None:
+    def save(self, path: pathlib.Path) -> None:
         """
         Save the SpotApp to file.
 
         Parameters
         ----------
-        path : PathLike
+        path : pathlib.Path
           filepath to save the zip file to
         """
         with zipfile.ZipFile(path, mode="w") as archive:
