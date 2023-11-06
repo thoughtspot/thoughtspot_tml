@@ -56,44 +56,45 @@ def _clean_edoc_proto():
     #
     text = EDOC_PROTO.read_text()
 
-    # comment out unnecessary import
-    text = re.sub(r'^(?!// )(import "a3/monitor/public/monitor_rule.proto")', r"// \1", text, flags=re.M)
-
     # strip all comments except ones starting with `import`
     text = re.sub(r"//(?! import).*", r"", text)
 
     # replace missing protos with their local representation
-    RE_COMMON_PROTO = r'(import "common/common.proto")'
+    localized_import_info = [
+        {
+            "regex_import": "a3/monitor/public/monitor_rule.proto",
+            "regex_package": r"a3.metric_monitor\.",
+            "localized_cleansed": _proto_local.PROTO_MONITOR_SUPPLEMENTAL,
+        },
+        {
+            "regex_import": "atlas/public/metadata.proto",
+            "regex_package": r"atlas\.",
+            "localized_cleansed": _proto_local.PROTO_ATLAS_ACTION_CONTEXT,
+        },
+        {
+            "regex_import": "common/common.proto",
+            "regex_package": r"common\.(?!proto_validation)",
+            "localized_cleansed": _proto_local.PROTO_COMMON,
+        },
+        {
+            "regex_import": "protos/number_format.proto",
+            "regex_package": r"blink.numberFormatConfig\.",
+            "localized_cleansed": _proto_local.PROTO_NUMBER_FORMAT_CONFIG,
+        },
+    ]
 
-    if re.search(rf"^{RE_COMMON_PROTO}", text, flags=re.M):
-        text = re.sub(RE_COMMON_PROTO, r"// \1", text, flags=re.M)
-        text = re.sub(r"common\.(?!proto_validation)(.+) ", r"\1", text)
-        imports, package, rest = text.partition(EDOC_IMPORTS)
-        text = "\n".join([imports, package, _proto_local.PROTO_COMMON, rest])
+    for localized_import in localized_import_info:
+        re_import_statement = rf"""(import "{localized_import['regex_import']}")"""
 
-    # replace missing protos with their local representation
-    RE_NUMBER_FORMAT_PROTO = r'(import "protos/number_format.proto")'
-
-    if re.search(rf"^{RE_NUMBER_FORMAT_PROTO}", text, flags=re.M):
-        text = re.sub(RE_NUMBER_FORMAT_PROTO, r"// \1", text, flags=re.M)
-        text = re.sub(r"blink.numberFormatConfig\.(.+) ", r"\1", text)
-        imports, package, rest = text.partition(EDOC_IMPORTS)
-        text = "\n".join([imports, package, _proto_local.PROTO_NUMBER_FORMAT_CONFIG, rest])
+        if re.search(re_import_statement, text, flags=re.M):
+            text = re.sub(re_import_statement, r"// \1", text, flags=re.M)
+            text = re.sub(rf"{localized_import['regex_package']}(.+)", r"\1", text)
+            imports, package, rest = text.partition(EDOC_IMPORTS)
+            text = "\n".join([imports, package, localized_import["localized_cleansed"], rest])
 
     # comment out validations import and strip out all their annotations
-    text = re.sub(r'^(?!// )(import "common/proto_validation/annotation.proto")', r"// \1", text, flags=re.M)
-    text = re.sub(r" \[\(common.proto_validation.Annotation...*\]", r"", text)
-
-    # strip out useless stuff that exists only for internal validation or historical reasons
-    text = re.sub(r"(?<=destination.{4};\s)  .*on.*;(?=\n)", r"", text)  # black magic
-    # text = re.sub(r"(?<=j.{13}\s{4}).*col.*(?=\s})", r"", text)  # blue magic
-    text = re.sub(r"message ObjectPermissions {[\s\S]+?}", r"", text)
-    text = re.sub(r"message ObjectEDocProto {[\s\S]+?}", r"", text)
-    text = re.sub(r"message User {[\s\S]+?}", r"", text)
-    text = re.sub(r"message MonitorAlertEDocProto {[\s\S]+?}", r"", text)
-    text = re.sub(r"message Token {[\s\S]+?}", r"", text)
-    text = re.sub(r"^  .*(generation).*;$", r"", text, flags=re.M)
-    text = re.sub(r"^  .*(generic).*;$", r"", text, flags=re.M)
+    text = re.sub(r'(import "common/proto_validation/annotation.proto";)', r"// \1", text, flags=re.M)
+    text = re.sub(r" \[\s*?\(common.proto_validation.(.|\n)*?\]", r"", text, flags=re.M)
 
     EDOC_PROTO.write_text(text)
 
@@ -122,7 +123,7 @@ def _run_protoc():
     EDOC_PY.parent.with_name("__init__.py").unlink()
 
 
-def _clean_scriptability():
+def _clean_scriptability():  # noqa: C901
     # @boonhapus, 2022/11/19
     #
     # python-betterproto isn't perfect, but 2.0.0 is in beta and we only need it to
