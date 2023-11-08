@@ -179,7 +179,7 @@ class TML:
             path = pathlib.Path(path)
 
         try:
-            instance = cls.loads(path.read_text())
+            instance = cls.loads(path.read_text(encoding="utf-8"))
         except TMLDecodeError as e:
             e.path = path
             raise e from None
@@ -232,4 +232,4 @@ class TML:
             )
 
         document = self.dumps(format_type="JSON" if ".json" in path.suffix.lower() else "YAML")
-        path.write_text(document)
+        path.write_text(document, encoding="utf-8")
