@@ -2,12 +2,6 @@
 requires = ["setuptools>=42", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools_scm]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["_generate*"]
-
 [project]
 name = "thoughtspot_tml"
 dynamic = ["version"]
@@ -74,10 +68,12 @@ dev = [
 # [project.scripts]
 # tml = "thoughtspot_tml.cli.main:run"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["_generate*"]
+
 [tool.setuptools.dynamic]
 version = {attr = "thoughtspot_tml._version.__version__"}
-
-[tool.setuptools_scm]
 
 [tool.black]
 line-length = 120
