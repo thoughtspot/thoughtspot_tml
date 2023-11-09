@@ -77,6 +77,8 @@ dev = [
 [tool.setuptools.dynamic]
 version = {attr = "thoughtspot_tml._version.__version__"}
 
+[tool.setuptools_scm]
+
 [tool.black]
 line-length = 120
 exclude = '''
