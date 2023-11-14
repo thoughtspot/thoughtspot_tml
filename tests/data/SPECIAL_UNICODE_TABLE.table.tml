@@ -1,0 +1,73 @@
+guid: 5867a8d5-e90c-4751-ba57-24df697c25e7
+table:
+  name: dim_rb_accounts 🐢
+  description: The full list of accounts for customers. 🐜
+  db: RETAIL_BANKING_V1_1
+  schema: PUBLIC
+  db_table: dim_rb_accounts
+  connection:
+    name: Retail Banking - Export
+  columns:
+  - name: account_id
+    db_column_name: account_id
+    properties:
+      column_type: ATTRIBUTE
+    db_column_properties:
+      data_type: VARCHAR
+  - name: customer_id
+    db_column_name: customer_id
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+    db_column_properties:
+      data_type: INT64
+  - name: account_type_updated
+    db_column_name: account_type
+    properties:
+      column_type: ATTRIBUTE
+    db_column_properties:
+      data_type: VARCHAR
+  - name: balance
+    description: customer account balance
+    db_column_name: balance
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+    db_column_properties:
+      data_type: DOUBLE
+  - name: opendate
+    description: date the account was opened
+    db_column_name: opendate
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+    db_column_properties:
+      data_type: DATE
+  - name: closedate
+    db_column_name: closedate
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+    db_column_properties:
+      data_type: DATE
+  rls_rules:
+    tables:
+    - name: dim_rb_accounts
+    table_paths:
+    - id: dim_rb_accounts_1
+      table: dim_rb_accounts
+      join_path:
+      - {}
+      column:
+      - account_type_updated
+    rules:
+    - name: account type RLS
+      expr: "[dim_rb_accounts_1::account_type_updated] = ts_groups"
+  joins_with:
+  - name: dim_customers
+    destination:
+      name: dim_rb_customers
+    "on": "[dim_rb_accounts::customer_id] = [dim_rb_customers::customer_id]"
+    type: INNER
