@@ -13,6 +13,18 @@ from thoughtspot_tml.tml import Table as SystemTable
 
 
 __all__ = (
-    "__version__", "Connection", "Table", "View", "SQLView", "Worksheet", "Answer", "Liveboard", "Pinboard", "SpotApp",
-    "EmbraceConnection", "ThoughtSpotView", "SavedAnswer", "SystemTable",
+    "__version__",
+    "Connection",
+    "Table",
+    "View",
+    "SQLView",
+    "Worksheet",
+    "Answer",
+    "Liveboard",
+    "Pinboard",
+    "SpotApp",
+    "EmbraceConnection",
+    "ThoughtSpotView",
+    "SavedAnswer",
+    "SystemTable",
 )
