@@ -71,7 +71,8 @@ class Connection(_tml.TML):
         # external_databases are nested dict of list of dict.. database -> schema -> table -> columns
         # if we sort first, we can guarantee the insertion order with simple iteration
         for table in sorted(
-            self.connection.table, key=lambda t: (t.external_table.db_name, t.external_table.schema_name),
+            self.connection.table,
+            key=lambda t: (t.external_table.db_name, t.external_table.schema_name),
         ):
             # if it's a new schema, append it this database's schema and reset
             if table.external_table.schema_name != this_schema["name"]:
