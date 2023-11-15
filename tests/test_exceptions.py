@@ -7,7 +7,6 @@ from . import _const
 
 @test("TMLDecodeError on text input")
 def _():
-
     with raises(TMLDecodeError) as exc:
         Answer.loads(tml_document="😅: INVALID")
 

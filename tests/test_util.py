@@ -3,7 +3,7 @@ import json
 from thoughtspot_tml.exceptions import TMLError
 from thoughtspot_tml.types import GUID
 from thoughtspot_tml.utils import determine_tml_type, disambiguate, EnvironmentGUIDMapper
-from thoughtspot_tml.utils import _recursive_scan #, _import_sort_order
+from thoughtspot_tml.utils import _recursive_scan  # , _import_sort_order
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
@@ -42,7 +42,6 @@ def _():
 
 @test("object utility requires one of: 'info' or 'path'")
 def _():
-
     with raises(TypeError) as exc:
         determine_tml_type()
 
@@ -166,6 +165,7 @@ for file, replace_type, to_replace, n_replacements, tml_cls in (
         assert len(identities) >= n_replacements
         assert len([i for i in identities if i.fqn == FAKE_GUID]) == n_replacements
 
+
 @test("return a mapping iterator for two environements")
 def _():
     mapper = EnvironmentGUIDMapper(str.upper)
@@ -186,9 +186,9 @@ def _():
         mapper[source_guid] = ("dest", dest_guid)
 
     mappings = mapper.generate_mapping("source", "dest")
-    assert(len(mappings) == 8)
+    assert len(mappings) == 8
     for g1, g2 in mappings.items():
-        assert(g2 == guid_to_guid_mappings[g1])
+        assert g2 == guid_to_guid_mappings[g1]
 
 
 # @test("raise on ambiguous TML input")
