@@ -97,8 +97,12 @@ def _recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(v, list):
             v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
 
-        # if v is an empty collection, discard it
-        if v is None or (isinstance(v, Collection) and not isinstance(v, str) and not v):  # pragma: peephole optimizer
+        # if v is empty
+        is_none = v is None
+        is_empty_string = v == ""
+        is_empty_collection = isinstance(v, Collection) and not v
+
+        if is_none or is_empty_string or is_empty_collection:  # pragma: peephole optimizer
             continue
 
         new[k] = v
