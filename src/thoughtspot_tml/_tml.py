@@ -91,7 +91,6 @@ def _recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
     new = {}
 
     for k, v in mapping.items():
-
         if isinstance(v, dict):
             v = _recursive_remove_null(v)
 
