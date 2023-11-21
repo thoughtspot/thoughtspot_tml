@@ -91,16 +91,24 @@ def _recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
     new = {}
 
     for k, v in mapping.items():
+
         if isinstance(v, dict):
             v = _recursive_remove_null(v)
 
         if isinstance(v, list):
             v = [_recursive_remove_null(e) if isinstance(e, dict) else e for e in v if e is not None]
 
-        # if v is empty
+        # EXCEPTION:
+        # - don't remove connection.yaml empty password
+        # - historical client_state attribute
+        if k in ("value", "client_state") and v == "":
+            new[k] = v
+            continue
+
+        # If v is any form of EMPTY
         is_none = v is None
         is_empty_string = v == ""
-        is_empty_collection = isinstance(v, Collection) and not v
+        is_empty_collection = isinstance(v, Collection) and not isinstance(v, str) and not v
 
         if is_none or is_empty_string or is_empty_collection:  # pragma: peephole optimizer
             continue
