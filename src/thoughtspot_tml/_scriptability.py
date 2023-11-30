@@ -259,7 +259,7 @@ class ColumnPropertiesGeoConfigProto(betterproto.Message):
     country: bool = betterproto.bool_field(3, optional=True)
     region_name: "ColumnPropertiesGeoConfigProtoSubRegion" = betterproto.message_field(4, optional=True)
     custom_file_guid: str = betterproto.string_field(5, optional=True)
-    geometry_type: "GeometryTypeEnumProtoE" = betterproto.enum_field(6, optional=True)
+    geometryType: "GeometryTypeEnumProtoE" = betterproto.enum_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
