@@ -1,0 +1,567 @@
+guid: 42f53bba-a939-46bb-951e-a721aba53640
+worksheet:
+  name: Interactions Worksheet
+  tables:
+  - name: PARCOURS
+  - name: HCP_THOUGHTSPOT
+  - name: INTERACTION_THOUGHTSPOT
+  - name: QUALIFICATION_THOUGHTSPOT
+  joins:
+  - name: HCP_THOUGHTSPOT_to_OmniData_HCP_parcour
+    source: PARCOURS
+    destination: HCP_THOUGHTSPOT
+    type: INNER
+    is_one_to_one: false
+  - name: HCP Interactions
+    source: HCP_THOUGHTSPOT
+    destination: INTERACTION_THOUGHTSPOT
+    type: INNER
+    is_one_to_one: false
+  - name: QUALIFICATION_THOUGHTSPOT_to_HCP_THOUGHTSPOT
+    source: QUALIFICATION_THOUGHTSPOT
+    destination: HCP_THOUGHTSPOT
+    type: INNER
+    is_one_to_one: false
+  table_paths:
+  - id: PARCOURS_1
+    table: PARCOURS
+    join_path:
+    - {}
+  - id: HCP_THOUGHTSPOT_1
+    table: HCP_THOUGHTSPOT
+    join_path:
+    - join:
+      - QUALIFICATION_THOUGHTSPOT_to_HCP_THOUGHTSPOT
+    - join:
+      - HCP_THOUGHTSPOT_to_OmniData_HCP_parcour
+  - id: INTERACTION_THOUGHTSPOT_1
+    table: INTERACTION_THOUGHTSPOT
+    join_path:
+    - join:
+      - HCP_THOUGHTSPOT_to_OmniData_HCP_parcour
+      - HCP Interactions
+    - join:
+      - QUALIFICATION_THOUGHTSPOT_to_HCP_THOUGHTSPOT
+      - HCP Interactions
+  - id: QUALIFICATION_THOUGHTSPOT_1
+    table: QUALIFICATION_THOUGHTSPOT
+    join_path:
+    - {}
+  formulas:
+  - name: '# of HCP with digital interaction'
+    expr: "unique_count_if ( [INTERACTION_THOUGHTSPOT_1::DIGITAL_OR_PHYSICAL] = 'digital' , [HCP_THOUGHTSPOT_1::SFDC_ACCOUNT_ID] )"
+    was_auto_generated: false
+  - name: '# of HCP with physical interaction'
+    expr: "unique_count_if ( [INTERACTION_THOUGHTSPOT_1::DIGITAL_OR_PHYSICAL] = 'physical' , [HCP_THOUGHTSPOT_1::SFDC_ACCOUNT_ID] )"
+    was_auto_generated: false
+  - name: Full_Name
+    expr: "concat ( [HCP_THOUGHTSPOT_1::FIRST_NAME] , \" \" , [HCP_THOUGHTSPOT_1::LAST_NAME] )"
+    was_auto_generated: false
+  - name: HasEmail
+    expr: "count_if ( not isnull ( [HCP_THOUGHTSPOT_1::EMAIL_ADDRESS] ) , 1 )"
+    was_auto_generated: false
+  - name: HasRegisteredToHCPPortal
+    expr: "count_if ( [HCP_THOUGHTSPOT_1::REGISTERED_TO_HCP_PORTAL] = 1 , 1 )"
+    was_auto_generated: false
+  - name: Last Interaction Date
+    expr: "max ( [INTERACTION_THOUGHTSPOT_1::INTERACTION_DATE] )"
+    was_auto_generated: false
+  - name: Nb of interactions per HCP
+    expr: "[Interaction #] / [HCP #]"
+    was_auto_generated: false
+  - name: "HCP #"
+    expr: "unique count ( [HCP_THOUGHTSPOT_1::SFDC_ACCOUNT_ID] )"
+    was_auto_generated: false
+  - name: "Interaction #"
+    expr: "unique count ( [INTERACTION_THOUGHTSPOT_1::INTERACTION_ID] )"
+    was_auto_generated: false
+  worksheet_columns:
+  - name: UCI_CODE
+    column_id: HCP_THOUGHTSPOT_1::UCI_CODE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - UCI
+      value_casing: UNKNOWN
+  - name: LAST_NAME
+    column_id: HCP_THOUGHTSPOT_1::LAST_NAME
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - LastName
+      value_casing: UNKNOWN
+  - name: FIRST_NAME
+    column_id: HCP_THOUGHTSPOT_1::FIRST_NAME
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - FirstName
+      value_casing: UNKNOWN
+  - name: MAIN_SPECIALTY
+    column_id: HCP_THOUGHTSPOT_1::MAIN_SPECIALTY
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Specialty
+      value_casing: UNKNOWN
+  - name: EMAIL_ADDRESS
+    column_id: HCP_THOUGHTSPOT_1::EMAIL_ADDRESS
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - eMailAddress
+      value_casing: UNKNOWN
+  - name: PRIVATE_EMAIL_ADDRESS
+    column_id: HCP_THOUGHTSPOT_1::PRIVATE_EMAIL_ADDRESS
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - PrivateeMailAddress
+      value_casing: UNKNOWN
+  - name: REGISTERED_TO_HCP_PORTAL
+    column_id: HCP_THOUGHTSPOT_1::REGISTERED_TO_HCP_PORTAL
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - RochePro
+      value_casing: UNKNOWN
+  - name: RELATIONAL_OPT_IN
+    column_id: HCP_THOUGHTSPOT_1::RELATIONAL_OPT_IN
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - RelationalOptIn
+      value_casing: UNKNOWN
+  - name: PROMOTIONAL_OPT_IN
+    column_id: HCP_THOUGHTSPOT_1::PROMOTIONAL_OPT_IN
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - PromotionalOptIn
+      value_casing: UNKNOWN
+  - name: REGISTRATION_DATE
+    column_id: HCP_THOUGHTSPOT_1::REGISTRATION_DATE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - RegistrationDate
+      calendar: calendar
+      value_casing: UNKNOWN
+  - name: EMAIL_CREATION_DATE
+    column_id: HCP_THOUGHTSPOT_1::EMAIL_CREATION_DATE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - eMailCreationDate
+      calendar: calendar
+      value_casing: UNKNOWN
+  - name: PARENT_ACCOUNT_NAME
+    column_id: HCP_THOUGHTSPOT_1::PARENT_ACCOUNT_NAME
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - ParentAccount
+      value_casing: UNKNOWN
+  - name: SFDC_ACCOUNT_ID
+    column_id: HCP_THOUGHTSPOT_1::SFDC_ACCOUNT_ID
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - SFDCAccountId
+      value_casing: UNKNOWN
+  - name: PRODUCT_INDICATION_QUALIFICATION
+    column_id: QUALIFICATION_THOUGHTSPOT_1::PRODUCT_INDICATION
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - ProductIndicationQualification
+      value_casing: UNKNOWN
+  - name: TYPOLOGY
+    column_id: QUALIFICATION_THOUGHTSPOT_1::TYPOLOGY
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Typology
+      value_casing: UNKNOWN
+  - name: QUALIFICATION_YEAR
+    column_id: QUALIFICATION_THOUGHTSPOT_1::QUALIFICATION_YEAR
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - QualificationYear
+      value_casing: UNKNOWN
+  - name: PROFILING
+    column_id: QUALIFICATION_THOUGHTSPOT_1::PROFILING
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Profiling
+      value_casing: UNKNOWN
+  - name: INFORMED
+    column_id: HCP_THOUGHTSPOT_1::INFORMED
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: AGE
+    column_id: HCP_THOUGHTSPOT_1::AGE
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      synonyms:
+      - Years
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: ZIP_CODE
+    column_id: HCP_THOUGHTSPOT_1::ZIP_CODE
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: FRANCE
+      value_casing: UNKNOWN
+  - name: DEPARTMENT
+    column_id: HCP_THOUGHTSPOT_1::DEPARTMENT
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        region_name:
+          country: FRANCE
+          region_name: department
+      value_casing: UNKNOWN
+  - name: CITY
+    column_id: HCP_THOUGHTSPOT_1::CITY
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: PRIMARY_ADDRESS
+    column_id: HCP_THOUGHTSPOT_1::PRIMARY_ADDRESS
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: HCP SPECIALTY 2
+    column_id: HCP_THOUGHTSPOT_1::HCP_SPECIALTY_2
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Specialty 2
+      - Specialization 2
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: SERVICE NAME
+    column_id: HCP_THOUGHTSPOT_1::SERVICE_NAME
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Service
+      - Service Title
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: HCP SPECIALTY 3
+    column_id: HCP_THOUGHTSPOT_1::HCP_SPECIALTY_3
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: HCP FONCTION
+    column_id: HCP_THOUGHTSPOT_1::HCP_FONCTION
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: HCP MODE EXERCICE
+    column_id: HCP_THOUGHTSPOT_1::HCP_MODE_EXERCICE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Exercise Mode
+      - Mode of Exercise
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: ONK ID
+    column_id: HCP_THOUGHTSPOT_1::ONK_ID
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: ACCOUNT ID
+    column_id: HCP_THOUGHTSPOT_1::ACCOUNT_ID
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: Parcours
+    column_id: PARCOURS_1::parcours
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Course
+      - Path
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: Tae Indication Local
+    column_id: PARCOURS_1::tae_indication_local
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: Tae Product Local
+    column_id: PARCOURS_1::tae_product_local
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Product Local
+      - Local Product
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: QualificationLastmodifieddate
+    column_id: QUALIFICATION_THOUGHTSPOT_1::lastmodifieddate
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      calendar: calendar
+      value_casing: UNKNOWN
+  - name: QualificationLastmodifiedby
+    column_id: QUALIFICATION_THOUGHTSPOT_1::lastmodifiedby
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: Profil Attitudinal Value
+    column_id: HCP_THOUGHTSPOT_1::profil_attitudinal_value
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: Brick
+    column_id: HCP_THOUGHTSPOT_1::BRICK
+    properties:
+      column_type: ATTRIBUTE
+      geo_config:
+        custom_file_guid: f90de5e1-ae69-44aa-9951-f8e1faba0ad4
+        geometryType: POLYGON
+      value_casing: UNKNOWN
+  - name: INTERACTION_ID
+    column_id: INTERACTION_THOUGHTSPOT_1::INTERACTION_ID
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: ORGANIZATION
+    column_id: INTERACTION_THOUGHTSPOT_1::ORGANIZATION
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Organisation
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: TYPE
+    column_id: INTERACTION_THOUGHTSPOT_1::TYPE
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: SUB_TYPE
+    column_id: INTERACTION_THOUGHTSPOT_1::SUB_TYPE
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: DIGITAL_OR_PHYSICAL
+    column_id: INTERACTION_THOUGHTSPOT_1::DIGITAL_OR_PHYSICAL
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: CONTRACT_START_DATE
+    column_id: INTERACTION_THOUGHTSPOT_1::CONTRACT_START_DATE
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Contract Date
+      - Contract Start
+      calendar: calendar
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: INTERACTION_DATE
+    column_id: INTERACTION_THOUGHTSPOT_1::INTERACTION_DATE
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      calendar: calendar
+      value_casing: UNKNOWN
+  - name: EMAIL_SEND_TYPE
+    column_id: INTERACTION_THOUGHTSPOT_1::EMAIL_SEND_TYPE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Send Type
+      - Email Sending Type
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: EMAIL_TYPE
+    column_id: INTERACTION_THOUGHTSPOT_1::EMAIL_TYPE
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Email Kind
+      - Email Classification
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: THERAPEUTIC_AREA
+    column_id: INTERACTION_THOUGHTSPOT_1::THERAPEUTIC_AREA
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Therapeutic Area
+      - Therapy Area
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: PRODUCT_INDICATION
+    column_id: INTERACTION_THOUGHTSPOT_1::PRODUCT_INDICATION
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: EMAIL_DELIVERED
+    column_id: INTERACTION_THOUGHTSPOT_1::EMAIL_DELIVERED
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Delivered
+      - Sent
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: EMAIL_OPENED
+    column_id: INTERACTION_THOUGHTSPOT_1::EMAIL_OPENED
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Opened
+      - Viewed
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: EMAIL_CLICKED
+    column_id: INTERACTION_THOUGHTSPOT_1::EMAIL_CLICKED
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Clicked
+      - Tapped
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: TYPE_OF_INTERACTION
+    column_id: INTERACTION_THOUGHTSPOT_1::TYPE_OF_INTERACTION
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Interaction Type
+      - Type of Interaction
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: TYPE_OF_INTERACTION_2
+    column_id: INTERACTION_THOUGHTSPOT_1::TYPE_OF_INTERACTION_2
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: TYPE_OF_INTERACTION_3
+    column_id: INTERACTION_THOUGHTSPOT_1::TYPE_OF_INTERACTION_3
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: TERRITORY_NAME
+    column_id: INTERACTION_THOUGHTSPOT_1::TERRITORY_NAME
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: INTERACTION_METHOD
+    column_id: INTERACTION_THOUGHTSPOT_1::INTERACTION_METHOD
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Interaction Method
+      - Interaction Mode
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: EVENT_NAME
+    column_id: INTERACTION_THOUGHTSPOT_1::EVENT_NAME
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Event
+      - Event Name
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: EVENT_ID
+    column_id: INTERACTION_THOUGHTSPOT_1::EVENT_ID
+    properties:
+      column_type: ATTRIBUTE
+      value_casing: UNKNOWN
+  - name: Activity Reason
+    column_id: INTERACTION_THOUGHTSPOT_1::activity_reason
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Reason
+      - Activity Rationale
+      synonym_type: AUTO_GENERATED
+      value_casing: UNKNOWN
+  - name: '# of HCP with digital interaction'
+    formula_id: '# of HCP with digital interaction'
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: '# of HCP with physical interaction'
+    formula_id: '# of HCP with physical interaction'
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: Full_Name
+    formula_id: Full_Name
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: HasEmail
+    formula_id: HasEmail
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: HasRegisteredToHCPPortal
+    formula_id: HasRegisteredToHCPPortal
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: Last Interaction Date
+    formula_id: Last Interaction Date
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      calendar: calendar
+      value_casing: UNKNOWN
+  - name: "HCP #"
+    formula_id: "HCP #"
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: "Interaction #"
+    formula_id: "Interaction #"
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  - name: Nb of interactions per HCP
+    formula_id: Nb of interactions per HCP
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      value_casing: UNKNOWN
+  properties:
+    is_bypass_rls: false
+    join_progressive: true
