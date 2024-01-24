@@ -294,6 +294,7 @@ class Parameter(betterproto.Message):
     range_config: "ParameterRangeConfig" = betterproto.message_field(7, group="value_restrictions", optional=True)
     sap_parameter_name: str = betterproto.string_field(8, optional=True)
     linked_parameters: List[str] = betterproto.string_field(9, optional=True)
+    description: str = betterproto.string_field(10, optional=True)
 
 
 @dataclass(eq=False, repr=False)
