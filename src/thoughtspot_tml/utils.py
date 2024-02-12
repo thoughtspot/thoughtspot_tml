@@ -84,7 +84,8 @@ def determine_tml_type(
         path = pathlib.Path(path)
 
         if path.name.endswith(".tml"):
-            tml_type, _, _ = ".".join(_[1:] for _ in path.suffixes).partition(".")
+            name_and_type_suffix, _, _ = path.name.rpartition(".tml")
+            _, _, tml_type = name_and_type_suffix.rpartition(".")
         elif path.name.lower() == "connection.yaml":
             tml_type = "connection"
         else:
