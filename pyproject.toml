@@ -7,7 +7,7 @@ name = "thoughtspot_tml"
 dynamic = ["version"]
 description = "Library for manipulating ThoughtSpot Modeling Language (TML) files"
 readme = "README.md"
-requires-python = ">=3.7 , < 3.12"
+requires-python = ">=3.7 , < 3.13"
 license = {file = "LICENSE"}
 authors = [
     {name = "Bryant Howell", email = "bryant.howell@thoughtspot.com"},
@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 dependencies = [
