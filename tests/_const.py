@@ -1,9 +1,9 @@
 import pathlib
 
 # fmt: off
-TESTS_DIR = pathlib.Path(__file__).parent
-DATA_DIR  = pathlib.Path(__file__).parent / "data"
-TEMP_DIR  = pathlib.Path(__file__).parent / "data" / "_temp"
+TESTS_DIR = pathlib.Path(__file__).resolve().parent
+DATA_DIR  = pathlib.Path(__file__).resolve().parent / "data"
+TEMP_DIR  = pathlib.Path(__file__).resolve().parent / "data" / "_temp"
 # fmt: on
 
 DUMMY_CONNECTION = DATA_DIR / "DUMMY.connection.tml"
