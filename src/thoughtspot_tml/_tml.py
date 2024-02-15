@@ -137,12 +137,12 @@ class TML:
     @classmethod
     def _loads(cls, tml_document: str) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
-        #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
+        #   These exist to handle backwards compatible changes between TML versions.
         return _yaml.load(tml_document)
 
     def _to_dict(self) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
-        #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
+        #   These exist to handle backwards compatible changes between TML versions.
         return asdict(self)
 
     @classmethod

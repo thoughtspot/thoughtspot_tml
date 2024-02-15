@@ -28,7 +28,11 @@ class Connection(_tml.TML):
 
     @classmethod
     def _loads(cls, tml_document):
+        # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
 
         if "guid" not in document:
             document = {"guid": None, "connection": document}
@@ -37,10 +41,14 @@ class Connection(_tml.TML):
 
     @classmethod
     def load(cls, path):
+        # Handle backwards incompatible changes.
         instance = super().load(path)
 
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
+
         try:
-            name, dot, ext = path.name.partition(".")
+            name, _, ext = path.name.partition(".")
             instance.guid = str(uuid.UUID(name, version=4))
         except ValueError:
             pass
@@ -48,6 +56,11 @@ class Connection(_tml.TML):
         return instance
 
     def _to_dict(self):
+        # Handle backwards incompatible changes.
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
+
         data = asdict(self)
         return data["connection"]
 
@@ -242,6 +255,7 @@ class Liveboard(_tml.TML):
 
     @classmethod
     def _loads(cls, tml_document):
+        # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
 
         # @boonhapus, 2022/11/25
