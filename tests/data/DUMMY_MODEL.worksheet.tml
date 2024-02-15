@@ -1,0 +1,151 @@
+guid: 5cb2b688-8531-45a4-9efb-35dbd2104a84
+worksheet:
+  name: Sales Model
+  description: Retails sales as a model.
+  schema:
+    tables:
+    - name: DIM_RETAPP_PRODUCTS
+      alias: PRODUCTS
+    - name: DIM_RETAPP_STORES
+      alias: STORES
+    - name: FACT_RETAPP_SALES
+      alias: SALES
+      joins:
+      - with: PRODUCTS
+        "on": "[FACT_RETAPP_SALES::Product ID] = [DIM_RETAPP_PRODUCTS::Product ID]"
+        type: RIGHT_OUTER
+        cardinality: MANY_TO_ONE
+      - with: STORES
+        "on": "[FACT_RETAPP_SALES::Store ID] = [DIM_RETAPP_STORES::Store ID]"
+        type: RIGHT_OUTER
+        cardinality: MANY_TO_ONE
+  formulas:
+  - id: Sales with tax
+    name: Sales with tax
+    expr: "( 1 + [Tax Rate] ) * [SALES::Sales Amount] "
+  worksheet_columns:
+  - name: Product Name
+    column_id: PRODUCTS::Product Name
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Item Name
+      - Goods Name
+      synonym_type: AUTO_GENERATED
+  - name: Product Type
+    column_id: PRODUCTS::Product Type
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Product Category
+      - Product Group
+      synonym_type: AUTO_GENERATED
+  - name: Item Price
+    column_id: SALES::Item Price
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Unit Price
+      - Unit Cost
+      currency_type:
+        iso_code: USD
+      synonym_type: AUTO_GENERATED
+  - name: Quantity Purchased
+    column_id: SALES::Quantity Purchased
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Quantity Bought
+      - Quantity Ordered
+      synonym_type: AUTO_GENERATED
+  - name: Sales Amount
+    column_id: SALES::Sales Amount
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Transaction Amount
+      - Purchase Amount
+      currency_type:
+        iso_code: USD
+      synonym_type: AUTO_GENERATED
+  - name: Sales Date
+    column_id: SALES::Sales Date
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Transaction Date
+      - Purchase Date
+      synonym_type: AUTO_GENERATED
+  - name: City
+    column_id: STORES::City
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Town
+      - Municipality
+      synonym_type: AUTO_GENERATED
+  - name: Region
+    column_id: STORES::Region
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Area
+      - Zone
+      synonym_type: AUTO_GENERATED
+  - name: State
+    column_id: STORES::State
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Province
+      - Territory
+      synonym_type: AUTO_GENERATED
+  - name: Store Name
+    column_id: STORES::Store Name
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Outlet Name
+      - Retailer Name
+      synonym_type: AUTO_GENERATED
+  - name: Zip Code
+    column_id: STORES::Zip Code
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+      synonyms:
+      - Postal Code
+      - Postal Index
+      synonym_type: AUTO_GENERATED
+  - name: Sales with tax
+    formula_id: Sales with tax
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+      synonyms:
+      - Transaction with Tax
+      - Purchase with Tax
+      synonym_type: AUTO_GENERATED
+  properties:
+    is_bypass_rls: false
+    join_progressive: true
+  parameters:
+  - id: cbcbf424-3b2d-402f-a372-32164674e162
+    name: Tax Rate
+    data_type: DOUBLE
+    default_value: "0.0"
+    description: Sales tax rate to add to the cost.
