@@ -2,21 +2,19 @@ from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
 from typing import TYPE_CHECKING
-import warnings
+import json
 import logging
 import pathlib
-import json
+import warnings
 
-from thoughtspot_tml.exceptions import TMLError, TMLDisambiguationError, MissingGUIDMappedValueWarning
-from thoughtspot_tml.tml import Connection
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
-from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
-from thoughtspot_tml import _scriptability, _compat
+from thoughtspot_tml import _compat, _scriptability
+from thoughtspot_tml.exceptions import MissingGUIDMappedValueWarning, TMLDisambiguationError, TMLError
+from thoughtspot_tml.tml import Answer, Connection, Liveboard, Pinboard, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Set, Tuple, Union, Optional, Type, Iterator
+    from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Type, Union
 
-    from thoughtspot_tml.types import GUID, TMLObject, TMLDocInfo
+    from thoughtspot_tml.types import GUID, TMLDocInfo, TMLObject
 
 
 _UNDEFINED = object()
@@ -192,7 +190,7 @@ class EnvironmentGUIDMapper:
     def __contains__(self, guid: GUID) -> bool:
         return bool(self.get(guid, default=False))
 
-    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:  # noqa: A003
+    def set(self, src_guid: GUID, *, environment: str, guid: GUID) -> None:
         """
         Insert a new GUID into the mapping.
 

@@ -1,16 +1,22 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from typing import TYPE_CHECKING
+from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING, Any, Dict
 import copy
+import json
 import uuid
 
-from thoughtspot_tml import _tml, _scriptability, _yaml
+from thoughtspot_tml import _scriptability, _tml, _yaml
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
+    from thoughtspot_tml.types import (
+        GUID,
+        ConnectionMetadata,
+        ExternalDatabase,
+        ExternalSchema,
+    )
 
 
 @dataclass
@@ -74,7 +80,11 @@ class Connection(_tml.TML):
             "configuration": {kv.key: kv.value for kv in self.connection.properties},
             "externalDatabases": [],
         }
-        this_database: ExternalDatabase = {"name": None, "isAutoCreated": False, "schemas": []}
+        this_database: ExternalDatabase = {
+            "name": None,
+            "isAutoCreated": False,
+            "schemas": [],
+        }
         this_schema: ExternalSchema = {"name": None, "tables": []}
 
         # this connection has 0 tables (very popular "initial state" structure TS 9.0.0+)
