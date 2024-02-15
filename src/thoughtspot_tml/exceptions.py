@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 import dataclasses
-
-from typing import Any, Dict, Optional, Type
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
 
-    from thoughtspot_tml.types import TMLObject, GUID
     from yaml import error
+
+    from thoughtspot_tml.types import GUID, TMLObject
 
 
 class TMLError(Exception):

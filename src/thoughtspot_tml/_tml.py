@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 from collections.abc import Collection
-from typing import TYPE_CHECKING
 from dataclasses import asdict, dataclass, fields, is_dataclass
-import warnings
-import pathlib
-import typing
+from typing import TYPE_CHECKING
 import json
+import pathlib
 import re
+import typing
+import warnings
 
 import yaml
 
-from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
-from thoughtspot_tml._compat import get_origin, get_args
 from thoughtspot_tml import _scriptability, _yaml
+from thoughtspot_tml._compat import get_args, get_origin
+from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 
 if TYPE_CHECKING:
     from typing import Any, Dict
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
-def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:  # noqa: C901
+def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
     """
     Convert all fields of type `dataclass` into an instance of the
     specified dataclass if the current value is a dict.
@@ -137,12 +137,12 @@ class TML:
     @classmethod
     def _loads(cls, tml_document: str) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
-        #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
+        #   These exist to handle backwards compatible changes between TML versions.
         return _yaml.load(tml_document)
 
     def _to_dict(self) -> Dict[str, Any]:
         # @boonhapus note: do not override this!!
-        #   ONLY exists to enable a TML interface over Connections and fix SCAL-134095
+        #   These exist to handle backwards compatible changes between TML versions.
         return asdict(self)
 
     @classmethod

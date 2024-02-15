@@ -1,16 +1,22 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from typing import TYPE_CHECKING
+from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING, Any, Dict
 import copy
+import json
 import uuid
 
-from thoughtspot_tml import _tml, _scriptability, _yaml
+from thoughtspot_tml import _scriptability, _tml, _yaml
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from thoughtspot_tml.types import ConnectionMetadata, ExternalDatabase, ExternalSchema, GUID
+    from thoughtspot_tml.types import (
+        GUID,
+        ConnectionMetadata,
+        ExternalDatabase,
+        ExternalSchema,
+    )
 
 
 @dataclass
@@ -28,7 +34,11 @@ class Connection(_tml.TML):
 
     @classmethod
     def _loads(cls, tml_document):
+        # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
 
         if "guid" not in document:
             document = {"guid": None, "connection": document}
@@ -37,10 +47,14 @@ class Connection(_tml.TML):
 
     @classmethod
     def load(cls, path):
+        # Handle backwards incompatible changes.
         instance = super().load(path)
 
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
+
         try:
-            name, dot, ext = path.name.partition(".")
+            name, _, ext = path.name.partition(".")
             instance.guid = str(uuid.UUID(name, version=4))
         except ValueError:
             pass
@@ -48,6 +62,11 @@ class Connection(_tml.TML):
         return instance
 
     def _to_dict(self):
+        # Handle backwards incompatible changes.
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # Connections do not offer a TML component, so we'll fake it.
+
         data = asdict(self)
         return data["connection"]
 
@@ -61,7 +80,11 @@ class Connection(_tml.TML):
             "configuration": {kv.key: kv.value for kv in self.connection.properties},
             "externalDatabases": [],
         }
-        this_database: ExternalDatabase = {"name": None, "isAutoCreated": False, "schemas": []}
+        this_database: ExternalDatabase = {
+            "name": None,
+            "isAutoCreated": False,
+            "schemas": [],
+        }
         this_schema: ExternalSchema = {"name": None, "tables": []}
 
         # this connection has 0 tables (very popular "initial state" structure TS 9.0.0+)
@@ -176,6 +199,42 @@ class Worksheet(_tml.TML):
     def name(self) -> str:
         return self.worksheet.name
 
+    @property
+    def is_model(self) -> bool:
+        """
+        Determines if the TML object is the newer Worksheet, a Model.
+
+        Further reading:
+          https://docs.thoughtspot.com/cloud/latest/models
+        """
+        return self.worksheet.schema is not None
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> Dict[str, Any]:
+        # Handle backwards incompatible changes.
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # The Worksheet V2 update include a python reserved word in the spec, which
+        # python-betterproto automatically adds a trailing sunder to. This reverses it.
+        if "with:" in tml_document:
+            tml_document = tml_document.replace("- with:", "- with_:")
+
+        return _yaml.load(tml_document)
+
+    def _to_dict(self) -> Dict[str, Any]:
+        # Handle backwards incompatible changes.
+        data = asdict(self)
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # The Worksheet V2 update include a python reserved word in the spec, which
+        # python-betterproto automatically adds a trailing sunder to. This reverses it.
+        if self.is_model:
+            text = json.dumps(data)
+            text = text.replace('"with_"', '"with"')
+            data = json.loads(text)
+
+        return data
+
 
 @dataclass
 class Answer(_tml.TML):
@@ -206,6 +265,7 @@ class Liveboard(_tml.TML):
 
     @classmethod
     def _loads(cls, tml_document):
+        # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
 
         # @boonhapus, 2022/11/25

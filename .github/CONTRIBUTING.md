@@ -10,7 +10,6 @@ Before submitting a pull request, please make sure the enhancement or bugfix you
 
 This will ensure no work is duplicated, and that a general approach has been agreed.
 
-
 ## Local development setup
 
 ```shell
@@ -21,15 +20,19 @@ pip install -e .[dev]
 
 ## Build
 
-```shell
-download edoc.proto from internal version control
-python _generate\__main__.py
-```
+> [!IMPORTANT]
+> If you're writing support for a new version of ThoughtSpot, this step requires you to download `scriptability`'s EDoc protocol buffer specification from ThoughtSpot's internal version control.
+>
+> ```shell
+> python _generate\__main__.py
+> ```
+
+If you're not building support for a new version of ThoughtSpot, simply **[Fork this repository](https://github.com/thoughtspot/thoughtspot_tml/fork)** and when ready, **[Open a Pull Request](https://github.com/thoughtspot/thoughtspot_tml/compare)** to contribute your changes.
 
 ## Linting
 
 ```shell
-black . --config pyproject.toml
+ruff check src/ --config pyproject.toml
 ```
 
 ## Running Tests

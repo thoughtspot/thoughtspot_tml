@@ -1,24 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional
+import json
 import pathlib
 import zipfile
-import json
 
-from thoughtspot_tml._compat import ZipPath
-from thoughtspot_tml.utils import determine_tml_type
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
 from thoughtspot_tml import _yaml
+from thoughtspot_tml._compat import ZipPath
+from thoughtspot_tml.tml import Answer, Liveboard, SQLView, Table, View, Worksheet
+from thoughtspot_tml.utils import determine_tml_type
 
 if TYPE_CHECKING:
-    from thoughtspot_tml.types import EDocExportResponses, TMLObject, TMLDocInfo, SpotAppInfo
+    from thoughtspot_tml.types import EDocExportResponses, SpotAppInfo, TMLDocInfo, TMLObject
 
 
 @dataclass
 class Manifest:
-    object: List[TMLDocInfo]  # noqa: A003
+    object: List[TMLDocInfo]
 
 
 @dataclass

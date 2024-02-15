@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Union, Type
+from typing import TYPE_CHECKING, Type, Union
 
-from thoughtspot_tml._compat import Literal, TypedDict, Annotated
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Answer, Liveboard
+from thoughtspot_tml._compat import Annotated, Literal, TypedDict
+from thoughtspot_tml.tml import Answer, Liveboard, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Optional
@@ -42,8 +41,8 @@ class TMLDocInfo(TypedDict):
     name: str
     filename: str
     status: StatusCode
-    type: str  # noqa: A003
-    id: GUID  # noqa: A003
+    type: str
+    id: GUID
     dependency: List[FileInfo]
 
 
@@ -53,7 +52,7 @@ class EDocExportResponse(TypedDict):
 
 
 class EDocExportResponses(TypedDict):
-    object: List[EDocExportResponse]  # noqa: A003
+    object: List[EDocExportResponse]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /connection/* Metadata Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +60,7 @@ class EDocExportResponses(TypedDict):
 
 class ExternalColumn(TypedDict):
     name: str
-    type: str  # noqa: A003
+    type: str
     canImport: bool
     selected: bool
     isLinkedActive: bool
@@ -73,7 +72,7 @@ class ExternalColumn(TypedDict):
 
 class ExternalTable(TypedDict):
     name: str
-    type: str  # noqa: A003
+    type: str
     description: str
     selected: bool
     linked: bool

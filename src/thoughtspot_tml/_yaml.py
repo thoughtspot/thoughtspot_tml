@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from math import inf as INFINITY
 from typing import Any, Dict
 import re
 
 import yaml
-
 
 # TML column ids typically take the form..
 #
@@ -52,8 +53,6 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.Scal
 
     if (special and not is_tml_id) or reserved or empty_str:
         style = '"'
-    # elif len(data.splitlines()) > 1:
-    #     style = "|"
     else:
         style = ""
 
