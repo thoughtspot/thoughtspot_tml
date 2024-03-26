@@ -575,7 +575,8 @@ class Answer(TML):
             # Change id to be previous name
             t["id"] = new_worksheet_name
             # Remove the original name parameter
-            del t["name"]
+            if 'name' in t:
+                del t["name"]
 
 
 class Pinboard(TML):
