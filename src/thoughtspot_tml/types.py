@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Type, Union
 
 from thoughtspot_tml._compat import Annotated, Literal, TypedDict
-from thoughtspot_tml.tml import Answer, Liveboard, SQLView, Table, View, Worksheet
+from thoughtspot_tml.tml import Answer, Liveboard, SQLView, Table, View, Worksheet, Model
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Optional
@@ -13,9 +13,9 @@ if TYPE_CHECKING:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TMLObject = Union[Table, View, SQLView, Worksheet, Answer, Liveboard]
+TMLObject = Union[Table, View, SQLView, Worksheet, Answer, Liveboard, Model]
 TMLObjectType = Type[TMLObject]
-TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard"]
+TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard", "model"]
 TMLDocument = Annotated[str, "a TMLObject represented as a YAML 1.1 document"]
 GUID = Annotated[str, "A globally unique ID represented as a stringified UUID4"]
 

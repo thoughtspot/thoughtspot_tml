@@ -198,7 +198,7 @@ class Worksheet(_tml.TML):
     @property
     def name(self) -> str:
         return self.worksheet.name
-
+    
     @property
     def is_model(self) -> bool:
         """
@@ -208,6 +208,46 @@ class Worksheet(_tml.TML):
           https://docs.thoughtspot.com/cloud/latest/models
         """
         return self.worksheet.schema is not None
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> Dict[str, Any]:
+        # Handle backwards incompatible changes.
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # The Worksheet V2 update include a python reserved word in the spec, which
+        # python-betterproto automatically adds a trailing sunder to. This reverses it.
+        if "with:" in tml_document:
+            tml_document = tml_document.replace("- with:", "- with_:")
+
+        return _yaml.load(tml_document)
+
+    def _to_dict(self) -> Dict[str, Any]:
+        # Handle backwards incompatible changes.
+        data = asdict(self)
+
+        # DEV NOTE: @boonhapus, 2024/02/14
+        # The Worksheet V2 update include a python reserved word in the spec, which
+        # python-betterproto automatically adds a trailing sunder to. This reverses it.
+        if self.is_model:
+            text = json.dumps(data)
+            text = text.replace('"with_"', '"with"')
+            data = json.loads(text)
+
+        return data
+
+
+@dataclass
+class Model(_tml.TML):
+    """
+    Representation of a ThoughtSpot Model TML.
+    """
+
+    guid: GUID
+    model: _scriptability.WorksheetEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.model.name
 
     @classmethod
     def _loads(cls, tml_document: str) -> Dict[str, Any]:

@@ -9,7 +9,7 @@ import warnings
 
 from thoughtspot_tml import _compat, _scriptability
 from thoughtspot_tml.exceptions import MissingGUIDMappedValueWarning, TMLDisambiguationError, TMLError
-from thoughtspot_tml.tml import Answer, Connection, Liveboard, Pinboard, SQLView, Table, View, Worksheet
+from thoughtspot_tml.tml import Answer, Connection, Liveboard, Pinboard, SQLView, Table, View, Worksheet, Model
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Type, Union
@@ -76,6 +76,7 @@ def determine_tml_type(
         "answer": Answer,
         "liveboard": Liveboard,
         "pinboard": Pinboard,
+        "model": Model
     }
 
     if path is not None:

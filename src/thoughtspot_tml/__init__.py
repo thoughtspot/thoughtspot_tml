@@ -1,7 +1,7 @@
 from thoughtspot_tml._version import __version__
 
 from thoughtspot_tml.tml import Connection
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
+from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Model
 from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 from thoughtspot_tml.spotapp import SpotApp
 
@@ -27,4 +27,5 @@ __all__ = (
     "ThoughtSpotView",
     "SavedAnswer",
     "SystemTable",
+    "Model"
 )
