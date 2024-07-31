@@ -90,6 +90,20 @@ exclude = '''
 
 [tool.ruff]
 line-length = 120
+src = ["src/thoughtspot_tml"]
+exclude = [
+    "__pycache__",   # ignore compiled bytecode
+    ".venv*",        # ignore virtual environments
+    ".nox",          # ignore virtual environments
+
+    # project specific ignores
+    "__init__.py",        # ignore __init__.py
+    "_version.py",        # ignore __version__
+    "*compat.py",         # ignore compatibles
+    "_scriptability.py",  # ignore auto-generated files
+]
+
+[tool.ruff.lint]
 select = [
     "A",     # flake8-builtins: https://pypi.org/project/flake8-builtins/
     "ARG",   # flake8-unused-arguments: https://pypi.org/project/flake8-unused-arguments/
@@ -106,25 +120,10 @@ select = [
     "T20",   # flake8-print: https://pypi.org/project/flake8-print/
     "TCH",   # flake8-type-checking: https://pypi.org/project/flake8-type-checking/
 ]
-src = ["src/thoughtspot_tml"]
-exclude = [
-    "__pycache__",   # ignore compiled bytecode
-    ".venv*",        # ignore virtual environments
-    ".nox",          # ignore virtual environments
-
-    # project specific ignores
-    "__init__.py",        # ignore __init__.py
-    "_version.py",        # ignore __version__
-    "*compat.py",         # ignore compatibles
-    "_scriptability.py",  # ignore auto-generated files
-]
 ignore-init-module-imports = true
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = [
-    "cs_tools.datastructures._GlobalModel",
-    "cs_tools.datastructures._GlobalSettings",
-    "cs_tools.datastructures.ValidatedSQLModel",
     "typer.params.Option",
     "typer.params.Argument",
     "pydantic.BaseModel",
