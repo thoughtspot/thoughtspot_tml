@@ -120,7 +120,6 @@ select = [
     "T20",   # flake8-print: https://pypi.org/project/flake8-print/
     "TCH",   # flake8-type-checking: https://pypi.org/project/flake8-type-checking/
 ]
-ignore-init-module-imports = true
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = [
