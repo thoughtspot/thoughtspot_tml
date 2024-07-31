@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Type, Union
 
 from thoughtspot_tml._compat import Annotated, Literal, TypedDict
-from thoughtspot_tml.tml import Answer, Liveboard, SQLView, Table, View, Worksheet, Model
+from thoughtspot_tml.tml import Answer, Liveboard, Model, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Optional
