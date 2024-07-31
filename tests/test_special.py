@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from thoughtspot_tml.utils import determine_tml_type
 from ward import test
 
 from . import _const
-
 
 for file in (_const.TESTS_DIR / "data").glob("SPECIAL_*"):
 

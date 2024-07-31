@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from thoughtspot_tml import Connection
 from ward import test
 
 from . import _const
-
 
 for path in (_const.DUMMY_CONNECTION, _const.DATA_DIR / "connection.yaml"):
 
@@ -283,8 +284,8 @@ def _():
                                 ],
                             },
                         ],
-                    }
+                    },
                 ],
-            }
+            },
         ],
     }

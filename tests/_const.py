@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pathlib
 
 # fmt: off
@@ -11,9 +13,9 @@ DUMMY_TABLE = DATA_DIR / "DUMMY.table.tml"
 DUMMY_VIEW = DATA_DIR / "DUMMY.view.tml"
 DUMMY_SQL_VIEW = DATA_DIR / "DUMMY.sql_view.tml"
 DUMMY_WORKSHEET = DATA_DIR / "DUMMY.worksheet.tml"
-DUMMY_MODEL = DATA_DIR / "DUMMY_model.worksheet.tml"
+DUMMY_MODEL = DATA_DIR / "DUMMY_MODEL.worksheet.tml"
 DUMMY_ANSWER = DATA_DIR / "DUMMY.answer.tml"
 DUMMY_PINBOARD = DATA_DIR / "DUMMY.pinboard.tml"
 DUMMY_LIVEBOARD = DATA_DIR / "DUMMY.liveboard.tml"
-DUMMY_SPOTAPP = DATA_DIR / "DUMMY_spot_app.zip"
+DUMMY_SPOTAPP = DATA_DIR / "DUMMY_SPOT_APP.zip"
 DUMMY_MODEL_GA = DATA_DIR / "DUMMY.model.tml"

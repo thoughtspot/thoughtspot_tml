@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from thoughtspot_tml import Worksheet
 from ward import test
 
 from . import _const
-
 
 for version, file in (("V1", _const.DUMMY_WORKSHEET), ("V2", _const.DUMMY_MODEL)):
 

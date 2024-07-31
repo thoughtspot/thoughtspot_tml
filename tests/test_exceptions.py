@@ -1,6 +1,8 @@
-from thoughtspot_tml.exceptions import TMLDecodeError
+from __future__ import annotations
+
 from thoughtspot_tml import Answer
-from ward import test, raises
+from thoughtspot_tml.exceptions import TMLDecodeError
+from ward import raises, test
 
 from . import _const
 
