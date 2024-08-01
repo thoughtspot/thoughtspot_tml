@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 from thoughtspot_tml import Connection
 from ward import test
 
 from . import _const
 
-
-for path in (_const.DUMMY_CONNECTION, _const.DATA_DIR / "connection.yaml"):
+for path in (_const.DUMMY_YAML_CONNECTION, _const.DATA_DIR / "connection.yaml"):
 
     @test("Connection deep attribute access ({path.name})")
     def _(path=path):
@@ -26,7 +27,7 @@ for path in (_const.DUMMY_CONNECTION, _const.DATA_DIR / "connection.yaml"):
 
 @test("Connection.to_rest_api_v1_metadata")
 def _():
-    t = Connection.load(_const.DUMMY_CONNECTION)
+    t = Connection.load(_const.DUMMY_YAML_CONNECTION)
     d = t.to_rest_api_v1_metadata()
 
     assert d == {
@@ -283,8 +284,8 @@ def _():
                                 ],
                             },
                         ],
-                    }
+                    },
                 ],
-            }
+            },
         ],
     }

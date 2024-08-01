@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from math import inf as INFINITY
 from typing import Any, Dict
 import re
 
 import yaml
+
+NEARLY_INFINITY = 999999999  # This used to be math.inf, but C has no concept of infinity. ;)
 
 # TML column ids typically take the form..
 #
@@ -59,7 +60,7 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.Scal
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
 
 
-yaml.add_representer(str, _double_quote_when_special_char)
+yaml.add_representer(str, _double_quote_when_special_char, Dumper=yaml.CDumper)
 
 # BUG: pyyaml #89 ==> resolved by #635
 yaml.Loader.yaml_implicit_resolvers.pop("=")
@@ -69,7 +70,7 @@ def load(document: str) -> Dict[str, Any]:
     """
     Load a TML object.
     """
-    return yaml.load(document, Loader=yaml.SafeLoader)
+    return yaml.load(document, Loader=yaml.CSafeLoader)
 
 
 def dump(document: Dict[str, Any]) -> str:
@@ -86,4 +87,11 @@ def dump(document: Dict[str, Any]) -> str:
 
     We'll attempt to reproduce them in Python.
     """
-    return yaml.dump(document, width=INFINITY, default_flow_style=False, sort_keys=False, allow_unicode=True)
+    options = {
+        "width": NEARLY_INFINITY,
+        "default_flow_style": False,
+        "sort_keys": False,
+        "allow_unicode": True,
+        "Dumper": yaml.CDumper,
+    }
+    return yaml.dump(document, **options)

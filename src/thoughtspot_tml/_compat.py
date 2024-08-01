@@ -21,3 +21,8 @@ if sys.version_info < (3, 10):
 else:
     # AVAILABLE IN PYTHON 3.8
     from zipfile import Path as ZipPath
+
+if sys.version_info < (3, 11):
+    from typing_extensions import Self
+else:
+    from typing import Self

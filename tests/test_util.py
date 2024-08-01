@@ -1,17 +1,20 @@
+from __future__ import annotations
+
 import json
 
-from thoughtspot_tml.exceptions import TMLError
-from thoughtspot_tml.types import GUID
-from thoughtspot_tml.utils import determine_tml_type, disambiguate, EnvironmentGUIDMapper
-from thoughtspot_tml.utils import _recursive_scan  # , _import_sort_order
-from thoughtspot_tml.tml import Connection
-from thoughtspot_tml.tml import Table, View, SQLView, Worksheet
-from thoughtspot_tml.tml import Answer, Liveboard, Pinboard
 from thoughtspot_tml import _scriptability
-from ward import test, raises
+from thoughtspot_tml.exceptions import TMLError
+from thoughtspot_tml.tml import Answer, Connection, Liveboard, Pinboard, SQLView, Table, View, Worksheet
+from thoughtspot_tml.types import GUID
+from thoughtspot_tml.utils import (
+    EnvironmentGUIDMapper,
+    _recursive_scan,  # , _import_sort_order
+    determine_tml_type,
+    disambiguate,
+)
+from ward import raises, test
 
 from . import _const
-
 
 for file, tml_cls in (
     (_const.DUMMY_CONNECTION, Connection),
@@ -130,7 +133,7 @@ def _():
 
     assert str(d) == json.dumps(
         {
-            "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d__d00f3754-15a9-4a7a-a3d5-3248ad19aa9e__d00f3754-15a9-4a7a-a3d5-3248ad19aa9f": {
+            "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d__d00f3754-15a9-4a7a-a3d5-3248ad19aa9e__d00f3754-15a9-4a7a-a3d5-3248ad19aa9f": {  # noqa: E501
                 "DEV": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9d",
                 "TEST": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9e",
                 "PROD": "d00f3754-15a9-4a7a-a3d5-3248ad19aa9f",
@@ -140,19 +143,19 @@ def _():
     )
 
 
-for file, replace_type, to_replace, n_replacements, tml_cls in (
-    (_const.DUMMY_TABLE, "name", "Retail - Apparel", 1, Table),
-    (_const.DUMMY_VIEW, "name", "(Sample) Retail - Apparel", 2, View),
-    (_const.DUMMY_VIEW, "fqn", "d00f3754-15a9-4a7a-a3d5-3248ad19aa9f", 1, View),
-    (_const.DUMMY_SQL_VIEW, "name", "Retail - Apparel", 1, SQLView),
-    (_const.DUMMY_WORKSHEET, "name", "fact_retapp_sales", 1, Worksheet),
-    (_const.DUMMY_ANSWER, "name", "(Sample) Retail - Apparel", 1, Answer),
-    (_const.DUMMY_LIVEBOARD, "name", "(Sample) Retail - Apparel", 2, Liveboard),
-    (_const.DUMMY_PINBOARD, "name", "(Sample) Retail - Apparel", 1, Pinboard),
+for file, to_replace, n_replacements, tml_cls in (
+    (_const.DUMMY_TABLE, "Retail - Apparel", 1, Table),
+    (_const.DUMMY_VIEW, "(Sample) Retail - Apparel", 2, View),
+    (_const.DUMMY_VIEW, "d00f3754-15a9-4a7a-a3d5-3248ad19aa9f", 1, View),
+    (_const.DUMMY_SQL_VIEW, "Retail - Apparel", 1, SQLView),
+    (_const.DUMMY_WORKSHEET, "fact_retapp_sales", 1, Worksheet),
+    (_const.DUMMY_ANSWER, "(Sample) Retail - Apparel", 1, Answer),
+    (_const.DUMMY_LIVEBOARD, "(Sample) Retail - Apparel", 2, Liveboard),
+    (_const.DUMMY_PINBOARD, "(Sample) Retail - Apparel", 1, Pinboard),
 ):
 
-    @test("disambiguate {tml_cls.__name__} by {replace_type} ({n_replacements} times)")
-    def _(file=file, replace_type=replace_type, to_replace=to_replace, n_replacements=n_replacements, tml_cls=tml_cls):
+    @test("disambiguate {tml_cls.__name__} ({n_replacements} times)")
+    def _(file=file, to_replace=to_replace, n_replacements=n_replacements, tml_cls=tml_cls):
         FAKE_GUID = "99999999-9999-4999-9999-999999999999"
         tml = tml_cls.load(file)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from thoughtspot_tml import Answer
 from ward import test
 

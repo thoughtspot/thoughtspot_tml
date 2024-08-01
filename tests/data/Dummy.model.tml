@@ -1,0 +1,104 @@
+guid: e6304582-5a95-4b6f-b3a2-17f82294zg41
+model:
+  name: SomeJiraTableName
+  model_tables:
+  - name: Jira_table_1
+    fqn: 9fdce110-2970-40e8-a69a-d7ad2a4b1901
+  - name: Jira_Table_2
+    fqn: 5b1dac91-56e5-439e-c0w4-1c1e2ccf0832
+    joins:
+    - with: Jira_Table_1
+      "on": "[Jira_Table_2::Update_Name] = [Jira_Table_1::Product_Version]"
+      type: INNER
+      cardinality: MANY_TO_ONE
+  columns:
+  - name: Target Date
+    column_id: Jira_table_1::Target Date
+    properties:
+      column_type: ATTRIBUTE
+  - name: Resolution Date
+    column_id: Jira_table_1::Resolution Date
+    properties:
+      column_type: ATTRIBUTE
+      format_pattern: MM/dd/yyyy
+  - name: priority
+    column_id: Jira_table_2::priority
+    properties:
+      column_type: ATTRIBUTE
+  - name: Name
+    column_id: Jira_table_1::Name
+    properties:
+      column_type: ATTRIBUTE
+  - name: fixVersions_released
+    column_id: Jira_table_1::fixVersions_released
+    properties:
+      column_type: ATTRIBUTE
+  - name: Initiative
+    column_id: Jira_table_1::Initiative
+    properties:
+      column_type: ATTRIBUTE
+  - name: Code_Complete_ETA
+    column_id: Jira_table_2::Code_Complete_ETA
+    properties:
+      column_type: ATTRIBUTE
+  - name: Test_Automation_ETA
+    column_id: Jira_table_1::Test_Automation_ETA
+    properties:
+      column_type: ATTRIBUTE
+  - name: customfield
+    column_id: Jira_table_1::customfield
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+  - name: statusCategory_id
+    column_id: Jira_table_1::statusCategory_id
+    properties:
+      column_type: ATTRIBUTE
+  - name: Functional Completeness Reviewer
+    column_id: Jira_table_1::Functional Completeness Reviewer
+    properties:
+      column_type: ATTRIBUTE
+  - name: Product Backlog
+    column_id: Jira_table_2::Product Backlog
+    properties:
+      column_type: ATTRIBUTE
+  - name: fake_key
+    column_id: Jira_table_1::fake_key
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+  - name: RCA- How to prevent in the future
+    column_id: Jira_table_1::RCA- How to prevent in the future
+    properties:
+      column_type: ATTRIBUTE
+  - name: Fix Versions Release Date
+    column_id: Jira_table_1::Fix Versions Release Date
+    properties:
+      column_type: ATTRIBUTE
+      format_pattern: MM/dd/yyyy
+  - name: Theme
+    column_id: Jira_table_1::Theme
+    properties:
+      column_type: ATTRIBUTE
+  - name: Production
+    column_id: Jira_table_2::Production
+    properties:
+      column_type: ATTRIBUTE
+      format_pattern: MM/dd/yyyy
+  - name: Canary
+    column_id: Jira_table_2::Canary
+    properties:
+      column_type: ATTRIBUTE
+      format_pattern: MM/dd/yyyy
+  - name: Release Name
+    column_id: Jira_table_2::Release Name
+    properties:
+      column_type: ATTRIBUTE
+  - name: (etv) Release Date
+    column_id: Jira_table_2::Release Date
+    properties:
+      column_type: ATTRIBUTE
+      format_pattern: MM/dd/yyyy
+  properties:
+    is_bypass_rls: false
+    join_progressive: true

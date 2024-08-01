@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 
-from thoughtspot_tml import Answer, Connection, Liveboard, Pinboard, SQLView, Table, View, Worksheet
+from thoughtspot_tml import Answer, Connection, Liveboard, Model, SQLView, Table, View, Worksheet
 from thoughtspot_tml.exceptions import TMLExtensionWarning
 from ward import test
 
@@ -14,9 +14,9 @@ for tml_cls, tml_type_name in (
     (View, "view"),
     (SQLView, "sql_view"),
     (Worksheet, "worksheet"),
+    (Model, "model"),
     (Answer, "answer"),
     (Liveboard, "liveboard"),
-    (Pinboard, "pinboard"),
 ):
 
     @test("{tml_cls.__name__} roundtrips")

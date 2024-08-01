@@ -5,11 +5,13 @@ from typing import TYPE_CHECKING, Any, Dict
 import copy
 import json
 import uuid
+import warnings
 
-from thoughtspot_tml import _scriptability, _tml, _yaml
+from thoughtspot_tml import _compat, _scriptability, _tml, _yaml, exceptions
 
 if TYPE_CHECKING:
     from typing import Optional
+    import pathlib
 
     from thoughtspot_tml.types import (
         GUID,
@@ -33,26 +35,25 @@ class Connection(_tml.TML):
         return self.connection.name
 
     @classmethod
-    def _loads(cls, tml_document):
+    def _loads(cls, tml_document: str) -> Dict[str, Any]:
         # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
 
         # DEV NOTE: @boonhapus, 2024/02/14
-        # Connections do not offer a TML component, so we'll fake it.
-
+        # Old connections do not offer a TML component, so we'll fake it.
         if "guid" not in document:
             document = {"guid": None, "connection": document}
 
         return document
 
     @classmethod
-    def load(cls, path):
+    def load(cls, path: pathlib.Path) -> _compat.Self:
         # Handle backwards incompatible changes.
         instance = super().load(path)
 
         # DEV NOTE: @boonhapus, 2024/02/14
-        # Connections do not offer a TML component, so we'll fake it.
-
+        # Old connections do not offer a TML component, so we'll fake it.
+        # The convention that follows is that the pathname contains the connection guid.
         try:
             name, _, ext = path.name.partition(".")
             instance.guid = str(uuid.UUID(name, version=4))
@@ -62,13 +63,14 @@ class Connection(_tml.TML):
         return instance
 
     def _to_dict(self):
-        # Handle backwards incompatible changes.
+        data = asdict(self)
 
         # DEV NOTE: @boonhapus, 2024/02/14
-        # Connections do not offer a TML component, so we'll fake it.
+        # Old connections do not offer a TML component, so we'll fake it.
+        if self.guid is None:
+            data = data["connection"]
 
-        data = asdict(self)
-        return data["connection"]
+        return data
 
     def to_rest_api_v1_metadata(self) -> ConnectionMetadata:
         """
@@ -199,20 +201,52 @@ class Worksheet(_tml.TML):
     def name(self) -> str:
         return self.worksheet.name
 
-    @property
-    def is_model(self) -> bool:
+    @classmethod
+    def loads(cls, tml_document: str) -> _compat.Self:
         """
-        Determines if the TML object is the newer Worksheet, a Model.
+        Deserialize a TML document to a Python object.
 
-        Further reading:
-          https://docs.thoughtspot.com/cloud/latest/models
+        Parameters
+        ----------
+        tml_document : str
+          text to parse into a TML object
+
+        Raises
+        ------
+        TMLDecodeError, when the document string cannot be parsed or receives extra data
         """
-        return self.worksheet.schema is not None
+        # DEV NOTE: @boonhapus, 2024/08/01
+        # Models have been standardized into thier own object types, if a worksheet
+        # include the python-reserved word "with:", then it's a V1.5 worksheet and
+        # we'll return a model instead.
+        if "with:" in tml_document:
+            warnings.warn(
+                "Detected Worksheet V1.5, returning a Model instead of Worksheet.",
+                exceptions.TMLDeprecationWarning,
+                stacklevel=2,
+            )
+
+            tml_document = tml_document.replace("worksheet:", "model:")
+            return Model.loads(tml_document)  # type: ignore[return-value]
+
+        return super().loads(tml_document)
+
+
+@dataclass
+class Model(_tml.TML):
+    """
+    Representation of a ThoughtSpot Model TML.
+    """
+
+    guid: GUID
+    model: _scriptability.WorksheetEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.model.name
 
     @classmethod
     def _loads(cls, tml_document: str) -> Dict[str, Any]:
-        # Handle backwards incompatible changes.
-
         # DEV NOTE: @boonhapus, 2024/02/14
         # The Worksheet V2 update include a python reserved word in the spec, which
         # python-betterproto automatically adds a trailing sunder to. This reverses it.
@@ -222,16 +256,13 @@ class Worksheet(_tml.TML):
         return _yaml.load(tml_document)
 
     def _to_dict(self) -> Dict[str, Any]:
-        # Handle backwards incompatible changes.
-        data = asdict(self)
-
         # DEV NOTE: @boonhapus, 2024/02/14
         # The Worksheet V2 update include a python reserved word in the spec, which
         # python-betterproto automatically adds a trailing sunder to. This reverses it.
-        if self.is_model:
-            text = json.dumps(data)
-            text = text.replace('"with_"', '"with"')
-            data = json.loads(text)
+        data = asdict(self)
+        text = json.dumps(data)
+        text = text.replace('"with_"', '"with"')
+        data = json.loads(text)
 
         return data
 
@@ -265,40 +296,23 @@ class Liveboard(_tml.TML):
 
     @classmethod
     def _loads(cls, tml_document):
-        # Handle backwards incompatible changes.
-        document = _yaml.load(tml_document)
-
         # @boonhapus, 2022/11/25
         # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
-        if "pinboard" in document:
-            document["liveboard"] = document.pop("pinboard")
+        if "pinboard:" in tml_document:
+            tml_document = tml_document.replace("pinboard:", "liveboard:")
 
-        return document
+        return _yaml.load(tml_document)
 
 
-@dataclass
-class Pinboard(_tml.TML):
-    """
-    Representation of a ThoughtSpot Pinboard TML.
+def __getattr__(name: str) -> Any:
+    # DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
+    #   As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.
+    if name == "Pinboard":
+        warnings.warn(
+            "ThoughtSpot deprecated 'Pinboard' in May 2022, use 'Liveboard' instead.",
+            exceptions.TMLDeprecationWarning,
+            stacklevel=2,
+        )
+        return Liveboard
 
-    DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
-      As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.
-    """
-
-    guid: GUID
-    pinboard: _scriptability.PinboardEDocProto
-
-    @property
-    def name(self) -> str:
-        return self.pinboard.name
-
-    @classmethod
-    def _loads(cls, tml_document):
-        document = _yaml.load(tml_document)
-
-        # @boonhapus, 2022/11/25
-        # SCAL-134095 - SpotApp export_associated uses `pinboard` for Liveboard edoc
-        if "liveboard" in document:
-            document["pinboard"] = document.pop("liveboard")
-
-        return document
+    raise AttributeError(f"module 'thoughtspot_tml' has no attribute '{name}'")
