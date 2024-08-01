@@ -5,7 +5,7 @@
 
   ![Badge: Lint](https://github.com/thoughtspot/thoughtspot_tml/actions/workflows/lint.yml/badge.svg)
   ![Badge: Test](https://github.com/thoughtspot/thoughtspot_tml/actions/workflows/test.yml/badge.svg)
-  
+
   <h3>
     <a href="#installation">Installation</a>
     <span> | </span>
@@ -81,7 +81,7 @@ def main():
 
     # Read from file
     tml = Worksheet.load(args.worksheet_tml)
-    
+
     # Replace instances of DEV_ with TEST_
     for table in tml.worksheet.tables:
         table.name = table.name.replace(args.src_prefix, args.dst_prefix)
@@ -128,7 +128,7 @@ A more complex version of this example, as well as more examples can be found in
 ### TML Objects
 ```python
 from thoughtspot_tml import Table, View, SQLView, Worksheet
-from thoughtspot_tml import Answer, Liveboard, Pinboard
+from thoughtspot_tml import Answer, Liveboard
 
 # aliases
 from thoughtspot_tml import ThoughtSpotView    # View
@@ -193,7 +193,7 @@ tml.table.db_table = "DIM_RETAPP_PRODUCTS"
 
 ---
 
-The `Connection` is a special type of TML object. Connections (also known as "Embrace" Connections) were implemented prior to the TML spec being officially released. The remapping file (`connection.yaml`), obtained from your platform at `Data > Connections > (...) in the top right > Remapping > Download` defines how __ThoughtSpot__ table objects relate to their external counterparts.
+Connections (also known as "Embrace" Connections) were implemented prior to the TML spec being officially released. The remapping file (`connection.yaml`), obtained from your platform at `Data > Connections > (...) in the top right > Remapping > Download` defines how __ThoughtSpot__ table objects relate to their external counterparts.
 
 ```python
 from thoughtspot_tml import Connection
@@ -202,15 +202,11 @@ from thoughtspot_tml import Connection
 from thoughtspot_tml import EmbraceConnection  # Connection
 ```
 
-Even though the resulting file is different, we've implemented the Connection with an identical form.
-
 The Connection GUID, while optional in `thoughtspot_tml`, is required when modifying or removing an existing connection via the REST API. A Connection's GUID can be obtained by calling the [`connection/list`][rest-api-cnxn-list] endpoint.
 
-When loading from a file, if `thoughtspot_tml` identifies the filename is a GUID, then the property will be set on the resulting object.
+When loading from a `connection.yaml` file, if `thoughtspot_tml` identifies the filename is a GUID, then the property will be set on the resulting object.
 
 The [`connection/update`][rest-api-cnxn-update] REST API endpoint requires connections to formatted in a different way. For this, we provide a method to generate the metadata parameter data, which is a mapping of configuration attributes, as well as database, schema, and table objects.
-
-<sub>\*__ThoughtSpot__ <i>plans to release Connection TML in a future release.</i></sub>
 
 ```python
 @dataclass
@@ -506,7 +502,7 @@ The `delete_unmapped_guids` (__default__: `False`) will remove any `.fqn`s which
 
 ## Migration to v2.0.0
 
-With __V2.0.0__, we now programmatically build the TML spec from the underlying microservice's data structure. The largest benefit of this move is that we can now 
+With __V2.0.0__, we now programmatically build the TML spec from the underlying microservice's data structure. The largest benefit of this move is that we can now
 
 ### Round-tripping to File
 
