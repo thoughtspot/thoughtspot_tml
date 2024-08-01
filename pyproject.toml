@@ -23,7 +23,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -36,9 +35,9 @@ dependencies = [
     "betterproto[compiler] >= 2.0.0b5",
 
     # version specific
-    "typing_extensions >= 4.4.0; python_version < '3.8.0'",
     "graphlib_backport; python_version < '3.9.0'",
-    "zipp >= 3.11.0; python_version < '3.10.0'"
+    "zipp >= 3.11.0; python_version < '3.10.0'",
+    "typing_extensions >= 4.4.0; python_version < '3.11.0'",
 ]
 
 [project.urls]
