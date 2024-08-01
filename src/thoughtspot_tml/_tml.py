@@ -13,7 +13,7 @@ import warnings
 import yaml
 
 from thoughtspot_tml import _scriptability, _yaml
-from thoughtspot_tml._compat import get_args, get_origin
+from thoughtspot_tml._compat import Self, get_args, get_origin
 from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 
 if TYPE_CHECKING:
@@ -145,17 +145,19 @@ class TML:
 
     @classmethod
     def _loads(cls, tml_document: str) -> Dict[str, Any]:
-        # @boonhapus note: do not override this!!
-        #   These exist to handle backwards compatible changes between TML versions.
+        # DEV NOTE: @boonhapus
+        #  DO NOT OVERRIDE THIS!!
+        #    These exist to handle backwards compatible changes between TML versions.
         return _yaml.load(tml_document)
 
     def _to_dict(self) -> Dict[str, Any]:
-        # @boonhapus note: do not override this!!
-        #   These exist to handle backwards compatible changes between TML versions.
+        # DEV NOTE: @boonhapus
+        #  DO NOT OVERRIDE THIS!!
+        #    These exist to handle backwards compatible changes between TML versions.
         return asdict(self)
 
     @classmethod
-    def loads(cls, tml_document: str) -> TML:
+    def loads(cls, tml_document: str) -> Self:
         """
         Deserialize a TML document to a Python object.
 
@@ -181,7 +183,7 @@ class TML:
         return instance
 
     @classmethod
-    def load(cls, path: pathlib.Path) -> TML:
+    def load(cls, path: pathlib.Path) -> Self:
         """
         Deserialize a TML document located at filepath to a Python object.
 

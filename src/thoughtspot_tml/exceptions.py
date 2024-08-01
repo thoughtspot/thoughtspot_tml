@@ -12,6 +12,12 @@ if TYPE_CHECKING:
     from thoughtspot_tml.types import GUID, TMLObject
 
 
+class TMLDeprecationWarning(DeprecationWarning):
+    """
+    Deprecations in thoughtspot_tml derive from this Exception.
+    """
+
+
 class TMLError(Exception):
     """
     All errors in thoughtspot_tml derive from this Exception.
