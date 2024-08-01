@@ -9,6 +9,7 @@ TEMP_DIR  = pathlib.Path(__file__).resolve().parent / "data" / "_temp"
 # fmt: on
 
 DUMMY_CONNECTION = DATA_DIR / "DUMMY.connection.tml"
+DUMMY_YAML_CONNECTION = DATA_DIR / "DUMMY_YAML.connection.tml"
 DUMMY_TABLE = DATA_DIR / "DUMMY.table.tml"
 DUMMY_VIEW = DATA_DIR / "DUMMY.view.tml"
 DUMMY_SQL_VIEW = DATA_DIR / "DUMMY.sql_view.tml"

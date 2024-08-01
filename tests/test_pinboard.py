@@ -1,22 +1,38 @@
 from __future__ import annotations
 
-from thoughtspot_tml import Pinboard
-from ward import test
+import warnings
+
+from thoughtspot_tml import Liveboard, exceptions
+from ward import test, xfail
 
 from . import _const
 
 
+@xfail("xfail until we move to pytest, ward has no way to test warnings")
+@test("Importing Pinboard flashes DeprecrationWarning")
+def _():
+
+    with warnings.catch_warnings(record=True) as w:
+        from thoughtspot_tml.tml import Liveboard
+        assert len(w) == 0
+
+        from thoughtspot_tml.tml import Pinboard
+        assert len(w) == 1
+        assert issubclass(w[0].category, exceptions.TMLDeprecationWarning)
+    
+
+
 @test("Pinboard deep attribute access")
 def _():
-    t = Pinboard.load(_const.DUMMY_PINBOARD)
+    t = Liveboard.load(_const.DUMMY_PINBOARD)
 
-    assert type(t) is Pinboard
+    assert type(t) is Liveboard
 
     t.guid
-    t.pinboard
-    t.pinboard.name
-    t.pinboard.visualizations
-    t.pinboard.visualizations[0].viz_guid
-    t.pinboard.visualizations[0].answer.search_query
-    t.pinboard.visualizations[0].answer.tables[0].name
-    t.pinboard.visualizations[0].answer.answer_columns[0].name
+    t.liveboard
+    t.liveboard.name
+    t.liveboard.visualizations
+    t.liveboard.visualizations[0].viz_guid
+    t.liveboard.visualizations[0].answer.search_query
+    t.liveboard.visualizations[0].answer.tables[0].name
+    t.liveboard.visualizations[0].answer.answer_columns[0].name
