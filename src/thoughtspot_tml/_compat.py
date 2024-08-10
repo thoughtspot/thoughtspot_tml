@@ -1,5 +1,15 @@
 import sys
 
+import yaml
+
+
+try:
+    Dumper = yaml.CDumper
+    Loader = yaml.CSafeLoader
+except AttributeError:
+    Dumper = yaml.Dumper
+    Loader = yaml.SafeLoader
+
 if sys.version_info < (3, 8):
     from typing_extensions import get_origin, get_args
     from typing_extensions import Literal, TypedDict

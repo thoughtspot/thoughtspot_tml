@@ -5,6 +5,8 @@ import re
 
 import yaml
 
+from thoughtspot_tml import _compat
+
 NEARLY_INFINITY = 999999999  # This used to be math.inf, but C has no concept of infinity. ;)
 
 # TML column ids typically take the form..
@@ -60,7 +62,7 @@ def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.Scal
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
 
 
-yaml.add_representer(str, _double_quote_when_special_char, Dumper=yaml.CDumper)
+yaml.add_representer(str, _double_quote_when_special_char, Dumper=_compat.Dumper)
 
 # BUG: pyyaml #89 ==> resolved by #635
 yaml.Loader.yaml_implicit_resolvers.pop("=")
@@ -70,7 +72,7 @@ def load(document: str) -> Dict[str, Any]:
     """
     Load a TML object.
     """
-    return yaml.load(document, Loader=yaml.CSafeLoader)
+    return yaml.load(document, Loader=_compat.Loader)
 
 
 def dump(document: Dict[str, Any]) -> str:
@@ -92,6 +94,6 @@ def dump(document: Dict[str, Any]) -> str:
         "default_flow_style": False,
         "sort_keys": False,
         "allow_unicode": True,
-        "Dumper": yaml.CDumper,
+        "Dumper": _compat.Dumper,
     }
     return yaml.dump(document, **options)
