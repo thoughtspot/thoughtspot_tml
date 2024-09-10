@@ -582,7 +582,7 @@ tml = disambiguate(tml, guid_mapping=name_guid_map)
 ## Notes on __ThoughtSpot Modeling Language__
 
 - TML is implemented in the YAML 1.1 spec.
-- When importing a TML file, if the `guid` matches to an existing object, then that object will be updated. If the `guid` is missing or does not match an object, a new object is created with a new GUID.
+- When importing a TML file, if the `guid` matches to an existing object in the same Org being uploaded into, then that object will be updated. If the `guid` is missing or does not match an object in that Org, a new object is created with a new GUID. GUIDs are unique to the entire ThoughtSpot instance - if no GUID match is found in an Org, but the GUID has not been used on the instance, ThoughtSpot will use the GUID provided in the TML file when creating the new object.
 
 ## Want to contribute?
 
