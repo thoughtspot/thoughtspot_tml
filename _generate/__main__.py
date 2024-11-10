@@ -1,201 +1,138 @@
 """
-@boonhapus, 2022/11/18
+@boonhapus, 2024/11/09
 
 At this time, we will not expose the entire EDoc protocol due to privacy concerns in the
-internal data format. External applications follow a public, approved interface.
-
-If you truly need to understand this package to build a new version, please consult one
-of the maintainers of this library.
+internal data format. External applications are allowed to consume only the exposed TML
+spec.
 """
-import subprocess as sp
-import pathlib
+
+from __future__ import annotations
+
 import ast
+import datetime as dt
 import re
+import subprocess as sp
 
-from rich.console import Console
-
-import _proto_local
-
-
-console = Console()
-HERE = pathlib.Path(__file__).parent
-EDOC_PROTO = HERE / "edoc.proto"
-EDOC_IMPORTS = """
-package scriptability;
-option java_package = "com.thoughtspot.callosum.metadata";
-option java_outer_classname = "EDoc";
-"""
-EDOC_PY = HERE / "scriptability" / "__init__.py"
-
-PACKAGE_SRC = HERE.parent / "src" / "thoughtspot_tml"
-SCRIPTABILITY_PY = PACKAGE_SRC / "_scriptability.py"
+import _clean
+import _const
 
 
-def _subprocess_run(*cmd):
-    # Run a shell command but output to rich.
-    #
-    console.log(f"[green]Running :: [white]{' '.join(cmd)}")
+def _subprocess_run(*cmd: str) -> None:
+    """Run a shell command, but output to rich console."""
+    _const.RICH_CONSOLE.log(f"[green]Running :: [white]{' '.join(cmd)}")
 
-    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT) as proc:
-        for line in proc.stdout:
-            console.log(f"[cyan]  {line.decode().strip()}")
+    # fmt: off
+    popen_streaming_options = {
+        "stdout": sp.PIPE,
+        "stderr": sp.STDOUT,
+        "text": True,
+        "bufsize": 1,
+    }
+    # fmt: on
 
-        console.log()
+    with sp.Popen(cmd, **popen_streaming_options) as proc:  # type: ignore[call-overload]
+        assert proc.stdout is not None, "Unexpected output stream"
 
+        for line in iter(proc.stdout.readline, ""):
+            _const.RICH_CONSOLE.log(f"[cyan]  {line}")
 
-def _clean_edoc_proto():
-    # @boonhapus, 2022/11/19
-    #
-    # This method is idempotent.
-    #
-    # Building this package is done manually and not all files are included. Some common
-    # parts of the EDoc spec are not included as part of the file itself. They're not
-    # complicated, so we can add them manually.
-    #
-    # Additionally, we need to sanitize private parts of the spec.
-    #
-    text = EDOC_PROTO.read_text()
-
-    # strip all comments except ones starting with `import`
-    text = re.sub(r"//(?! import).*", r"", text)
-
-    # replace missing protos with their local representation
-    localized_import_info = [
-        {
-            "regex_import": "a3/monitor/public/monitor_rule.proto",
-            "regex_package": r"a3.metric_monitor\.",
-            "localized_cleansed": _proto_local.PROTO_MONITOR_SUPPLEMENTAL,
-        },
-        {
-            "regex_import": "atlas/public/metadata.proto",
-            "regex_package": r"atlas\.",
-            "localized_cleansed": _proto_local.PROTO_ATLAS_ACTION_CONTEXT,
-        },
-        {
-            "regex_import": "common/common.proto",
-            "regex_package": r"common\.(?!proto_validation)",
-            "localized_cleansed": _proto_local.PROTO_COMMON,
-        },
-        {
-            "regex_import": "protos/number_format.proto",
-            "regex_package": r"blink.numberFormatConfig\.",
-            "localized_cleansed": _proto_local.PROTO_NUMBER_FORMAT_CONFIG,
-        },
-    ]
-
-    for localized_import in localized_import_info:
-        re_import_statement = rf"""(import "{localized_import['regex_import']}")"""
-
-        if re.search(re_import_statement, text, flags=re.M):
-            text = re.sub(re_import_statement, r"// \1", text, flags=re.M)
-            text = re.sub(rf"{localized_import['regex_package']}(.+)", r"\1", text)
-            imports, package, rest = text.partition(EDOC_IMPORTS)
-            text = "\n".join([imports, package, localized_import["localized_cleansed"], rest])
-
-    # comment out validations import and strip out all their annotations
-    text = re.sub(r'(import "common/proto_validation/annotation.proto";)', r"// \1", text, flags=re.M)
-    text = re.sub(r" \[\s*?\(common.proto_validation.(.|\n)*?\]", r"", text, flags=re.M)
-
-    EDOC_PROTO.write_text(text)
+        _const.RICH_CONSOLE.log()
 
 
-def _run_protoc():
-    # @boonhapus, 2022/11/19
-    #
-    # Run protoc and move the output files, then clean up the temporary files.
-    #
-    # /_generate/scriptability/__init__.py   -->   /src/thoughtspot_tml/_scriptability.py
-    #
-    # Don't have protoc?
-    #   >>> brew install protobuf
-    #
-    _subprocess_run(
-        # fmt: off
-        "protoc",
-        "-I", HERE.as_posix(),
-        "--python_betterproto_out", HERE.as_posix(),
-        EDOC_PROTO.as_posix(),
-        # fmt: on
+def _clean_edoc_proto() -> None:
+    """
+    Sanitize the edoc.proto for external consumption.
+
+    edoc.proto is an internal spec and not all parts can be exposed to customers.
+
+    Additionally, _scriptability.py should be a single file, whereas the edoc spec is
+    composed from multiple separate protos.
+    """
+    # fmt: off
+    SCRIPTABILITY_PACKAGE_INFO = (
+        'package scriptability;'
+        '\noption java_package = "com.thoughtspot.callosum.metadata";'
+        '\noption java_outer_classname = "EDoc";'
     )
+    # fmt: on
 
-    EDOC_PY.replace(SCRIPTABILITY_PY)
-    EDOC_PY.parent.rmdir()
-    EDOC_PY.parent.with_name("__init__.py").unlink()
+    # READ THE LATEST edoc.proto
+    text = _const.LATEST_EDOC_PROTO.read_text(encoding="utf-8")
+
+    # REMOVE ALL COMMENTS
+    text = re.sub(r"//.*", _const.VOID, text)
+    text = re.sub(r"\/\*\*(?:.|\n)*?\*\/", _const.VOID, text)
+
+    # REMOVE VALIDATION ANNOTATIONS (we won't use these in python).
+    text = re.sub(r'^import "common/proto_validation/annotation.proto";$', _const.VOID, text, flags=re.MULTILINE)
+    # WHY TWICE? Because some teams have complex validation... :')
+    text = re.sub(r"\[\s?\(common.proto_validation\S+\).*?\]", _const.VOID, text, flags=re.MULTILINE | re.DOTALL)
+    text = re.sub(r",\s+\(common.proto_validation\S+\).+", _const.VOID, text, flags=re.MULTILINE)
+
+    for preprocessor in _clean.preprocessors:
+        # REMOVE THE IMPORT STATEMENT SINCE WE ARE LOCALIZING OR STRIPPING THE PROTO
+        text = re.sub(rf'^import "{preprocessor.import_name}";$', _const.VOID, text, flags=re.MULTILINE)
+
+        # STRIP OFF THE PACKAGE IDENTITY (and optional path separator)
+        text = re.sub(rf"(?<=\s){preprocessor.package}\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)
+
+        # DIVIDE THE edoc.proto INTO 3 PARTS, INJECT THE LOCAL PROTO, STICK IT BACK TOGETHER
+        imports, package_info, edoc_contents = text.partition(SCRIPTABILITY_PACKAGE_INFO)
+        text = "\n".join([imports, package_info, preprocessor.local, edoc_contents])
+
+    # SAVE BACK TO edoc.proto
+    _const.LATEST_EDOC_PROTO.write_text(text, encoding="utf-8")
 
 
-def _clean_scriptability():  # noqa: C901
-    # @boonhapus, 2022/11/19
-    #
-    # python-betterproto isn't perfect, but 2.0.0 is in beta and we only need it to
-    # translate from protobuf -> python.
-    #
-    # As of right now, betterproto (v2.0.0b5) does not allow optionality.
-    #
-    class ThoughtSpotVisitor(ast.NodeVisitor):
-        # EXCEPTION RULES:
-        # - rewrite Format.*Config dataclasses to have camelCase attributes
-        # - rewrite plot_as_band to be a camelCase attribute again
-        # - rewrite geometry_type to be camelCase attribute again
+def _run_protoc() -> None:
+    """
+    Run protoc, move the output files, then clean up the temporary files.
 
-        @staticmethod
-        def snake_to_camel(snake_case: str) -> str:
-            components = snake_case.split("_")
-            # We capitalize the first letter of each component except the first one
-            # with the 'title' method and join them together.
-            return components[0] + "".join(x.title() for x in components[1:])
+    Don't have protoc?
+      >>> brew install protobuf
+    """
+    # fmt: off
+    _subprocess_run(
+        "protoc",
+        "--proto_path", _const.LATEST_EDOC_PROTO.parent.as_posix(),
+        "--python_betterproto_out", _const.THIS_DIR.as_posix(),
+        _const.LATEST_EDOC_PROTO.as_posix(),
+    )
+    # fmt: on
 
-        def visit_ClassDef(self, node: ast.ClassDef) -> None:
-            if "dataclass" in [deco.func.id for deco in node.decorator_list]:
-                for attr in node.body:
-                    exception_rules = (
-                        node.name.startswith("Format") and node.name.endswith("Config"),
-                        isinstance(attr, ast.AnnAssign) and attr.target.id in {"plot_as_band", "geometry_type"},
-                    )
+    # protoc GENERATES AN __init__.py FILE IN THE SCRIPTABILITY PACKAGE (because
+    # edoc.proto names its package as scriptability)
+    edoc_py = _const.THIS_DIR / "scriptability" / "__init__.py"
 
-                    if any(exception_rules):
-                        attr.target.id = self.snake_to_camel(attr.target.id)
+    # BUT WE WANT TO RENAME IT TO _scriptability.py INSTEAD
+    edoc_py.replace(_const._SCRIPTABILITY_PY)
 
-            self.generic_visit(node)
+    # THEN CLEAN UP protoc's WORK
+    edoc_py.parent.rmdir()
+    edoc_py.parent.with_name("__init__.py").unlink()
 
-    class BetterProtoVisitor(ast.NodeVisitor):
-        OPTIONAL_FIELDS = (
-            "string_field",
-            "double_field",
-            "bool_field",
-            "message_field",
-            "int32_field",
-            "enum_field",
-        )
-        KW_OPTIONAL = ast.keyword(arg="optional", value=ast.Constant(True))  # optional=True
 
-        def visit_ClassDef(self, node: ast.ClassDef) -> None:
-            if "dataclass" in [deco.func.id for deco in node.decorator_list]:
-                attrs = []
-                rest = []
+def _clean_scriptability_py() -> None:
+    """Perform post-processing of the output _scriptability.py file."""
+    # READ THE _scriptability.py
+    text = _const._SCRIPTABILITY_PY.read_text()
 
-                for attribute in node.body:
-                    if isinstance(attribute, ast.AnnAssign):
-                        attrs.append(attribute)
+    # SPLIT THE FILE INTO NON-CODE AND CODE PARTS
+    warning, plugin, code_as_text = text.partition("# plugin: python-betterproto")
 
-                        if attribute.value.func.attr in self.OPTIONAL_FIELDS:
-                            attribute.value.keywords.append(self.KW_OPTIONAL)
-                    else:
-                        rest.append(attribute)
+    # RUN THE CODE THROUGH THE POST-PROCESSORS
+    code_as_tree = ast.parse(code_as_text, filename=_const._SCRIPTABILITY_PY)
 
-                # sort body so that all fields are numerically ordered
-                node.body = [*sorted(attrs, key=lambda e: e.value.args[0].value), *rest]
+    for postprocessor in _clean.postprocessors:
+        postprocessor.visit(code_as_tree)
 
-            self.generic_visit(node)
+    code_as_text = ast.unparse(code_as_tree)
 
-    text = SCRIPTABILITY_PY.read_text()
-    warning, plugin, code = text.partition("# plugin: python-betterproto")
-    tree = ast.parse(code, filename=SCRIPTABILITY_PY)
-    ThoughtSpotVisitor().visit(tree)
-    BetterProtoVisitor().visit(tree)
-    text = ast.unparse(tree)
+    # SAVE BACK TO _scriptability.py
+    _const._SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, code_as_text]))
 
-    SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, text]))
-    _subprocess_run("black", SCRIPTABILITY_PY.as_posix(), "-v")
+    # FINALLY, ENSURE THE OUTPUT FILE IS LINTED.
+    _subprocess_run("ruff", "format", _const._SCRIPTABILITY_PY.as_posix(), "-v")
 
 
 if __name__ == "__main__":
@@ -204,9 +141,16 @@ if __name__ == "__main__":
     if sys.version_info < (3, 8):
         raise RuntimeError("The ThoughtSpot TML SDK must be generated from py38 or greater.")
 
-    with console.status("Working..", spinner="smiley"):
+    if not _const.LATEST_EDOC_PROTO.exists():
+        raise FileNotFoundError(f"Could not find edoc.proto in {_const.LATEST_EDOC_PROTO.parent}")
+
+    with _const.RICH_CONSOLE.status("Working..", spinner="smiley"):
+        # MAKE A BACKUP.
+        backup = _const.LATEST_EDOC_PROTO.with_name(f"edoc.proto.{dt.datetime.now(tz=dt.timezone.utc):%Y%m%d}.backup")
+        backup.write_text(_const.LATEST_EDOC_PROTO.read_text(encoding="utf-8"), encoding="utf-8")
+
         _clean_edoc_proto()
         _run_protoc()
-        _clean_scriptability()
+        _clean_scriptability_py()
 
-    console.bell()
+    _const.RICH_CONSOLE.bell()
