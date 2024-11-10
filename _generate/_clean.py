@@ -107,10 +107,6 @@ class ThoughtSpotLintingFormatter(ast.NodeTransformer):
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef | None:
         """Rewrite specific class attributes to be camelCase."""
         if self.is_dataclass(node):
-            # Remove the class by returning None
-            if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
-                return None
-
             for cls_attr in node.body:
                 # SKIP THE CONSTRUCTOR
                 if isinstance(cls_attr, ast.FunctionDef) and cls_attr.name == "__post_init__":
@@ -137,7 +133,7 @@ class ThoughtSpotLintingFormatter(ast.NodeTransformer):
         return node
 
 
-class BetterprotoBetaVisitor(ast.NodeTransformer):
+class BetterprotoBetaCleaner(ast.NodeTransformer):
     # NOTE: @boonhapus, 2024/11/09
     # INJECTING OPTIONALITY INTO EVERY FIELD IS WHAT STRONGLY ALLOWS US TO BE BACKWARDS COMPATIBLE IN TML.
 
@@ -155,9 +151,13 @@ class BetterprotoBetaVisitor(ast.NodeTransformer):
 
         return False
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef | None:
         """Inject optionality to dataclass attributes."""
         if self.is_dataclass(node):
+            # IF betterproto CREATED A CLASS WITH NO FIELDS, JUST DROP IT
+            if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
+                return None
+
             optional_keyword = ast.keyword(arg="optional", value=ast.Constant(True))  # betterproto.field(optional=True)
             cls_attrs: list[ast.AnnAssign] = []
             cls_other: list[Any] = []
@@ -186,6 +186,6 @@ postprocessors = [
     # DEVNOTE: @boonhapus, 2024/11/09
     # THIS IS IN A PRIORITY ORDER
     #
+    BetterprotoBetaCleaner(),
     ThoughtSpotLintingFormatter(),
-    BetterprotoBetaVisitor(),
 ]
