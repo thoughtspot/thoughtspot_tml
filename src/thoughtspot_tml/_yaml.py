@@ -76,7 +76,7 @@ def load(document: str) -> Dict[str, Any]:
         return yaml.load(document, Loader=_compat.Loader)
 
     # FALL BACK TO THE SLOWER PYTHON LOADER IF WE CAN'T FULLY PARSE UNICODE
-    except (yaml.scanner.ScannerError, yaml.reader.ReaderError):
+    except yaml.scanner.ScannerError:
         return yaml.load(document, Loader=yaml.SafeLoader)
 
 

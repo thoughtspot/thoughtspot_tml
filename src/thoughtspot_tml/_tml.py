@@ -172,8 +172,8 @@ class TML:
         """
         try:
             document = cls._loads(tml_document)
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
-            raise TMLDecodeError(cls, problem_mark=e.problem_mark) from None  # type: ignore[arg-type]
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError, yaml.reader.ReaderError) as e:
+            raise TMLDecodeError(cls, message=str(e), problem_mark=getattr(e, "problem_mark", None)) from None  # type: ignore[arg-type]
 
         try:
             instance = cls(**document)
