@@ -8,7 +8,7 @@ import zipfile
 
 from thoughtspot_tml import _yaml
 from thoughtspot_tml._compat import ZipPath
-from thoughtspot_tml.tml import Answer, Liveboard, Model, SQLView, Table, View, Worksheet
+from thoughtspot_tml.tml import Answer, Cohort, Liveboard, Model, SQLView, Table, View, Worksheet
 from thoughtspot_tml.utils import determine_tml_type
 
 if TYPE_CHECKING:
@@ -58,6 +58,10 @@ class SpotApp:
     @property
     def model(self) -> List[Model]:
         return [tml for tml in self.tml if isinstance(tml, Model)]
+
+    @property
+    def cohort(self) -> List[Cohort]:
+        return [tml for tml in self.tml if isinstance(tml, Cohort)]
 
     @classmethod
     def from_api(cls, payload: EDocExportResponses) -> SpotApp:

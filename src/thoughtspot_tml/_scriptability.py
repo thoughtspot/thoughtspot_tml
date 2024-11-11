@@ -876,8 +876,8 @@ class CohortEDocProto(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class CohortEDocProtoCohortConfig(betterproto.Message):
-    anchor_column: List["AnswerEDocProtoAnswerColumn"] = betterproto.message_field(1, optional=True)
-    return_column: "AnswerEDocProtoAnswerColumn" = betterproto.message_field(2, optional=True)
+    anchor_column_id: str = betterproto.message_field(1, optional=True)
+    return_column_id: str = betterproto.message_field(2, optional=True)
     null_output_value: str = betterproto.string_field(3, optional=True)
     combine_non_group_values: bool = betterproto.bool_field(4, optional=True)
     cohort_type: "CohortTypeE" = betterproto.enum_field(5, optional=True)
