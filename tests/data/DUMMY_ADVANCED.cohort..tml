@@ -1,0 +1,31 @@
+guid: 23b94c53-d214-4f1d-a907-21833e74ed75
+cohort:
+  name: First Purchase Date
+  answer:
+    tables:
+    - id: (Sample) Retail - Apparel
+      name: (Sample) Retail - Apparel
+    search_query: "[SKU] min [date]"
+    answer_columns:
+    - name: Minimum date
+    - name: SKU
+    table:
+      table_columns:
+      - column_id: Minimum date
+        show_headline: false
+      - column_id: SKU
+        show_headline: false
+      ordered_column_ids:
+      - SKU
+      - Minimum date
+      client_state: ""
+    display_mode: TABLE_MODE
+  owner: peter.peterson@thoughtspot.com
+  config:
+    anchor_column_id: SKU
+    return_column_id: Minimum date
+    cohort_type: ADVANCED
+    cohort_grouping_type: COLUMN_BASED
+  worksheet:
+    id: (Sample) Retail - Apparel
+    name: (Sample) Retail - Apparel
