@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
 from typing import TYPE_CHECKING
+import functools as ft
 import json
 import logging
 import pathlib
@@ -354,7 +355,9 @@ def disambiguate(
             tml.guid = None  # type: ignore[assignment]
 
     # DEVNOTE: @boonhapus, might need to add another scan for PinnedVisualization.viz_guid
-    attrs = _recursive_scan(tml, check=lambda attr: isinstance(attr, _scriptability.Identity))
+    IS_IDENTITY = ft.partial(lambda A: isinstance(A, (_scriptability.Identity, _scriptability.SchemaSchemaTable)))
+
+    attrs = _recursive_scan(tml, check=IS_IDENTITY)
 
     if not attrs:
         log.debug(f"could not find any attributes to disambiguate on {tml}")
