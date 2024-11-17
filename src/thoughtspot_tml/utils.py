@@ -354,9 +354,11 @@ def disambiguate(
         elif delete_unmapped_guids:
             tml.guid = None  # type: ignore[assignment]
 
-    # DEVNOTE: @boonhapus, might need to add another scan for PinnedVisualization.viz_guid
     IS_IDENTITY = ft.partial(lambda A: isinstance(A, (_scriptability.Identity, _scriptability.SchemaSchemaTable)))
 
+    # DEVNOTE: @boonhapus, might need to add more scans for
+    # - PinnedVisualization.viz_guid
+    # - PersonalisedViewEDocProto.view_guid
     attrs = _recursive_scan(tml, check=IS_IDENTITY)
 
     if not attrs:
