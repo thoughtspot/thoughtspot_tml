@@ -1,0 +1,13 @@
+name: "Setup Environment"
+description: "Installs uv using the community GH Action and installs the development dependencies."
+runs:
+  using: composite
+  steps:
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        version: "0.5.14"
+
+    - name: Install development dependencies
+      run: uv pip install -e ".[dev]"

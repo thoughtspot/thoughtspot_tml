@@ -304,6 +304,30 @@ class Liveboard(_tml.TML):
         return _yaml.load(tml_document)
 
 
+@dataclass
+class Cohort(_tml.TML):
+    """
+    Representation of a ThoughtSpot Cohort TML.
+    """
+
+    guid: GUID
+    cohort: _scriptability.CohortEDocProto
+
+    @property
+    def name(self) -> str:
+        return self.cohort.name
+
+    @property
+    def is_column_set(self) -> bool:
+        """Determines if the COHORT is a ColumnSet."""
+        return self.cohort.config.cohort_type == _scriptability.CohortTypeE.SIMPLE
+
+    @property
+    def is_query_set(self) -> bool:
+        """Determines if the COHORT is a QuerySet."""
+        return self.cohort.config.cohort_type == _scriptability.CohortTypeE.ADVANCED
+
+
 def __getattr__(name: str) -> Any:
     # DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
     #   As part of the May 2022 ThoughtSpot release, we rebranded pinboards as Liveboards.

@@ -1,0 +1,28 @@
+guid: 7ae32a15-e018-45a3-a7d5-c36439e2675a
+cohort:
+  name: Region Groupings
+  owner: peter.peterson@thoughtspot.com
+  config:
+    anchor_column_id: region
+    null_output_value: Rest of the US
+    combine_non_group_values: true
+    cohort_type: SIMPLE
+    cohort_grouping_type: GROUP_BASED
+    groups:
+    - name: West
+      conditions:
+      - operator: CONTAINS
+        value:
+        - west
+        column_name: region
+      combine_type: ALL
+    - name: East
+      conditions:
+      - operator: CONTAINS
+        value:
+        - east
+        column_name: region
+      combine_type: ALL
+  worksheet:
+    id: (Sample) Retail - Apparel
+    name: (Sample) Retail - Apparel

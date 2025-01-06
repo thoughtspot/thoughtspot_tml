@@ -17,6 +17,7 @@ for tml_cls, tml_type_name in (
     (Model, "model"),
     (Answer, "answer"),
     (Liveboard, "liveboard"),
+    # (Cohort, "cohort"),  # NOTE: Cohort is not yet released so the spec is under shift.
 ):
 
     @test("{tml_cls.__name__} roundtrips")

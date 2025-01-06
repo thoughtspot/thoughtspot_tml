@@ -38,6 +38,7 @@ venv.bak/
 
 # ignore workspace files
 *sublime*
+*vscode*
 
 # ignore virtualization
 .python-version
@@ -46,11 +47,7 @@ venv.bak/
 .coverage
 
 # ignore spec generators
-_generate/*.json
-_generate/*.yaml
-_generate/*.proto
-_generate/*.toml
-_generate/archive/*
+_generate/edoc/*
 
 # ignore test temp directory
 tests/data/_temp/*

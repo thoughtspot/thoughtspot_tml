@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools>=42", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "thoughtspot_tml"
 dynamic = ["version"]
 description = "Library for manipulating ThoughtSpot Modeling Language (TML) files"
 readme = "README.md"
-requires-python = ">=3.7 , < 3.13"
+requires-python = ">= 3.9 , < 3.14"
 license = {file = "LICENSE"}
 authors = [
     {name = "Bryant Howell", email = "bryant.howell@thoughtspot.com"},
@@ -23,19 +23,20 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 dependencies = [
-    "PyYAML >= 6.0",
-    "betterproto[compiler] >= 2.0.0b5",
+    "PyYAML >= 6.0.0",
 
-    # version specific
-    "graphlib_backport; python_version < '3.9.0'",
+    # PINNED DUE TO thoughtspot_tml#24
+    "betterproto[compiler] == 2.0.0b6",
+
+    # VERSION SPECIFIC
     "zipp >= 3.11.0; python_version < '3.10.0'",
     "typing_extensions >= 4.4.0; python_version < '3.11.0'",
 ]
@@ -44,35 +45,56 @@ dependencies = [
 repository = "https://github.com/thoughtspot/thoughtspot_tml"
 bug_tracker = "https://github.com/thoughtspot/thoughtspot_tml/issues"
 
-[project.optional-dependencies]
-# cli = [
-#     "typer[all]==0.7.0",
-#     "click==8.1.3",
-# ]
-dev = [
-    "rich",
-
-    # code quality
-    "pre-commit",
-    "ruff",
-    "mypy",
-
-    # tests
-    "nox",
-    "ward",
-    "coverage[toml]",
-]
-
 # eventual plans for a jq-like utility for TML
 # [project.scripts]
 # tml = "thoughtspot_tml.cli.main:run"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["_generate*"]
+[project.optional-dependencies]
+dev = [
+    "rich",
 
-[tool.setuptools.dynamic]
-version = {attr = "thoughtspot_tml._version.__version__"}
+    # code quality
+    "hatch",
+    "pre-commit",
+    "mypy",
+    "ruff",
+    "vulture",
+
+    # tests
+    "coverage[toml]",
+    # TODO.. switch from nox + ward --> hatch + pytest
+    # "pytest",
+    "nox",
+    "ward",
+]
+
+
+[tool.hatch.envs.default.scripts]
+# https://hatch.pypa.io/latest/how-to/environment/select-installer/#enabling-uv
+installer = "uv"
+
+[tool.hatch.build.targets.wheel]
+where = ["src/thoughtspot_tml"]
+
+[tool.hatch.version]
+path = "src/thoughtspot_tml/__project__.py"
+
+[tool.hatch.envs.dev.scripts]
+setup = [
+    "pre-commit install",
+    "mypy --install-types --non-interactive",
+]
+compile = [
+    "uv run python {root:}/_generate/__main__.py"
+]
+test = "ward test --test-output-style=dots-global --order=standard"
+clean = "vulture --min-confidence 100"
+lint = [
+    "ruff check --config pyproject.toml",
+    "ruff format --config pyproject.toml",
+]
+typecheck = "mypy"
+
 
 [tool.mypy]
 warn_unused_configs = true
@@ -83,23 +105,27 @@ strict_equality = true
 strict_concatenate = true
 exclude = '''
 (?x)(
-    ^_scriptability.py$  # ignore auto-generated files
+    ^_scriptability.py$  # IGNORE AUTO-GENERATED FILES
 )
 '''
 
+
 [tool.ruff]
+target-version = "py39"
 line-length = 120
 src = ["src/thoughtspot_tml"]
 exclude = [
-    "__pycache__",   # ignore compiled bytecode
-    ".venv*",        # ignore virtual environments
-    ".nox",          # ignore virtual environments
 
+    # PROJECT SPECIFIC IGNORES
     # project specific ignores
     "__init__.py",        # ignore __init__.py
-    "_version.py",        # ignore __version__
-    "*compat.py",         # ignore compatibles
+    "__project__.py",     # ignore project metadata
+    "_compat.py",         # ignore compatibles
     "_scriptability.py",  # ignore auto-generated files
+
+    # CODE QUALITY FILES
+    "noxfile.py",
+    ".vulture*",
 ]
 
 [tool.ruff.lint]
@@ -119,15 +145,13 @@ select = [
     "T20",   # flake8-print: https://pypi.org/project/flake8-print/
     "TCH",   # flake8-type-checking: https://pypi.org/project/flake8-type-checking/
 ]
-
-[tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = [
-    "typer.params.Option",
-    "typer.params.Argument",
-    "pydantic.BaseModel",
-    "pydantic_settings.BaseSettings",
-    "sqlalchemy.orm.DeclarativeBase",
-    "sqlmodel.SQLModel",
+ignore = [
+    "A002",   # Function argument `<variable>` is shadowing a Python builtin
+    "B008",   # Checks for function calls in default function arguments.
+    "COM812", # Checks for the absence of trailing commas.
+    "TC001",  # Moves imports into the TYPE_CHECKING block, hurting Pydantic, SQLModel
+    "TC002",  # Moves imports into the TYPE_CHECKING block, hurting Pydantic, SQLModel
+    "TC003",  # Moves imports into the TYPE_CHECKING block, hurting Pydantic, SQLModel
 ]
 
 [tool.ruff.lint.isort]
@@ -136,8 +160,14 @@ force-wrap-aliases = true
 from-first = true
 required-imports = ["from __future__ import annotations"]
 
+
+[tool.vulture]
+paths = ["src/thoughtspot_tml"]
+
+
 [tool.ward]
 path = "tests/"
+
 
 [tool.coverage.run]
 branch = true

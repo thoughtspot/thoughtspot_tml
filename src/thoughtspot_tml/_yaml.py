@@ -72,7 +72,12 @@ def load(document: str) -> Dict[str, Any]:
     """
     Load a TML object.
     """
-    return yaml.load(document, Loader=_compat.Loader)
+    try:
+        return yaml.load(document, Loader=_compat.Loader)
+
+    # FALL BACK TO THE SLOWER PYTHON LOADER IF WE CAN'T FULLY PARSE UNICODE
+    except yaml.scanner.ScannerError:
+        return yaml.load(document, Loader=yaml.SafeLoader)
 
 
 def dump(document: Dict[str, Any]) -> str:
@@ -94,6 +99,10 @@ def dump(document: Dict[str, Any]) -> str:
         "default_flow_style": False,
         "sort_keys": False,
         "allow_unicode": True,
-        "Dumper": _compat.Dumper,
     }
-    return yaml.dump(document, **options)
+    try:
+        return yaml.dump(document, Dumper=_compat.Dumper, **options)
+
+    # FALL BACK TO THE SLOWER PYTHON DUMPER IF WE CAN'T FULLY PARSE UNICODE
+    except UnicodeEncodeError:
+        return yaml.dump(document, Dumper=yaml.SafeDumper, **options)
