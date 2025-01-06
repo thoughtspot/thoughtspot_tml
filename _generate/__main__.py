@@ -136,11 +136,6 @@ def _clean_scriptability_py() -> None:
 
 
 if __name__ == "__main__":
-    import sys
-
-    if sys.version_info < (3, 8):
-        raise RuntimeError("The ThoughtSpot TML SDK must be generated from py38 or greater.")
-
     if not _const.LATEST_EDOC_PROTO.exists():
         raise FileNotFoundError(f"Could not find edoc.proto in {_const.LATEST_EDOC_PROTO.parent}")
 
