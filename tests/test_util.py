@@ -1,3 +1,4 @@
+# ruff: noqa: B018
 from __future__ import annotations
 
 import json
@@ -160,7 +161,7 @@ for file, to_replace, n_replacements, tml_cls in (
         tml = tml_cls.load(file)
 
         identities = _recursive_scan(tml, check=lambda x: isinstance(x, _scriptability.Identity))
-        assert all((i.fqn != FAKE_GUID for i in identities)) is True
+        assert all(i.fqn != FAKE_GUID for i in identities) is True
 
         tml = disambiguate(tml, guid_mapping={to_replace: FAKE_GUID})
 

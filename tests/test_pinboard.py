@@ -1,3 +1,4 @@
+# ruff: noqa: B018
 from __future__ import annotations
 
 import warnings
@@ -11,15 +12,11 @@ from . import _const
 @xfail("xfail until we move to pytest, ward has no way to test warnings")
 @test("Importing Pinboard flashes DeprecrationWarning")
 def _():
-
     with warnings.catch_warnings(record=True) as w:
-        from thoughtspot_tml.tml import Liveboard
         assert len(w) == 0
 
-        from thoughtspot_tml.tml import Pinboard
         assert len(w) == 1
         assert issubclass(w[0].category, exceptions.TMLDeprecationWarning)
-    
 
 
 @test("Pinboard deep attribute access")
