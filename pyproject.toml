@@ -57,6 +57,7 @@ dev = [
     "hatch",
     "pre-commit",
     "mypy",
+    "types-PyYAML",
     "ruff",
     "vulture",
 
@@ -93,7 +94,7 @@ lint = [
     "ruff check --config pyproject.toml",
     "ruff format --config pyproject.toml",
 ]
-typecheck = "mypy"
+typecheck = "mypy src/"
 
 
 [tool.mypy]
