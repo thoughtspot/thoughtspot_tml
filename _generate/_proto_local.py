@@ -56,7 +56,7 @@ message QueryTrigger {
 
 
 # DEV NOTE @
-# LAST UPDATE: 2024/11/10 , v10.3.0.cl
+# LAST UPDATE: 2025/01/06 , v10.5.0.cl
 #  PROTO PATH: callosum/public/metadata/answer_spec.proto
 #  PROTO NAME: package entitylib;
 #
@@ -75,6 +75,21 @@ message ChartVizProto {
     }
     optional Type type = 3;
   }
+}
+
+
+// ====================================================
+// Chip.ChipType
+// ====================================================
+
+message Chip {
+  enum ChipType {
+    FILTER = 0;
+    PARAMETER = 1;
+  }
+
+  required string object_id = 1;
+  required ChipType type = 2;
 }
 """
 
@@ -383,7 +398,7 @@ message ActionContext {
 
 
 # DEV NOTE @boonhapus
-# LAST UPDATE: 2024/11/10 , v10.3.0.cl
+# LAST UPDATE: 2025/01/06 , v10.5.0.cl
 #  PROTO PATH: a3/monitor/public/monitor_rule.proto
 #  PROTO NAME: package a3.metric_monitor;
 #
@@ -473,5 +488,25 @@ message MetricId {
     string answer_id = 2;
   }
   optional string personalised_view_id = 3;
+}
+
+// ====================================================
+// AlertType
+// ====================================================
+
+enum AlertType {
+  Scheduled = 0;
+  Threshold = 1;
+  Anomaly = 2;
+}
+
+// ====================================================
+// AttributeInfo
+// ====================================================
+
+message AttributeInfo {
+  optional string id = 1;
+  repeated string values = 2;
+  optional string answer_id = 3;
 }
 """
