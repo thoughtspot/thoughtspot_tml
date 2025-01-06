@@ -1,4 +1,4 @@
-from thoughtspot_tml._version import __version__
+from thoughtspot_tml.__project__ import __version__
 
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Model
