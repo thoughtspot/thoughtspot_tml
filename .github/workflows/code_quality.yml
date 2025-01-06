@@ -7,6 +7,11 @@ on:
     branches:
       - v2_main
 
+
+env:
+  UV_SYSTEM_PYTHON: 1
+
+
 jobs:
 
   lint:

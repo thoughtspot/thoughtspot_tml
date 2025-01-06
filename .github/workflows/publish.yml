@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
 
+
+env:
+  UV_SYSTEM_PYTHON: 1
+
+
 jobs:
 
   publish:
