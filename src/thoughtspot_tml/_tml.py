@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import TYPE_CHECKING, get_args, get_origin
+import functools as ft
 import json
 import keyword
 import pathlib
