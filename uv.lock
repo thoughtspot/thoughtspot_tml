@@ -1137,7 +1137,7 @@ wheels = [
 
 [[package]]
 name = "thoughtspot-tml"
-version = "2.2.0b7"
+version = "2.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "betterproto", extra = ["compiler"] },
@@ -1155,6 +1155,7 @@ dev = [
     { name = "pre-commit" },
     { name = "rich" },
     { name = "ruff" },
+    { name = "types-pyyaml" },
     { name = "vulture" },
     { name = "ward" },
 ]
@@ -1170,6 +1171,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.0" },
     { name = "rich", marker = "extra == 'dev'" },
     { name = "ruff", marker = "extra == 'dev'" },
+    { name = "types-pyyaml", marker = "extra == 'dev'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.4.0" },
     { name = "vulture", marker = "extra == 'dev'" },
     { name = "ward", marker = "extra == 'dev'" },
@@ -1240,6 +1242,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2a/86/32d098b84898064c7a70563ec60891ceb7465d6ce2491733b5a1bb509177/trove_classifiers-2025.1.6.15.tar.gz", hash = "sha256:49ab0326e000c54be6adc945d8fd618265c27de1296cf17caf9106fef96d2da4", size = 16151 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/1f/3216fd02c2949d3311033788b3fcfdde15fc804b719e1bae3a5570f0b7cf/trove_classifiers-2025.1.6.15-py3-none-any.whl", hash = "sha256:cd8e14d53158c72b68f7adcd119e3b4c7271d282999d3a8ec7486733a6202e4d", size = 13533 },
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20241230"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9a/f9/4d566925bcf9396136c0a2e5dc7e230ff08d86fa011a69888dd184469d80/types_pyyaml-6.0.12.20241230.tar.gz", hash = "sha256:7f07622dbd34bb9c8b264fe860a17e0efcad00d50b5f27e93984909d9363498c", size = 17078 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/c1/48474fbead512b70ccdb4f81ba5eb4a58f69d100ba19f17c92c0c4f50ae6/types_PyYAML-6.0.12.20241230-py3-none-any.whl", hash = "sha256:fa4d32565219b68e6dee5f67534c722e53c00d1cfc09c435ef04d7353e1e96e6", size = 20029 },
 ]
 
 [[package]]
