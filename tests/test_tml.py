@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 
-from thoughtspot_tml import Answer, Cohort, Connection, Liveboard, Model, SQLView, Table, View, Worksheet
+from thoughtspot_tml import Answer, Connection, Liveboard, Model, SQLView, Table, View, Worksheet
 from thoughtspot_tml.exceptions import TMLExtensionWarning
 from ward import test
 
@@ -17,7 +17,7 @@ for tml_cls, tml_type_name in (
     (Model, "model"),
     (Answer, "answer"),
     (Liveboard, "liveboard"),
-    (Cohort, "cohort"),
+    # (Cohort, "cohort"),  # NOTE: Cohort is not yet released so the spec is under shift.
 ):
 
     @test("{tml_cls.__name__} roundtrips")
