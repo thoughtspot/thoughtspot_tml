@@ -38,6 +38,7 @@ venv.bak/
 
 # ignore workspace files
 *sublime*
+*vscode*
 
 # ignore virtualization
 .python-version
