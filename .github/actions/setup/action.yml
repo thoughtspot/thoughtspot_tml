@@ -10,4 +10,5 @@ runs:
         version: "0.5.14"
 
     - name: Install development dependencies
+      shell: bash
       run: uv pip install -e ".[dev]"
