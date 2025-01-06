@@ -2,25 +2,31 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args, get_origin
+import functools as ft
 import json
 import keyword
 import pathlib
 import re
-import typing
 import warnings
 
 import yaml
 
 from thoughtspot_tml import _scriptability, _yaml
-from thoughtspot_tml._compat import Self, get_args, get_origin
+from thoughtspot_tml._compat import Self
 from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 
 if TYPE_CHECKING:
     from typing import Any, Dict
 
-
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
+
+
+def attempt_resolve_type(type_hint: Any) -> Any:
+    """Resolves string type hints to actual types."""
+    if isinstance(type_hint, str):
+        return getattr(_scriptability, type_hint.replace("_scriptability.", ""), type_hint)
+    return type_hint
 
 
 def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
