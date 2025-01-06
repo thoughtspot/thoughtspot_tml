@@ -117,11 +117,12 @@ src = ["src/thoughtspot_tml"]
 exclude = [
 
     # PROJECT SPECIFIC IGNORES
-    # project specific ignores
     "__init__.py",        # ignore __init__.py
     "__project__.py",     # ignore project metadata
     "_compat.py",         # ignore compatibles
     "_scriptability.py",  # ignore auto-generated files
+
+    "examples/*",
 
     # CODE QUALITY FILES
     "noxfile.py",
