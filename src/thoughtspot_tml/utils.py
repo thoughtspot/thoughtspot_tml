@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args
 import functools as ft
 import json
 import logging
 import pathlib
 import warnings
 
-from thoughtspot_tml import _compat, _scriptability
+from thoughtspot_tml import _scriptability
 from thoughtspot_tml.exceptions import MissingGUIDMappedValueWarning, TMLError
 from thoughtspot_tml.tml import Answer, Cohort, Connection, Liveboard, Model, Pinboard, SQLView, Table, View, Worksheet
 
@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     collect = []
-    is_container_type = lambda t: len(_compat.get_args(t)) > 0  # noqa: E731
+    is_container_type = lambda t: len(get_args(t)) > 0  # noqa: E731
 
     for field in fields(scriptability_object):
         child = getattr(scriptability_object, field.name)

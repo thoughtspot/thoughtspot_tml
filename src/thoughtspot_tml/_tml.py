@@ -2,25 +2,31 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args, get_origin
+import functools as ft
 import json
 import keyword
 import pathlib
 import re
-import typing
 import warnings
 
 import yaml
 
 from thoughtspot_tml import _scriptability, _yaml
-from thoughtspot_tml._compat import Self, get_args, get_origin
+from thoughtspot_tml._compat import Self
 from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 
 if TYPE_CHECKING:
-    from typing import Any, Dict
-
+    from typing import Any
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
+
+
+def attempt_resolve_type(type_hint: Any) -> Any:
+    """Resolves string type hints to actual types."""
+    if isinstance(type_hint, str):
+        return getattr(_scriptability, type_hint.replace("_scriptability.", ""), type_hint)
+    return type_hint
 
 
 def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
@@ -35,65 +41,68 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
       - list of basic types
       - list of dataclass annotation
     """
+    RESOLVED_TYPEHINT_HAS_CHILDREN = ft.partial(lambda hint, expr: is_dataclass(hint) and isinstance(expr, dict))
     cls = type(instance)
 
     for field in fields(cls):
         value = getattr(instance, field.name)
 
-        # ignore nulls, they get dropped to support optionality
         if value is None:
             continue
 
-        # it's a dataclass
-        if is_dataclass(field.type) and isinstance(value, dict):
-            new_value = field.type(**value)
+        # TRY TO RESOLVE STRING REFERENCES FROM _scriptability.py
+        # eg. ActionObjectEDocProto , ConnectionEDocProto , etc ..
+        #
+        # NOTE: this falls back to the original type_hint when it can't be resolved.
+        field_type = attempt_resolve_type(field.type)
+
+        # RECURSE INTO RESOLVED _scripatability.py HINTS
+        if RESOLVED_TYPEHINT_HAS_CHILDREN(hint=field_type, expr=value):
+            new_value = field_type(**value)
             recursive_complex_attrs_to_dataclasses(new_value)
 
-        # it's an _scriptability dataclass Annotation that needs resolution
-        elif isinstance(field.type, str) and isinstance(value, dict):
-            if field.type.startswith("_scriptability"):
-                _, _, field_type = field.type.partition(".")
-            else:
-                field_type = field.type
+        # list IS USED TO DENOTE THAT A TML OBJECT CAN CONTAIN MULTIPLE HOMOGENOUS
+        # CHILDREN SO WE TAKE JUST THE FIRST ELEMENT AND ATTEMPT TO RESOLVE IT.
+        elif get_origin(field_type) is list:
+            new_value = []
+            homo_type = next(iter(get_args(field_type)))
+            item_type = attempt_resolve_type(homo_type)
 
-            type_ = getattr(_scriptability, field_type)
-            new_value = type_(**value)
-            recursive_complex_attrs_to_dataclasses(new_value)
-
-        # it's a List of basic types or ForwardRefs
-        elif get_origin(field.type) is list:
-            new_value = []  # type: ignore[assignment]
-            args = get_args(field.type)
-            field_type = args[0].__forward_value__ if isinstance(args[0], typing.ForwardRef) else args[0]
+            # OLD ... will keep this around JUST IN CASE.
+            #
+            # item_type = attempt_resolve_type(
+            #     get_args(field_type)[0].__forward_value__
+            #     if isinstance(get_args(field_type)[0], typing.ForwardRef)
+            #     else get_args(field_type)[0]
+            # )
 
             for item in value:
-                if is_dataclass(field_type) and isinstance(item, dict):
-                    item = _sanitize_reserved_keyword_keys(item)
-                    item = field_type(**item)
-
-                new_value.append(item)  # type: ignore[attr-defined]
-
-                if is_dataclass(field_type):
+                # RECURSE INTO RESOLVED _scripatability.py HINTS
+                if RESOLVED_TYPEHINT_HAS_CHILDREN(hint=item_type, expr=item):
+                    item = item_type(**_sanitize_reserved_keyword_keys(item))
                     recursive_complex_attrs_to_dataclasses(item)
 
-        # it's an empty mapping, python-betterproto doesn't support optional map_fields
-        elif get_origin(field.type) is dict and value == {}:
+                new_value.append(item)
+
+        # IF OUR VALUE IS EMPTY, WE'RE GOING TO DROP IT.
+        elif get_origin(field_type) is dict and not value:
             new_value = None
 
-        else:  # pragma: peephole optimizer
+        # SIMPLE TYPES DO NOT NEED RECURSION.
+        else:
             continue
 
         setattr(instance, field.name, new_value)
 
 
-def _sanitize_reserved_keyword_keys(mapping: Dict[str, Any]) -> Dict[str, Any]:
+def _sanitize_reserved_keyword_keys(mapping: dict[str, Any]) -> dict[str, Any]:
     """
     Replace reserved keywords with a trailing sunder.
     """
     return {(f"{k}_" if keyword.iskeyword(k) else k): v for k, v in mapping.items()}
 
 
-def _recursive_remove_null(mapping: Dict[str, Any]) -> Dict[str, Any]:
+def _recursive_remove_null(mapping: dict[str, Any]) -> dict[str, Any]:
     """
     Drop all keys with null values, they're optional.
     """
@@ -144,13 +153,13 @@ class TML:
         recursive_complex_attrs_to_dataclasses(self)
 
     @classmethod
-    def _loads(cls, tml_document: str) -> Dict[str, Any]:
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
         # DEV NOTE: @boonhapus
         #  DO NOT OVERRIDE THIS!!
         #    These exist to handle backwards compatible changes between TML versions.
         return _yaml.load(tml_document)
 
-    def _to_dict(self) -> Dict[str, Any]:
+    def _to_dict(self) -> dict[str, Any]:
         # DEV NOTE: @boonhapus
         #  DO NOT OVERRIDE THIS!!
         #    These exist to handle backwards compatible changes between TML versions.
@@ -207,7 +216,7 @@ class TML:
 
         return instance
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Serialize this object to native python data types.
         """

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, Annotated, Literal, Type, TypedDict, Union
 
-from thoughtspot_tml._compat import Annotated, Literal, TypedDict
 from thoughtspot_tml.tml import Answer, Cohort, Liveboard, Model, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
