@@ -1,5 +1,7 @@
 from thoughtspot_tml.__project__ import __version__
 
+from thoughtspot_tml._tml import TML
+
 from thoughtspot_tml.tml import Connection
 from thoughtspot_tml.tml import Table, View, SQLView, Worksheet, Model
 from thoughtspot_tml.tml import Answer, Liveboard, Cohort
@@ -14,6 +16,7 @@ from thoughtspot_tml.tml import Table as SystemTable
 
 __all__ = (
     "__version__",
+    "TML",
     "Connection",
     "Table",
     "View",

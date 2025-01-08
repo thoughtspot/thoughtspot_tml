@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
-from typing import TYPE_CHECKING, ForwardRef, get_args, get_origin
+from typing import TYPE_CHECKING, ForwardRef, Optional, get_args, get_origin
 import functools as ft
 import json
 import keyword
@@ -10,14 +10,14 @@ import pathlib
 import re
 import warnings
 
-import yaml
-
 from thoughtspot_tml import _scriptability, _yaml
 from thoughtspot_tml._compat import Self
 from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 
 if TYPE_CHECKING:
     from typing import Any
+
+    from thoughtspot_tml.types import GUID
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
@@ -161,6 +161,8 @@ class TML:
     Base object for ThoughtSpot TML.
     """
 
+    guid: Optional[GUID]
+
     @property
     def tml_type_name(self) -> str:
         """Return the type name of the TML object."""
@@ -168,6 +170,11 @@ class TML:
         camels = RE_CAMEL_CASE.findall(cls_name)
         snakes = "_".join(camels)
         return snakes.lower()
+
+    @property
+    def name(self) -> str:
+        """This should be implemented in child classes."""
+        raise NotImplementedError
 
     def __post_init__(self):
         recursive_complex_attrs_to_dataclasses(self)
@@ -200,14 +207,10 @@ class TML:
         TMLDecodeError, when the document string cannot be parsed or receives extra data
         """
         try:
-            document = cls._loads(tml_document)
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError, yaml.reader.ReaderError) as e:
-            raise TMLDecodeError(cls, message=str(e), problem_mark=getattr(e, "problem_mark", None)) from None  # type: ignore[arg-type]
-
-        try:
-            instance = cls(**document)
-        except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None  # type: ignore[arg-type]
+            data = cls._loads(tml_document)
+            instance = cls(**data)
+        except Exception as e:
+            raise TMLDecodeError(cls, exc=e, document=tml_document) from None
 
         return instance
 
@@ -231,7 +234,8 @@ class TML:
         try:
             instance = cls.loads(path.read_text(encoding="utf-8"))
         except TMLDecodeError as e:
-            e.path = path
+            # INTERCEPT AND INJECT THE FILEPATH.
+            e.filepath = path
             raise e from None
 
         return instance

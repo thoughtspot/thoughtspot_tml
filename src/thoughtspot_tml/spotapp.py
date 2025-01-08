@@ -84,7 +84,7 @@ class SpotApp:
             document = json.loads(edoc_info["edoc"])
             manifest_data["object"].append(edoc_info["info"])
             tml = tml_cls(**document)
-            info["tml"].append(tml)  # type: ignore[arg-type]
+            info["tml"].append(tml)
 
         info["manifest"] = Manifest(**manifest_data)
         return cls(**info)
@@ -103,7 +103,7 @@ class SpotApp:
 
         with zipfile.ZipFile(path, mode="r") as archive:
             for member in archive.infolist():
-                path = ZipPath(archive, at=member.filename)
+                path = ZipPath(archive, at=member.filename)  # type: ignore[assignment]
 
                 if member.filename == "Manifest.yaml":
                     document = _yaml.load(path.read_text())
@@ -112,7 +112,7 @@ class SpotApp:
 
                 tml_cls = determine_tml_type(path=pathlib.Path(member.filename))
                 tml = tml_cls.load(path)
-                info["tml"].append(tml)  # type: ignore[arg-type]
+                info["tml"].append(tml)
 
         return cls(**info)
 

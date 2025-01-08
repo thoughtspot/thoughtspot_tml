@@ -181,7 +181,7 @@ class EnvironmentGUIDMapper:
             self._mapping.pop(old_key)
 
             envts[environment] = guid_to_add
-            new_key = "__".join(envts.values())  # type: ignore[assignment]
+            new_key = "__".join(envts.values())
 
         self._mapping.setdefault(new_key, {}).update(envts)
 
@@ -353,7 +353,7 @@ def disambiguate(
             tml.guid = guid_mapping[tml.guid]
 
         elif delete_unmapped_guids:
-            tml.guid = None  # type: ignore[assignment]
+            tml.guid = None
 
     IS_IDENTITY = ft.partial(lambda A: isinstance(A, (_scriptability.Identity, _scriptability.SchemaSchemaTable)))
 
