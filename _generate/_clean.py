@@ -44,7 +44,7 @@ preprocessors = [
     ),
     ProtobufPreprocessor(
         import_name=r"common/common.proto",
-        package=r"common.(?!proto_validation)",
+        package=r"common(?!.proto_validation)",
         local=_proto_local.PROTO_COMMON,
     ),
     ProtobufPreprocessor(

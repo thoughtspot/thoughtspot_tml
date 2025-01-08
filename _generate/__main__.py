@@ -73,8 +73,10 @@ def _clean_edoc_proto() -> None:
         # REMOVE THE IMPORT STATEMENT SINCE WE ARE LOCALIZING OR STRIPPING THE PROTO
         text = re.sub(rf'^import "{preprocessor.import_name}";$', _const.VOID, text, flags=re.MULTILINE)
 
-        # STRIP OFF THE PACKAGE IDENTITY (and optional path separator)
-        text = re.sub(rf"(?<=\s){preprocessor.package}\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)
+        # STRIP OFF THE PACKAGE IDENTITY (and not following by an underscore, with an optional path separator)
+        # fmt: off
+        text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)  # noqa: E501
+        # fmt: on
 
         # DIVIDE THE edoc.proto INTO 3 PARTS, INJECT THE LOCAL PROTO, STICK IT BACK TOGETHER
         imports, package_info, edoc_contents = text.partition(SCRIPTABILITY_PACKAGE_INFO)
