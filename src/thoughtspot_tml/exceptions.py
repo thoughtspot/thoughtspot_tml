@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
-import dataclasses
+from typing import TYPE_CHECKING, Optional
+
+from yaml import error
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
-
-    from yaml import error
 
     from thoughtspot_tml.types import GUID, TMLObject
 
@@ -41,50 +40,40 @@ class TMLDecodeError(TMLError):
     Raised when a TML object cannot be instantiated from input data.
     """
 
-    def __init__(
-        self,
-        tml_cls: type[TMLObject],
-        *,
-        message: Optional[str] = None,
-        data: Optional[dict[str, Any]] = None,
-        path: Optional[Path] = None,
-        problem_mark: Optional[error.Mark] = None,
-    ):  # pragma: no cover
+    def __init__(self, tml_cls: type[TMLObject], *, exc: Exception, document: str, filepath: Optional[Path] = None):
         self.tml_cls = tml_cls
-        self.message = message
-        self.data = data
-        self.path = path
-        self.problem_mark = problem_mark
+        self.parent_exc = exc
+        self.document = document
+        self.filepath = filepath
+
+    def with_filepath(self, filepath) -> TMLDecodeError:
+        """Add the file which generated the exception."""
+        self.filepath = filepath
+        return self
 
     def __str__(self) -> str:
-        lines = []
-        class_name = self.tml_cls.__name__
+        lines: list[str] = []
 
-        if self.message is not None:
-            lines.append(self.message)
+        if isinstance(self.parent_exc, TypeError):
+            _, _, attribute = str(self.parent_exc).partition(" unexpected keyword argument ")
+            lines.append(f"Unrecognized attribute in the TML spec: {attribute}")
 
-        if self.data is not None:
-            lines.append(f"supplied data does not produce a valid TML ({class_name}) document")
-            fields = {f.name for f in dataclasses.fields(self.tml_cls)}
-            data = set(self.data)
+        if self.filepath is not None:
+            lines.append("\n")
+            lines.append(f"File '{self.filepath}' may not be a valid {self.tml_cls.__name__} file")
 
-            if data.difference(fields):
-                extra = ", ".join([f"'{arg}'" for arg in data.difference(fields)])
-                lines.append(f"\ngot extra data: {extra}")
+        if isinstance(self.parent_exc, error.MarkedYAMLError):
+            if mark := self.parent_exc.problem_mark:
+                lines.append("\n")
+                lines.append(f"Syntax error on line {mark.line + 1}, around column {mark.column + 1}")
 
-        if self.path is not None:
-            lines.append(f"'{self.path}' is not a valid TML ({class_name}) file")
+                if snippet := mark.get_snippet():
+                    lines.append(snippet)
 
-        if self.problem_mark is not None:
-            err_line = self.problem_mark.line + 1
-            err_column = self.problem_mark.column + 1
-            snippet = self.problem_mark.get_snippet()
-            lines.append(f"\nsyntax error on line {err_line}, around column {err_column}")
+        if not lines:
+            lines.append(str(self.parent_exc))
 
-            if snippet is not None:
-                lines.append(snippet)
-
-        return "\n".join(lines)
+        return "\n".join(lines).strip()
 
 
 class TMLDisambiguationError(TMLError):
