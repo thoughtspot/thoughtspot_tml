@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, Optional
 import dataclasses
 
 if TYPE_CHECKING:
@@ -43,10 +43,10 @@ class TMLDecodeError(TMLError):
 
     def __init__(
         self,
-        tml_cls: Type[TMLObject],
+        tml_cls: type[TMLObject],
         *,
         message: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[dict[str, Any]] = None,
         path: Optional[Path] = None,
         problem_mark: Optional[error.Mark] = None,
     ):  # pragma: no cover

@@ -13,7 +13,8 @@ from thoughtspot_tml.exceptions import MissingGUIDMappedValueWarning, TMLError
 from thoughtspot_tml.tml import Answer, Cohort, Connection, Liveboard, Model, Pinboard, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, Union
+    from collections.abc import Iterator
+    from typing import Any, Callable, Optional, Union
 
     from thoughtspot_tml.types import GUID, TMLDocInfo, TMLObject
 
@@ -22,7 +23,7 @@ _UNDEFINED = object()
 log = logging.getLogger(__name__)
 
 
-def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> List[Any]:
+def _recursive_scan(scriptability_object: Any, *, check: Optional[Callable[[Any], bool]] = None) -> list[Any]:
     collect = []
     is_container_type = lambda t: len(get_args(t)) > 0  # noqa: E731
 
@@ -48,7 +49,7 @@ def determine_tml_type(
     *,
     info: Optional[TMLDocInfo] = None,
     path: Optional[pathlib.Path] = None,
-) -> Union[Type[Connection], Type[TMLObject]]:
+) -> Union[type[Connection], type[TMLObject]]:
     """
     Get the appropriate TML class based on input data.
 
@@ -164,14 +165,14 @@ class EnvironmentGUIDMapper:
 
     def __init__(self, environment_transformer: Callable[[str], str] = str.upper):
         self.environment_transformer = environment_transformer
-        self._mapping: Dict[str, Dict[str, GUID]] = {}
+        self._mapping: dict[str, dict[str, GUID]] = {}
 
-    def __setitem__(self, guid: GUID, value: Tuple[str, GUID]) -> None:
+    def __setitem__(self, guid: GUID, value: tuple[str, GUID]) -> None:
         environment, guid_to_add = value
         environment = self.environment_transformer(environment)
 
         try:
-            envts: Dict[str, GUID] = self[guid]
+            envts: dict[str, GUID] = self[guid]
         except KeyError:
             new_key = guid_to_add
             envts = {environment: guid_to_add}
@@ -184,7 +185,7 @@ class EnvironmentGUIDMapper:
 
         self._mapping.setdefault(new_key, {}).update(envts)
 
-    def __getitem__(self, guid: GUID) -> Dict[str, GUID]:
+    def __getitem__(self, guid: GUID) -> dict[str, GUID]:
         for guids_across_envts, envts in self._mapping.items():
             if guid in guids_across_envts.split("__"):
                 return envts
@@ -204,7 +205,7 @@ class EnvironmentGUIDMapper:
         """
         self[src_guid] = (environment, guid)
 
-    def get(self, guid: GUID, *, default: Any = _UNDEFINED) -> Dict[str, GUID]:
+    def get(self, guid: GUID, *, default: Any = _UNDEFINED) -> dict[str, GUID]:
         """
         Retrieve a GUID mapping.
 
@@ -222,7 +223,7 @@ class EnvironmentGUIDMapper:
 
         return retval
 
-    def generate_mapping(self, from_environment: str, to_environment: str) -> Dict[GUID, GUID]:
+    def generate_mapping(self, from_environment: str, to_environment: str) -> dict[GUID, GUID]:
         """
         Create a mapping of GUIDs between two environments.
 
@@ -236,7 +237,7 @@ class EnvironmentGUIDMapper:
         """
         from_environment = self.environment_transformer(from_environment)
         to_environment = self.environment_transformer(to_environment)
-        mapping: Dict[GUID, GUID] = {}
+        mapping: dict[GUID, GUID] = {}
 
         for envts in self._mapping.values():
             envt_a = envts.get(from_environment, None)
@@ -280,7 +281,7 @@ class EnvironmentGUIDMapper:
         instance._mapping = data
         return instance
 
-    def save(self, path: pathlib.Path, *, info: Optional[Dict[str, Any]] = None) -> None:
+    def save(self, path: pathlib.Path, *, info: Optional[dict[str, Any]] = None) -> None:
         """
         Save the guid mapping to file.
 
@@ -299,7 +300,7 @@ class EnvironmentGUIDMapper:
         with pathlib.Path(path).open(mode="w", encoding="UTF-8") as j:
             json.dump(data, j, indent=4)
 
-    def get_environment_guids(self, *, source: str, destination: str) -> Iterator[Tuple[GUID, GUID]]:
+    def get_environment_guids(self, *, source: str, destination: str) -> Iterator[tuple[GUID, GUID]]:
         """
         Iterate through all guid pairs between source and destination.
 
@@ -323,7 +324,7 @@ class EnvironmentGUIDMapper:
 def disambiguate(
     tml: TMLObject,
     *,
-    guid_mapping: Dict[str, GUID],
+    guid_mapping: dict[str, GUID],
     remap_object_guid: bool = True,
     delete_unmapped_guids: bool = False,
 ) -> TMLObject:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Optional
 import json
 import pathlib
 import zipfile
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Manifest:
-    object: List[TMLDocInfo]
+    object: list[TMLDocInfo]
 
 
 @dataclass
@@ -28,39 +28,39 @@ class SpotApp:
     This object is usually packaged together as a zip file.
     """
 
-    tml: List[TMLObject]
+    tml: list[TMLObject]
     manifest: Optional[Manifest] = None
 
     @property
-    def tables(self) -> List[Table]:
+    def tables(self) -> list[Table]:
         return [tml for tml in self.tml if isinstance(tml, Table)]
 
     @property
-    def views(self) -> List[View]:
+    def views(self) -> list[View]:
         return [tml for tml in self.tml if isinstance(tml, View)]
 
     @property
-    def sql_views(self) -> List[SQLView]:
+    def sql_views(self) -> list[SQLView]:
         return [tml for tml in self.tml if isinstance(tml, SQLView)]
 
     @property
-    def worksheets(self) -> List[Worksheet]:
+    def worksheets(self) -> list[Worksheet]:
         return [tml for tml in self.tml if isinstance(tml, Worksheet)]
 
     @property
-    def answers(self) -> List[Answer]:
+    def answers(self) -> list[Answer]:
         return [tml for tml in self.tml if isinstance(tml, Answer)]
 
     @property
-    def liveboards(self) -> List[Liveboard]:
+    def liveboards(self) -> list[Liveboard]:
         return [tml for tml in self.tml if isinstance(tml, Liveboard)]
 
     @property
-    def model(self) -> List[Model]:
+    def model(self) -> list[Model]:
         return [tml for tml in self.tml if isinstance(tml, Model)]
 
     @property
-    def cohort(self) -> List[Cohort]:
+    def cohort(self) -> list[Cohort]:
         return [tml for tml in self.tml if isinstance(tml, Cohort)]
 
     @classmethod
@@ -77,7 +77,7 @@ class SpotApp:
           metadata/tml/export response data to parse
         """
         info: SpotAppInfo = {"tml": [], "manifest": None}
-        manifest_data: Dict[str, List[TMLDocInfo]] = {"object": []}
+        manifest_data: dict[str, list[TMLDocInfo]] = {"object": []}
 
         for edoc_info in payload["object"]:
             tml_cls = determine_tml_type(info=edoc_info["info"])

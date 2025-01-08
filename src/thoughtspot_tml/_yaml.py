@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 import re
 
 import yaml
@@ -68,7 +68,7 @@ yaml.add_representer(str, _double_quote_when_special_char, Dumper=_compat.Dumper
 yaml.Loader.yaml_implicit_resolvers.pop("=")
 
 
-def load(document: str) -> Dict[str, Any]:
+def load(document: str) -> dict[str, Any]:
     """
     Load a TML object.
     """
@@ -80,7 +80,7 @@ def load(document: str) -> Dict[str, Any]:
         return yaml.load(document, Loader=yaml.SafeLoader)
 
 
-def dump(document: Dict[str, Any]) -> str:
+def dump(document: dict[str, Any]) -> str:
     """
     Dump a TML object as YAML.
 

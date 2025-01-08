@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 import copy
 import json
 import uuid
@@ -35,7 +35,7 @@ class Connection(_tml.TML):
         return self.connection.name
 
     @classmethod
-    def _loads(cls, tml_document: str) -> Dict[str, Any]:
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
         # Handle backwards incompatible changes.
         document = _yaml.load(tml_document)
 
@@ -246,7 +246,7 @@ class Model(_tml.TML):
         return self.model.name
 
     @classmethod
-    def _loads(cls, tml_document: str) -> Dict[str, Any]:
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
         # DEV NOTE: @boonhapus, 2024/02/14
         # The Worksheet V2 update include a python reserved word in the spec, which
         # python-betterproto automatically adds a trailing sunder to. This reverses it.
@@ -255,7 +255,7 @@ class Model(_tml.TML):
 
         return _yaml.load(tml_document)
 
-    def _to_dict(self) -> Dict[str, Any]:
+    def _to_dict(self) -> dict[str, Any]:
         # DEV NOTE: @boonhapus, 2024/02/14
         # The Worksheet V2 update include a python reserved word in the spec, which
         # python-betterproto automatically adds a trailing sunder to. This reverses it.
