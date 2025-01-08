@@ -654,7 +654,7 @@ class WorksheetEDocProto(betterproto.Message):
 class WorksheetEDocProtoQueryProperties(betterproto.Message):
     is_bypass_rls: bool = betterproto.bool_field(1, optional=True)
     join_progressive: bool = betterproto.bool_field(2, optional=True)
-    config: "SageConfigProto" = betterproto.message_field(3, optional=True)
+    sage_config: "SageConfigProto" = betterproto.message_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1115,7 +1115,7 @@ class LogicalTableEDocProtoDbColumnProperties(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class LogicalTableEDocProtoProperties(betterproto.Message):
-    config: "SageConfigProto" = betterproto.message_field(1, optional=True)
+    sage_config: "SageConfigProto" = betterproto.message_field(1, optional=True)
 
 
 @dataclass(eq=False, repr=False)
