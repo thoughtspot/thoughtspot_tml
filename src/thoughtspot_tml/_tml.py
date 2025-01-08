@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from dataclasses import asdict, dataclass, fields, is_dataclass
-from typing import TYPE_CHECKING, get_args, get_origin
+from typing import TYPE_CHECKING, ForwardRef, Optional, get_args, get_origin
 import functools as ft
 import json
 import keyword
 import pathlib
 import re
 import warnings
-
-import yaml
 
 from thoughtspot_tml import _scriptability, _yaml
 from thoughtspot_tml._compat import Self
@@ -19,14 +17,33 @@ from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 if TYPE_CHECKING:
     from typing import Any
 
+    from thoughtspot_tml.types import GUID
+
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 
 
 def attempt_resolve_type(type_hint: Any) -> Any:
     """Resolves string type hints to actual types."""
+    # IF IT'S A ForwardRef, RESOLVE IT.
+    # Further Reading:
+    #   https://docs.python.org/3/library/typing.html#typing.ForwardRef
+    if isinstance(type_hint, ForwardRef):
+        return type_hint.__forward_value__
+
+    # IF IT'S A STRING, ATTEMPT TO LOOK IT UP IN _scriptability.py
     if isinstance(type_hint, str):
         return getattr(_scriptability, type_hint.replace("_scriptability.", ""), type_hint)
     return type_hint
+
+
+def origin_or_fallback(type_hint: Any, *, default: Any) -> Any:
+    """
+    Get the unsubscripted version of a type, with optional fallback.
+
+    Further Reading:
+      https://docs.python.org/3/library/typing.html#typing.get_origin
+    """
+    return get_origin(type_hint) or default
 
 
 def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
@@ -56,6 +73,10 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
         # NOTE: this falls back to the original type_hint when it can't be resolved.
         field_type = attempt_resolve_type(field.type)
 
+        # ORIGIN TYPES ARE THE X in X[a, b, c] hints.. but does not include native types
+        # eg.  typing.List[str] but NOT list[str]
+        origin_type = origin_or_fallback(field_type, default=field_type)
+
         # RECURSE INTO RESOLVED _scripatability.py HINTS
         if RESOLVED_TYPEHINT_HAS_CHILDREN(hint=field_type, expr=value):
             new_value = field_type(**value)
@@ -63,18 +84,11 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
 
         # list IS USED TO DENOTE THAT A TML OBJECT CAN CONTAIN MULTIPLE HOMOGENOUS
         # CHILDREN SO WE TAKE JUST THE FIRST ELEMENT AND ATTEMPT TO RESOLVE IT.
-        elif get_origin(field_type) is list:
-            new_value = []
+        elif origin_type is list:
             homo_type = next(iter(get_args(field_type)))
             item_type = attempt_resolve_type(homo_type)
 
-            # OLD ... will keep this around JUST IN CASE.
-            #
-            # item_type = attempt_resolve_type(
-            #     get_args(field_type)[0].__forward_value__
-            #     if isinstance(get_args(field_type)[0], typing.ForwardRef)
-            #     else get_args(field_type)[0]
-            # )
+            new_value = []
 
             for item in value:
                 # RECURSE INTO RESOLVED _scripatability.py HINTS
@@ -84,9 +98,15 @@ def recursive_complex_attrs_to_dataclasses(instance: Any) -> None:
 
                 new_value.append(item)
 
-        # IF OUR VALUE IS EMPTY, WE'RE GOING TO DROP IT.
-        elif get_origin(field_type) is dict and not value:
+        # IF OUR VALUE IS EMPTY, IT IS OPTIONAL AND SO WE'RE GOING TO DROP IT.
+        elif origin_type is dict and not value:
             new_value = None
+
+        # DEV NOTE: @boonhapus, 2025/01/08
+        #   Q. WHY NO (origin_type is dict and value) LIKE WE HAVE FOR LISTS?
+        #   A. Currently the edoc spec does not maintain complex mapping types. If we
+        #      need to support them, we'll need to add them at this priority (below
+        #      empty dicts -- so we continue to support optionality).
 
         # SIMPLE TYPES DO NOT NEED RECURSION.
         else:
@@ -141,6 +161,8 @@ class TML:
     Base object for ThoughtSpot TML.
     """
 
+    guid: Optional[GUID]
+
     @property
     def tml_type_name(self) -> str:
         """Return the type name of the TML object."""
@@ -148,6 +170,11 @@ class TML:
         camels = RE_CAMEL_CASE.findall(cls_name)
         snakes = "_".join(camels)
         return snakes.lower()
+
+    @property
+    def name(self) -> str:
+        """This should be implemented in child classes."""
+        raise NotImplementedError
 
     def __post_init__(self):
         recursive_complex_attrs_to_dataclasses(self)
@@ -180,14 +207,10 @@ class TML:
         TMLDecodeError, when the document string cannot be parsed or receives extra data
         """
         try:
-            document = cls._loads(tml_document)
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError, yaml.reader.ReaderError) as e:
-            raise TMLDecodeError(cls, message=str(e), problem_mark=getattr(e, "problem_mark", None)) from None  # type: ignore[arg-type]
-
-        try:
-            instance = cls(**document)
-        except TypeError as e:
-            raise TMLDecodeError(cls, data=document, message=str(e)) from None  # type: ignore[arg-type]
+            data = cls._loads(tml_document)
+            instance = cls(**data)
+        except Exception as e:
+            raise TMLDecodeError(cls, exc=e, document=tml_document) from None
 
         return instance
 
@@ -211,7 +234,8 @@ class TML:
         try:
             instance = cls.loads(path.read_text(encoding="utf-8"))
         except TMLDecodeError as e:
-            e.path = path
+            # INTERCEPT AND INJECT THE FILEPATH.
+            e.filepath = path
             raise e from None
 
         return instance

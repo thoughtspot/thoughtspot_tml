@@ -106,7 +106,8 @@ strict_equality = true
 strict_concatenate = true
 exclude = '''
 (?x)(
-    ^_scriptability.py$  # IGNORE AUTO-GENERATED FILES
+      _scriptability.py$  # IGNORE AUTO-GENERATED FILES
+    | _compat.py$         # IGNORE COMPAT FILES
 )
 '''
 
@@ -116,7 +117,6 @@ target-version = "py39"
 line-length = 120
 src = ["src/thoughtspot_tml"]
 exclude = [
-
     # PROJECT SPECIFIC IGNORES
     "__init__.py",        # ignore __init__.py
     "__project__.py",     # ignore project metadata

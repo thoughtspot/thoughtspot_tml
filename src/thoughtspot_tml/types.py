@@ -1,26 +1,26 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Literal, Type, TypedDict, Union
+from typing import TYPE_CHECKING, Annotated, Literal, TypedDict, Union
 
-from thoughtspot_tml.tml import Answer, Cohort, Liveboard, Model, SQLView, Table, View, Worksheet
+from thoughtspot_tml import TML, Answer, Cohort, Liveboard, Model, SQLView, Table, View, Worksheet
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional
+    from typing import Any, Optional
 
     from thoughtspot_tml.spotapp import Manifest
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reused Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TMLObject = Union[Table, View, SQLView, Worksheet, Answer, Liveboard, Cohort, Model]
-TMLObjectType = Type[TMLObject]
+TMLObject = Union[Table, View, SQLView, Worksheet, Answer, Liveboard, Cohort, Model, TML]
+TMLObjectType = type[TMLObject]
 TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard", "cohort", "model"]
 TMLDocument = Annotated[str, "a TMLObject represented as a YAML 1.1 document"]
 GUID = Annotated[str, "A globally unique ID represented as a stringified UUID4"]
 
 
 class SpotAppInfo(TypedDict):
-    tml: List[TMLObject]
+    tml: list[TMLObject]
     manifest: Optional[Manifest]
 
 
@@ -42,7 +42,7 @@ class TMLDocInfo(TypedDict):
     status: StatusCode
     type: str
     id: GUID
-    dependency: List[FileInfo]
+    dependency: list[FileInfo]
 
 
 class EDocExportResponse(TypedDict):
@@ -51,7 +51,7 @@ class EDocExportResponse(TypedDict):
 
 
 class EDocExportResponses(TypedDict):
-    object: List[EDocExportResponse]
+    object: list[EDocExportResponse]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ /connection/* Metadata Data Structure ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,22 +75,22 @@ class ExternalTable(TypedDict):
     description: str
     selected: bool
     linked: bool
-    columns: List[ExternalColumn]
+    columns: list[ExternalColumn]
 
 
 class ExternalSchema(TypedDict):
     name: Optional[str]
-    tables: List[ExternalTable]
+    tables: list[ExternalTable]
 
 
 class ExternalDatabase(TypedDict):
     name: Optional[str]
     isAutoCreated: bool
-    schemas: List[ExternalSchema]
+    schemas: list[ExternalSchema]
 
 
 class ConnectionMetadata(TypedDict):
     # for a full list of connection configurations
     #  https://developers.thoughtspot.com/docs/?pageid=connections-api#connection-metadata
-    configuration: Dict[str, Any]
-    externalDatabases: List[ExternalDatabase]
+    configuration: dict[str, Any]
+    externalDatabases: list[ExternalDatabase]

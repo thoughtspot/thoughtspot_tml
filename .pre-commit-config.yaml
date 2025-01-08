@@ -17,6 +17,8 @@ repos:
       - id: pyupgrade
         # SEE pyproject.toml FOR py{min-support}-plus.
         args: [--py39-plus, --keep-runtime-typing]
+        # THIS FILE NEEDS TO STAY python27 COMPATIBLE "ABOVE" __main__ AND py{min-support} "BELOW" __main__.
+        exclude: ^examples/
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.8.6

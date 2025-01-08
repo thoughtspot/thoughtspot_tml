@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 import re
 
 import yaml
 
 from thoughtspot_tml import _compat
-
-NEARLY_INFINITY = 999999999  # This used to be math.inf, but C has no concept of infinity. ;)
 
 # TML column ids typically take the form..
 #
@@ -40,7 +38,7 @@ _RESERVED_WORDS = (
 # fmt: on
 
 
-def _double_quote_when_special_char(dumper: yaml.Dumper, data: str) -> yaml.ScalarNode:
+def _double_quote_when_special_char(dumper: yaml.Dumper | yaml.CDumper, data: str) -> yaml.ScalarNode:
     """
     Double quote the string when any condition is met.
 
@@ -68,7 +66,7 @@ yaml.add_representer(str, _double_quote_when_special_char, Dumper=_compat.Dumper
 yaml.Loader.yaml_implicit_resolvers.pop("=")
 
 
-def load(document: str) -> Dict[str, Any]:
+def load(document: str) -> dict[str, Any]:
     """
     Load a TML object.
     """
@@ -80,7 +78,7 @@ def load(document: str) -> Dict[str, Any]:
         return yaml.load(document, Loader=yaml.SafeLoader)
 
 
-def dump(document: Dict[str, Any]) -> str:
+def dump(document: dict[str, Any]) -> str:
     """
     Dump a TML object as YAML.
 
@@ -94,6 +92,8 @@ def dump(document: Dict[str, Any]) -> str:
 
     We'll attempt to reproduce them in Python.
     """
+    NEARLY_INFINITY = 999999999  # This used to be math.inf, but C has no concept of infinity. ;)
+
     options = {
         "width": NEARLY_INFINITY,
         "default_flow_style": False,
@@ -101,8 +101,8 @@ def dump(document: Dict[str, Any]) -> str:
         "allow_unicode": True,
     }
     try:
-        return yaml.dump(document, Dumper=_compat.Dumper, **options)
+        return yaml.dump(document, Dumper=_compat.Dumper, **options)  # type: ignore[call-overload]
 
     # FALL BACK TO THE SLOWER PYTHON DUMPER IF WE CAN'T FULLY PARSE UNICODE
     except UnicodeEncodeError:
-        return yaml.dump(document, Dumper=yaml.SafeDumper, **options)
+        return yaml.dump(document, Dumper=yaml.SafeDumper, **options)  # type: ignore[call-overload]

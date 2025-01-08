@@ -13,7 +13,7 @@ def _():
     with raises(TMLDecodeError) as exc:
         Answer.loads(tml_document="😅: INVALID")
 
-    assert "supplied data does not produce a valid TML (Answer) document" in str(exc.raised)
+    assert "Unrecognized attribute in the TML spec:" in str(exc.raised)
 
 
 @test("TMLDecodeError on invalid file input")
@@ -23,5 +23,5 @@ def _():
     with raises(TMLDecodeError) as exc:
         Answer.load(path=fp)
 
-    assert "is not a valid TML (Answer) file" in str(exc.raised)
-    assert "syntax error on line 2, around column 9" in str(exc.raised)
+    assert "may not be a valid Answer file" in str(exc.raised)
+    assert "Syntax error on line 2, around column 9" in str(exc.raised)
