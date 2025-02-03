@@ -194,6 +194,16 @@ class FrequencySpecFrequencyGranularity(betterproto.Enum):
     MONTHLY = 4
 
 
+class FeedbackEDocProtoType(betterproto.Enum):
+    QUERY = 1
+    FRAGMENT = 2
+
+
+class FeedbackEDocProtoScope(betterproto.Enum):
+    GLOBAL = 1
+    WORKSHEET_USER = 2
+
+
 class ActionTypeE(betterproto.Enum):
     CALLBACK = 1
     URL = 2
@@ -575,13 +585,13 @@ class Identity(betterproto.Message):
     id: str = betterproto.string_field(1, optional=True)
     name: str = betterproto.string_field(2, optional=True)
     fqn: str = betterproto.string_field(3, optional=True)
-    reference_object_id: str = betterproto.string_field(4, optional=True)
+    obj_id: str = betterproto.string_field(4, optional=True)
 
 
 @dataclass(eq=False, repr=False)
 class ObjectEDocProto(betterproto.Message):
     guid: str = betterproto.string_field(1, optional=True)
-    object_id: str = betterproto.string_field(2, optional=True)
+    obj_id: str = betterproto.string_field(2, optional=True)
     view: "ViewEDocProto" = betterproto.message_field(3, optional=True)
     answer: "AnswerEDocProto" = betterproto.message_field(4, optional=True)
     pinboard: "PinboardEDocProto" = betterproto.message_field(5, optional=True)
@@ -601,6 +611,7 @@ class ObjectEDocProto(betterproto.Message):
     is_demo_data: bool = betterproto.bool_field(19, optional=True)
     model: "WorksheetEDocProto" = betterproto.message_field(20, optional=True)
     worksheet: "WorksheetEDocProto" = betterproto.message_field(21, optional=True)
+    nls_feedback: "FeedbackEDocProto" = betterproto.message_field(22, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -623,7 +634,7 @@ class SchemaSchemaTable(betterproto.Message):
     alias: str = betterproto.string_field(2, optional=True)
     fqn: str = betterproto.string_field(3, optional=True)
     joins: list["SchemaInPlaceJoin"] = betterproto.message_field(4, optional=True)
-    reference_object_id: str = betterproto.string_field(5, optional=True)
+    obj_id: str = betterproto.string_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -702,6 +713,34 @@ class LessonPlanEDocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class FeedbackEDocProto(betterproto.Message):
+    parent_object_id: str = betterproto.string_field(1, optional=True)
+    feedback: list["FeedbackEDocProtoFeedback"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class FeedbackEDocProtoFormulaInfo(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    expression: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class FeedbackEDocProtoFeedback(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    type: "FeedbackEDocProtoType" = betterproto.enum_field(2, optional=True)
+    scope: "FeedbackEDocProtoScope" = betterproto.enum_field(3, optional=True)
+    nl_query: str = betterproto.string_field(4, optional=True)
+    parent_query: str = betterproto.string_field(5, optional=True)
+    tml_tokens: str = betterproto.string_field(6, optional=True)
+    formula_info: list["FeedbackEDocProtoFormulaInfo"] = betterproto.message_field(7, optional=True)
+    sql: str = betterproto.string_field(8, optional=True)
+    upvotes: int = betterproto.int64_field(9, optional=True)
+    display_mode: str = betterproto.string_field(10, optional=True)
+    chart_type: str = betterproto.string_field(11, optional=True)
+    axis_config: list["ChartVisualizationAxisConfig"] = betterproto.message_field(12, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class ViewEDocProto(betterproto.Message):
     name: str = betterproto.string_field(1, optional=True)
     description: str = betterproto.string_field(2, optional=True)
@@ -728,7 +767,7 @@ class ConnectionDoc(betterproto.Message):
     name: str = betterproto.string_field(1, optional=True)
     type: str = betterproto.string_field(2, optional=True)
     authentication_type: str = betterproto.string_field(3, optional=True)
-    properties: list["KeyValueStr"] = betterproto.message_field(4, optional=True)
+    properties: list["ConnectionDocProperty"] = betterproto.message_field(4, optional=True)
     table: list["ConnectionDocTableDoc"] = betterproto.message_field(5, optional=True)
     description: str = betterproto.string_field(6, optional=True)
     connection_configurations: list["ConnectionDocConnectionConfigurationDoc"] = betterproto.message_field(
@@ -770,6 +809,18 @@ class ConnectionDocConnectionConfigurationDoc(betterproto.Message):
     policy_type: str = betterproto.string_field(7, optional=True)
     disabled: bool = betterproto.bool_field(8, optional=True)
     description: str = betterproto.string_field(9, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ConnectionDocProperty(betterproto.Message):
+    key: str = betterproto.string_field(1, optional=True)
+    value: str = betterproto.string_field(2, optional=True)
+    templated_fields: "ConnectionDocPropertyTemplatedFields" = betterproto.message_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ConnectionDocPropertyTemplatedFields(betterproto.Message):
+    value: str = betterproto.string_field(1, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1081,6 +1132,7 @@ class LogicalTableEDocProto(betterproto.Message):
     parameters: list["Parameter"] = betterproto.message_field(10, optional=True)
     dataset_id: str = betterproto.string_field(11, optional=True)
     properties: "LogicalTableEDocProtoProperties" = betterproto.message_field(12, optional=True)
+    templated_fields: "LogicalTableEDocProtoTemplatedFields" = betterproto.message_field(13, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1116,6 +1168,13 @@ class LogicalTableEDocProtoDbColumnProperties(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class LogicalTableEDocProtoProperties(betterproto.Message):
     sage_config: "SageConfigProto" = betterproto.message_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class LogicalTableEDocProtoTemplatedFields(betterproto.Message):
+    db: str = betterproto.string_field(1, optional=True)
+    schema: str = betterproto.string_field(2, optional=True)
+    db_table: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
