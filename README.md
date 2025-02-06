@@ -43,6 +43,11 @@ __Installation is as simple as:__
 pip install thoughtspot-tml
 ```
 
+## Upgrade after ThoughtSpot instance upgrades
+If you see errors after the `.load()` method when loading a TML file exported directly from your ThoughtSpot instance, please upgrade to the latest `thoughtpot_tml`.
+
+New attributes may have been added to the TML specification that are not present in the older version of `thoughtspot_tml` you have installed.
+
 ## A Basic Example
 
 This example creates a command-line tool for changing the prefix in the names of the Table objects that a Worksheet object connects to.
