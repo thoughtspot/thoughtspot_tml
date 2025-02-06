@@ -43,7 +43,7 @@ __Installation is as simple as:__
 pip install thoughtspot-tml
 ```
 
-## Upgrade after ThoughtSpot instance upgrades
+## Upgrade library after ThoughtSpot is upgraded
 If you have errors using the `.load()` method on a TML file directly exported with no modification from ThoughtSpot, please upgrade to the latest `thoughtpot_tml` version.
 
 New attributes may have been added to the TML specification that are not present in the older version of `thoughtspot_tml` library you have installed.
