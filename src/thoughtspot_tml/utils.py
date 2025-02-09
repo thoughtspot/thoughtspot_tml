@@ -353,28 +353,52 @@ def disambiguate(
             tml.guid = guid_mapping[tml.guid]
 
         elif delete_unmapped_guids:
-            tml.guid = None
+            tml.guid = None  # type: ignore[assignment]
 
-    IS_IDENTITY = ft.partial(lambda A: isinstance(A, (_scriptability.Identity, _scriptability.SchemaSchemaTable)))
+    ATTEMPT_TO_REMAP = {
+        # DEV NOTE: @boonhapus, 2025/02/09
+        # 1. Check each object based on the partial.
+        # 2.   If it matches.. search for the mapping key (in priority order)
+        # 3.   Replace it with the mapping value.
+        # 4. If no mapping was found, and delete_unmapped_guids is True, set the key to None
+        #
+        # LOGICAL_TABLE TABLE refernces
+        _scriptability.Identity: {
+            "check": ft.partial(lambda A: isinstance(A, _scriptability.Identity)),
+            "search": ("fqn", "name"),
+            "map": "fqn",
+        },
+        # MODEL TABLE refernces
+        _scriptability.SchemaSchemaTable: {
+            "check": ft.partial(lambda A: isinstance(A, _scriptability.SchemaSchemaTable)),
+            "search": ("fqn", "name"),
+            "map": "fqn",
+        },
+        # LIVEBOARD ANSWER.viz_guid
+        _scriptability.PinnedVisualization: {
+            "check": ft.partial(lambda A: isinstance(A, _scriptability.PinnedVisualization)),
+            "search": ("viz_guid",),
+            "map": "viz_guid",
+        },
+        # PERSONALIZED LIVEBOARDS
+        _scriptability.PersonalisedViewEDocProto: {
+            "check": ft.partial(lambda A: isinstance(A, _scriptability.PersonalisedViewEDocProto)),
+            "search": ("view_guid",),
+            "map": "view_guid",
+        },
+    }
 
-    # DEVNOTE: @boonhapus, might need to add more scans for
-    # - PinnedVisualization.viz_guid
-    # - PersonalisedViewEDocProto.view_guid
-    attrs = _recursive_scan(tml, check=IS_IDENTITY)
+    for _, remapping_info in ATTEMPT_TO_REMAP.items():
+        for attribute in _recursive_scan(tml, check=remapping_info["check"]):
+            for subattr in remapping_info["search"]:
+                identifier = getattr(attribute, subattr)
 
-    if not attrs:
-        log.debug(f"could not find any attributes to disambiguate on {tml}")
+                if identifier in guid_mapping:
+                    setattr(attribute, remapping_info["map"], guid_mapping[identifier])
+                    break
 
-    for attribute in attrs:
-        # NAME -> GUID
-        if attribute.name in guid_mapping:
-            attribute.fqn = guid_mapping[attribute.name]
-
-        # ENVT_A.GUID -> ENVT_B.GUID
-        elif attribute.fqn in guid_mapping:
-            attribute.fqn = guid_mapping[attribute.fqn]
-
-        elif delete_unmapped_guids:
-            attribute.fqn = None
+            else:
+                if delete_unmapped_guids:
+                    setattr(attribute, subattr, None)
 
     return tml
