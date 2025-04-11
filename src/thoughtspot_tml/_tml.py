@@ -17,7 +17,7 @@ from thoughtspot_tml.exceptions import TMLDecodeError, TMLExtensionWarning
 if TYPE_CHECKING:
     from typing import Any
 
-    from thoughtspot_tml.types import GUID, ObjId
+    from thoughtspot_tml.types import GUID
 
 RE_CAMEL_CASE = re.compile(r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+")
 

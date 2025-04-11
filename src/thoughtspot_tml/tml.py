@@ -13,13 +13,7 @@ if TYPE_CHECKING:
     from typing import Optional
     import pathlib
 
-    from thoughtspot_tml.types import (
-        GUID,
-        ConnectionMetadata,
-        ExternalDatabase,
-        ExternalSchema,
-        ObjId
-    )
+    from thoughtspot_tml.types import GUID, ConnectionMetadata, ExternalDatabase, ExternalSchema, ObjId
 
 
 @dataclass
@@ -425,7 +419,6 @@ class Cohort(_tml.TML):
         return self.cohort.config.cohort_type == _scriptability.CohortTypeE.ADVANCED
 
     def _loads(cls, tml_document: str) -> dict[str, Any]:
-
         document = _yaml.load(tml_document)
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
@@ -438,6 +431,7 @@ class Cohort(_tml.TML):
             document["obj_id"] = None
 
         return document
+
 
 def __getattr__(name: str) -> Any:
     # DEPRECATED :: https://docs.thoughtspot.com/software/latest/deprecation
