@@ -238,7 +238,8 @@ class Model(_tml.TML):
     Representation of a ThoughtSpot Model TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[GUID]
     model: _scriptability.WorksheetEDocProto
 
     @property
@@ -253,7 +254,20 @@ class Model(_tml.TML):
         if "with:" in tml_document:
             tml_document = tml_document.replace("- with:", "- with_:")
 
-        return _yaml.load(tml_document)
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "guid" not in document and "obj_id" not in document:
+            document = {"guid": None, "obj_id": None, "model": document}
+        elif "guid" not in document:
+            document["guid"] = None
+        elif "obj_id" not in document:
+            document["obj_id"] = None
+
+        return document
+
+
 
     def _to_dict(self) -> dict[str, Any]:
         # DEV NOTE: @boonhapus, 2024/02/14
