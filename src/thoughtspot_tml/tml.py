@@ -13,12 +13,7 @@ if TYPE_CHECKING:
     from typing import Optional
     import pathlib
 
-    from thoughtspot_tml.types import (
-        GUID,
-        ConnectionMetadata,
-        ExternalDatabase,
-        ExternalSchema,
-    )
+    from thoughtspot_tml.types import GUID, ConnectionMetadata, ExternalDatabase, ExternalSchema, ObjId
 
 
 @dataclass
@@ -28,6 +23,7 @@ class Connection(_tml.TML):
     """
 
     guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     connection: _scriptability.ConnectionDoc
 
     @property
@@ -41,8 +37,17 @@ class Connection(_tml.TML):
 
         # DEV NOTE: @boonhapus, 2024/02/14
         # Old connections do not offer a TML component, so we'll fake it.
-        if "guid" not in document:
-            document = {"guid": None, "connection": document}
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "guid" not in document and "obj_id" not in document:
+            if "connection" in document:
+                document = {"guid": None, "obj_id": None, "connection": document["connection"]}
+            else:
+                document = {"guid": None, "obj_id": None, "connection": document}
+        elif "guid" not in document:
+            document["guid"] = None
+        elif "obj_id" not in document:
+            document["obj_id"] = None
 
         return document
 
@@ -152,12 +157,29 @@ class Table(_tml.TML):
     Representation of a ThoughtSpot System Table TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     table: _scriptability.LogicalTableEDocProto
 
     @property
     def name(self) -> str:
         return self.table.name
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "table" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "table": document["table"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 @dataclass
@@ -166,12 +188,29 @@ class View(_tml.TML):
     Representation of a ThoughtSpot View TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     view: _scriptability.ViewEDocProto
 
     @property
     def name(self) -> str:
         return self.view.name
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "view" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "view": document["view"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 @dataclass
@@ -180,12 +219,29 @@ class SQLView(_tml.TML):
     Representation of a ThoughtSpot SQLView TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     sql_view: _scriptability.SqlViewEDocProto
 
     @property
     def name(self) -> str:
         return self.sql_view.name
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "sql_view" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "sql_view": document["sql_view"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 @dataclass
@@ -194,7 +250,8 @@ class Worksheet(_tml.TML):
     Representation of a ThoughtSpot Worksheet TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     worksheet: _scriptability.WorksheetEDocProto
 
     @property
@@ -231,6 +288,22 @@ class Worksheet(_tml.TML):
 
         return super().loads(tml_document)
 
+    @classmethod
+    def _loads(cls, tml_document: str) -> _compat.Self:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "worksheet" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "worksheet": document["worksheet"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
+
 
 @dataclass
 class Model(_tml.TML):
@@ -238,7 +311,8 @@ class Model(_tml.TML):
     Representation of a ThoughtSpot Model TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     model: _scriptability.WorksheetEDocProto
 
     @property
@@ -253,7 +327,19 @@ class Model(_tml.TML):
         if "with:" in tml_document:
             tml_document = tml_document.replace("- with:", "- with_:")
 
-        return _yaml.load(tml_document)
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "model" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "model": document["model"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
     def _to_dict(self) -> dict[str, Any]:
         # DEV NOTE: @boonhapus, 2024/02/14
@@ -273,12 +359,29 @@ class Answer(_tml.TML):
     Representation of a ThoughtSpot Answer TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     answer: _scriptability.AnswerEDocProto
 
     @property
     def name(self) -> str:
         return self.answer.name
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "answer" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "answer": document["answer"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 @dataclass
@@ -287,7 +390,8 @@ class Liveboard(_tml.TML):
     Representation of a ThoughtSpot Liveboard TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     liveboard: _scriptability.PinboardEDocProto
 
     @property
@@ -301,7 +405,19 @@ class Liveboard(_tml.TML):
         if "pinboard:" in tml_document:
             tml_document = tml_document.replace("pinboard:", "liveboard:")
 
-        return _yaml.load(tml_document)
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "liveboard" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "liveboard": document["liveboard"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 @dataclass
@@ -310,7 +426,8 @@ class Cohort(_tml.TML):
     Representation of a ThoughtSpot Cohort TML.
     """
 
-    guid: GUID
+    guid: Optional[GUID]
+    obj_id: Optional[ObjId]
     cohort: _scriptability.CohortEDocProto
 
     @property
@@ -326,6 +443,22 @@ class Cohort(_tml.TML):
     def is_query_set(self) -> bool:
         """Determines if the COHORT is a QuerySet."""
         return self.cohort.config.cohort_type == _scriptability.CohortTypeE.ADVANCED
+
+    @classmethod
+    def _loads(cls, tml_document: str) -> dict[str, Any]:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "cohort" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "cohort": document["cohort"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
 
 
 def __getattr__(name: str) -> Any:

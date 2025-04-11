@@ -17,6 +17,7 @@ TMLObjectType = type[TMLObject]
 TMLType = Literal["table", "view", "sqlview", "worksheet", "answer", "liveboard", "pinboard", "cohort", "model"]
 TMLDocument = Annotated[str, "a TMLObject represented as a YAML 1.1 document"]
 GUID = Annotated[str, "A globally unique ID represented as a stringified UUID4"]
+ObjId = Annotated[str, "An Org Level unique str ID that overrides GUID for updates"]
 
 
 class SpotAppInfo(TypedDict):
