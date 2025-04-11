@@ -40,7 +40,10 @@ class Connection(_tml.TML):
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
         if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "connection": document["connection"]}
+            if "connection" in document:
+                document = {"guid": None, "obj_id": None, "connection": document["connection"]}
+            else:
+                document = {"guid": None, "obj_id": None, "connection": document}
         elif "guid" not in document:
             document["guid"] = None
         elif "obj_id" not in document:
@@ -168,12 +171,13 @@ class Table(_tml.TML):
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "table": document["table"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "table" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "table": document["table"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -198,12 +202,13 @@ class View(_tml.TML):
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "view": document["view"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "view" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "view": document["view"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -228,12 +233,13 @@ class SQLView(_tml.TML):
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "sql_view": document["sql_view"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "sql_view" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "sql_view": document["sql_view"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -282,6 +288,22 @@ class Worksheet(_tml.TML):
 
         return super().loads(tml_document)
 
+    @classmethod
+    def _loads(cls, tml_document: str) -> _compat.Self:
+        document = _yaml.load(tml_document)
+
+        # DEV NOTE: @bryanthowell-ts, 2025/04/11
+        # In 10.6, TML can have guid: or obj_id: as their identifier
+        if "worksheet" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "worksheet": document["worksheet"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
+
+        return document
+
 
 @dataclass
 class Model(_tml.TML):
@@ -309,14 +331,13 @@ class Model(_tml.TML):
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "model": document["model"]}
-
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "model" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "model": document["model"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -346,17 +367,19 @@ class Answer(_tml.TML):
     def name(self) -> str:
         return self.answer.name
 
+    @classmethod
     def _loads(cls, tml_document: str) -> dict[str, Any]:
         document = _yaml.load(tml_document)
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "answer": document["answer"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "answer" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "answer": document["answer"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -386,12 +409,13 @@ class Liveboard(_tml.TML):
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "liveboard": document["liveboard"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "liveboard" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "liveboard": document["liveboard"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
@@ -420,17 +444,19 @@ class Cohort(_tml.TML):
         """Determines if the COHORT is a QuerySet."""
         return self.cohort.config.cohort_type == _scriptability.CohortTypeE.ADVANCED
 
+    @classmethod
     def _loads(cls, tml_document: str) -> dict[str, Any]:
         document = _yaml.load(tml_document)
 
         # DEV NOTE: @bryanthowell-ts, 2025/04/11
         # In 10.6, TML can have guid: or obj_id: as their identifier
-        if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "cohort": document["cohort"]}
-        elif "guid" not in document:
-            document["guid"] = None
-        elif "obj_id" not in document:
-            document["obj_id"] = None
+        if "cohort" in document:
+            if "guid" not in document and "obj_id" not in document:
+                document = {"guid": None, "obj_id": None, "cohort": document["cohort"]}
+            elif "guid" not in document:
+                document["guid"] = None
+            elif "obj_id" not in document:
+                document["obj_id"] = None
 
         return document
 
