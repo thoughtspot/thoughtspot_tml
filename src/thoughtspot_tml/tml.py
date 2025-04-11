@@ -311,7 +311,7 @@ class Model(_tml.TML):
         # In 10.6, TML can have guid: or obj_id: as their identifier
 
         if "guid" not in document and "obj_id" not in document:
-            document = {"guid": None, "obj_id": None, "model": document['model']}
+            document = {"guid": None, "obj_id": None, "model": document["model"]}
 
         elif "guid" not in document:
             document["guid"] = None
