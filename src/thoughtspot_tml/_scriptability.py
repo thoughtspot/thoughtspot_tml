@@ -194,16 +194,6 @@ class FrequencySpecFrequencyGranularity(betterproto.Enum):
     MONTHLY = 4
 
 
-class FeedbackEDocProtoType(betterproto.Enum):
-    QUERY = 1
-    FRAGMENT = 2
-
-
-class FeedbackEDocProtoScope(betterproto.Enum):
-    GLOBAL = 1
-    WORKSHEET_USER = 2
-
-
 class ActionTypeE(betterproto.Enum):
     CALLBACK = 1
     URL = 2
@@ -433,6 +423,8 @@ class ColumnProperties(betterproto.Message):
     default_date_bucket: "TimeBucketE" = betterproto.enum_field(22, optional=True)
     is_time_bucket_restricted: bool = betterproto.bool_field(23, optional=True)
     is_mandatory_token_filter: bool = betterproto.bool_field(24, optional=True)
+    data_type: str = betterproto.string_field(25, optional=True)
+    sql_data_type: str = betterproto.string_field(26, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -542,6 +534,7 @@ class Filter(betterproto.Message):
     date_filter: "DateFilterProto" = betterproto.message_field(6, optional=True)
     is_single_value: bool = betterproto.bool_field(7, optional=True)
     display_name: str = betterproto.string_field(8, optional=True)
+    apply_on_tables: list[str] = betterproto.string_field(9, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -565,6 +558,8 @@ class RelationEDocProto(betterproto.Message):
     type: str = betterproto.string_field(6, optional=True)
     is_one_to_one: bool = betterproto.bool_field(7, optional=True)
     relation_id: str = betterproto.string_field(8, optional=True)
+    with_: "Identity" = betterproto.message_field(9, optional=True)
+    cardinality: str = betterproto.string_field(10, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -612,6 +607,7 @@ class ObjectEDocProto(betterproto.Message):
     model: "WorksheetEDocProto" = betterproto.message_field(20, optional=True)
     worksheet: "WorksheetEDocProto" = betterproto.message_field(21, optional=True)
     nls_feedback: "FeedbackEDocProto" = betterproto.message_field(22, optional=True)
+    belongs_to_all_orgs: bool = betterproto.bool_field(23, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -714,8 +710,7 @@ class LessonPlanEDocProto(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class FeedbackEDocProto(betterproto.Message):
-    parent_object_id: str = betterproto.string_field(1, optional=True)
-    feedback: list["FeedbackEDocProtoFeedback"] = betterproto.message_field(2, optional=True)
+    feedback: list["FeedbackEDocProtoFeedback"] = betterproto.message_field(1, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -727,17 +722,16 @@ class FeedbackEDocProtoFormulaInfo(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class FeedbackEDocProtoFeedback(betterproto.Message):
     id: str = betterproto.string_field(1, optional=True)
-    type: "FeedbackEDocProtoType" = betterproto.enum_field(2, optional=True)
-    scope: "FeedbackEDocProtoScope" = betterproto.enum_field(3, optional=True)
-    nl_query: str = betterproto.string_field(4, optional=True)
-    parent_query: str = betterproto.string_field(5, optional=True)
-    tml_tokens: str = betterproto.string_field(6, optional=True)
+    type: str = betterproto.string_field(2, optional=True)
+    access: str = betterproto.string_field(3, optional=True)
+    feedback_phrase: str = betterproto.string_field(4, optional=True)
+    parent_question: str = betterproto.string_field(5, optional=True)
+    search_tokens: str = betterproto.string_field(6, optional=True)
     formula_info: list["FeedbackEDocProtoFormulaInfo"] = betterproto.message_field(7, optional=True)
-    sql: str = betterproto.string_field(8, optional=True)
-    upvotes: int = betterproto.int64_field(9, optional=True)
-    display_mode: str = betterproto.string_field(10, optional=True)
-    chart_type: str = betterproto.string_field(11, optional=True)
-    axis_config: list["ChartVisualizationAxisConfig"] = betterproto.message_field(12, optional=True)
+    rating: str = betterproto.string_field(8, optional=True)
+    display_mode: str = betterproto.string_field(9, optional=True)
+    chart_type: str = betterproto.string_field(10, optional=True)
+    axis_config: list["ChartVisualizationAxisConfig"] = betterproto.message_field(11, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -923,6 +917,8 @@ class AnswerEDocProto(betterproto.Message):
     parameters: list["Parameter"] = betterproto.message_field(13, optional=True)
     parameter_values: dict[str, str] = betterproto.map_field(14, betterproto.TYPE_STRING, betterproto.TYPE_STRING)
     action_object_associations: list["ActionObjectAssociationEdocProto"] = betterproto.message_field(15, optional=True)
+    dynamic_name: str = betterproto.string_field(16, optional=True)
+    dynamic_description: str = betterproto.string_field(17, optional=True)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -936,6 +932,7 @@ class AnswerEDocProtoAnswerColumn(betterproto.Message):
     name: str = betterproto.string_field(2, optional=True)
     custom_name: str = betterproto.string_field(3, optional=True)
     format: "FormatConfig" = betterproto.message_field(4, optional=True)
+    dynamic_title: str = betterproto.string_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1053,6 +1050,7 @@ class PinnedVisualization(betterproto.Message):
 class PinboardLayout(betterproto.Message):
     tabs: list["PinboardLayoutTab"] = betterproto.message_field(1, optional=True)
     tiles: list["PinboardLayoutTile"] = betterproto.message_field(2, optional=True)
+    group_layouts: list["PinboardLayoutGroupLayout"] = betterproto.message_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1061,6 +1059,7 @@ class PinboardLayoutTab(betterproto.Message):
     description: str = betterproto.string_field(2, optional=True)
     tiles: list["PinboardLayoutTile"] = betterproto.message_field(3, optional=True)
     id: str = betterproto.string_field(4, optional=True)
+    group_layouts: list["PinboardLayoutGroupLayout"] = betterproto.message_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1079,6 +1078,12 @@ class PinboardLayoutTile(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class PinboardLayoutGroupLayout(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    tiles: list["PinboardLayoutTile"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class PinboardParameterOverrideEDoc(betterproto.Message):
     name: str = betterproto.string_field(1, optional=True)
     id: str = betterproto.string_field(2, optional=True)
@@ -1093,14 +1098,43 @@ class PinboardEDocProto(betterproto.Message):
     description: str = betterproto.string_field(2, optional=True)
     tables: list["Identity"] = betterproto.message_field(3, optional=True)
     visualizations: list["PinnedVisualization"] = betterproto.message_field(4, optional=True)
-    filters: list["Filter"] = betterproto.message_field(5, optional=True)
-    layout: "PinboardLayout" = betterproto.message_field(6, optional=True)
-    parameters: list["Parameter"] = betterproto.message_field(7, optional=True)
+    groups: list["PinboardGroupEDocProto"] = betterproto.message_field(5, optional=True)
+    filters: list["Filter"] = betterproto.message_field(6, optional=True)
+    layout: "PinboardLayout" = betterproto.message_field(7, optional=True)
+    parameters: list["Parameter"] = betterproto.message_field(8, optional=True)
     parameter_overrides: dict[str, "PinboardParameterOverrideEDoc"] = betterproto.map_field(
-        8, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+        9, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
     )
-    views: list["PersonalisedViewEDocProto"] = betterproto.message_field(9, optional=True)
     ordered_chips: list["OrderedChipEDocProto"] = betterproto.message_field(10, optional=True)
+    views: list["PersonalisedViewEDocProto"] = betterproto.message_field(11, optional=True)
+    style: "LiveboardStyleEDocProto" = betterproto.message_field(12, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class PinboardGroupEDocProto(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    name: str = betterproto.string_field(2, optional=True)
+    description: str = betterproto.string_field(3, optional=True)
+    visualizations: list[str] = betterproto.string_field(4, optional=True)
+    group_guid: str = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class LiveboardStyleEDocProto(betterproto.Message):
+    style_properties: list["LiveboardStyleEDocProtoStyleProperty"] = betterproto.message_field(1, optional=True)
+    overrides: list["LiveboardStyleEDocProtoOverrideProto"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class LiveboardStyleEDocProtoStyleProperty(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    value: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class LiveboardStyleEDocProtoOverrideProto(betterproto.Message):
+    object_id: str = betterproto.string_field(1, optional=True)
+    style_properties: list["LiveboardStyleEDocProtoStyleProperty"] = betterproto.message_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1216,12 +1250,18 @@ class MonitorAlertEDocProto(betterproto.Message):
     personalised_view_info: "MonitorAlertEDocProtoPersonalisedViewInfo" = betterproto.message_field(9, optional=True)
     alert_type: "AlertType" = betterproto.enum_field(10, optional=True)
     attribute_info: "AttributeInfo" = betterproto.message_field(11, optional=True)
+    subscribed_group: list["MonitorAlertEDocProtoGroup"] = betterproto.message_field(12, optional=True)
 
 
 @dataclass(eq=False, repr=False)
 class MonitorAlertEDocProtoUser(betterproto.Message):
     username: str = betterproto.string_field(1, optional=True)
     user_email: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class MonitorAlertEDocProtoGroup(betterproto.Message):
+    group_name: str = betterproto.string_field(1, optional=True)
 
 
 @dataclass(eq=False, repr=False)
