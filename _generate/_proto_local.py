@@ -153,11 +153,18 @@ message ComparisonOperator {
   }
 }
 
+// This message captures simple and advance grouping in cohorts.
 message FilterCondition {
+  enum FilterValueType {
+    STRING=1;
+    DATE_FILTER=2;
+  }
   optional string column_id = 1;
   optional ComparisonOperator.E operator = 2;
   repeated string value = 3;
   optional string column_name = 4;
+  optional FilterValueType filter_value_type = 5 [default = STRING];
+  repeated sage.DateFilterProto date_filter_values = 6;
 }
 
 message CohortGroup {
@@ -175,6 +182,53 @@ message CohortBin {
   optional double maximum_value = 2;
   optional double bin_size = 3;
 }
+
+message PassThruFilter {
+  optional bool accept_all = 1;
+  repeated string include_column_ids = 2;
+  repeated string exclude_column_ids = 3;
+}
+
+message CohortConfig {
+  enum Version {
+    V1 = 1;
+    V1DOT1 = 2;
+  }
+  optional string name = 1;
+  optional string description = 2;
+  // Output value when return column returns {Null} value after the join. Only applicable to
+  // VARCHAR columns.
+  optional string null_output_value = 3;
+  // This boolean flag determines the handling of non-grouped values in the output.
+  // If true (default), all non-grouped values will be consolidated under 'null_output_value'.
+  // If false, non-grouped values will be retained as separate individual values in the output.
+  optional bool combine_non_group_values = 4 [default = true];
+  optional CohortType.E cohort_type = 5;
+  optional CohortGroupingType.E cohort_grouping_type = 10;
+  // Used to uniquely identify the anchor column. It is answer column or column GUID when used
+  // to save in Logical Column. It is column name or answer column name when used
+  // for cohort TML.
+  optional string anchor_column_id = 6;
+  // Used to uniquely identify the return column. It is answer column or column GUID when used
+  // to save in Logical Column. It is column name or answer column name when used
+  // for cohort TML.
+  optional string return_column_id = 7;
+  repeated CohortGroup groups = 8;
+  optional CohortBin bins = 9;
+  optional string cohort_answer_guid = 11;
+  optional bool is_editable = 12 [default = false];
+  // Cohort guid to be set in case of editing an existing cohort.
+  optional string cohort_guid = 13 [deprecated = true];
+  // This boolean flag determines the handling of excluded values for answer-based cohorts.
+  // If true (default), all excluded query values will be hidden.
+  // If false, excluded values will be consolidated under 'group_excluded_query_values'.
+  optional bool hide_excluded_query_values = 14 [default = true];
+  // Output value when excluded query values are grouped.
+  optional string group_excluded_query_values = 15;
+  optional Version version = 16;
+  optional PassThruFilter pass_thru_filter = 17;
+}
+
 """
 
 
