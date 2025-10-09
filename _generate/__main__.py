@@ -85,9 +85,9 @@ def _clean_edoc_proto() -> None:
         # of the combined edoc.proto file, with the package name of 'scriptability'.
         # So this logic prefixes those few with 'scriptability.' which fixes the name resolution issue
         if re_match is not None:
-            if re_match.group(0) in ['callosum.']:
+            if re_match.group(0) in ["callosum."]:
                 text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", "scriptability.", text,
-                                flags=re.MULTILINE | re.DOTALL)  # noqa: E501
+                                flags=re.MULTILINE | re.DOTALL)
             else:
                 text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)  # noqa: E501
         # fmt: on
