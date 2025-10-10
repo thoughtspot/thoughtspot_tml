@@ -153,11 +153,22 @@ message ComparisonOperator {
   }
 }
 
+// This message captures simple and advance grouping in cohorts.
+// sage.DateFilterProto is Modified from the original, to adjust for the name space issue
+// 
+
 message FilterCondition {
+  enum FilterValueType {
+    STRING=1;
+    DATE_FILTER=2;
+  }
   optional string column_id = 1;
   optional ComparisonOperator.E operator = 2;
   repeated string value = 3;
   optional string column_name = 4;
+  optional FilterValueType filter_value_type = 5 [default = STRING];
+
+  repeated SageDateFilterProto date_filter_values = 6;
 }
 
 message CohortGroup {
@@ -175,6 +186,44 @@ message CohortBin {
   optional double maximum_value = 2;
   optional double bin_size = 3;
 }
+
+message PassThruFilter {
+  optional bool accept_all = 1;
+  repeated string include_column_ids = 2;
+  repeated string exclude_column_ids = 3;
+}
+
+message CohortConfig {
+  enum Version {
+    V1 = 1;
+    V1DOT1 = 2;
+  }
+  optional string name = 1;
+  optional string description = 2;
+
+  optional string null_output_value = 3;
+
+  optional bool combine_non_group_values = 4 [default = true];
+  optional CohortType.E cohort_type = 5;
+  optional CohortGroupingType.E cohort_grouping_type = 10;
+
+  optional string anchor_column_id = 6;
+
+  optional string return_column_id = 7;
+  repeated CohortGroup groups = 8;
+  optional CohortBin bins = 9;
+  optional string cohort_answer_guid = 11;
+  optional bool is_editable = 12 [default = false];
+
+  optional string cohort_guid = 13 [deprecated = true];
+
+  optional bool hide_excluded_query_values = 14 [default = true];
+
+  optional string group_excluded_query_values = 15;
+  optional Version version = 16;
+  optional PassThruFilter pass_thru_filter = 17;
+}
+
 """
 
 
@@ -211,6 +260,87 @@ message TimeBucket {
     MONTH_OF_QUARTER = 16;
     MONTH_OF_YEAR = 17;
     QUARTER_OF_YEAR = 18;
+  }
+}
+
+
+// bryanthowell-ts 2025-10-09
+// from sage/public/date_filter.proto
+
+message SageDateFilterProto {
+  enum DatePeriod {
+    DAY = 0;
+    WEEK = 1;
+    MONTH = 2;
+    QUARTER = 3;
+    YEAR = 4;
+    HOUR = 5;
+    MINUTE = 6;
+    SECOND = 7;
+    NUM_DATE_PERIODS = 8;
+  }
+
+  enum Quarter {
+    Q1 = 0;
+    Q2 = 1;
+    Q3 = 2;
+    Q4 = 3;
+    NUM_QUARTERS = 4;
+  }
+
+  enum Month {
+    JANUARY = 0;
+    FEBRUARY = 1;
+    MARCH = 2;
+    APRIL = 3;
+    MAY = 4;
+    JUNE = 5;
+    JULY = 6;
+    AUGUST = 7;
+    SEPTEMBER = 8;
+    OCTOBER = 9;
+    NOVEMBER = 10;
+    DECEMBER = 11;
+    NUM_MONTHS = 12;
+  }
+
+  enum WeekDay {
+    MONDAY = 0;
+    TUESDAY = 1;
+    WEDNESDAY = 2;
+    THURSDAY = 3;
+    FRIDAY = 4;
+    SATURDAY = 5;
+    SUNDAY = 6;
+    NUM_WEEK_DAYS = 7;
+  }
+
+  enum DateFilterType {
+    YESTERDAY = 0;
+    TODAY = 1;
+    TOMORROW = 18;
+    LAST_PERIOD = 2;       // e.g., Last Week
+    LAST_N_PERIOD = 3;     // e.g., Last 2 week
+    PERIOD_TO_DATE = 4;    // e.g., month to date
+    YEAR_ONLY = 5;         // e.g., 2014
+    QUARTER_YEAR = 6;      // e.g., Q1 2014
+    QUARTER_ONLY = 20;     // e.g., Q1
+    MONTH_ONLY = 7;        // e.g., January
+    WEEKDAY_ONLY = 8;      // e.g., Monday
+    MONTH_YEAR = 9;        // e.g., January 2014
+    N_PERIOD_AGO = 10;     // e.g., 2 day ago
+    THIS_PERIOD = 13;      // e.g. This Week
+    NEXT_PERIOD = 14;      // e.g. Next Week
+    NEXT_N_PERIOD = 17;    // e.g. Next 7 week
+    EXACT_DATE = 11;       // e.g., 12/31/2014
+    EXACT_TIME = 19;       // e.g., 10:05
+    EXACT_DATE_TIME = 12;  // e.g., 12/31/2014 23:59:59
+    NOW = 15;  // same as EXACT_DATE_TIME but interpreted when query executes
+    EXACT_DATE_RANGE = 16;
+    PERIOD_ONLY = 21;      // Used to specify a date bucket filter.
+                           // e.g. "week of year = 50"
+    // Keep it as highest value.
+    NUM_DATE_FILTERS = 22;
   }
 }
 """

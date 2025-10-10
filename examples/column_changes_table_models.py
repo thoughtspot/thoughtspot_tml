@@ -36,6 +36,7 @@ def generate_column_id_reference_for_model(table: Table):
     cols = table.table.columns
     for col in cols:
         table_col_id = "{}::{}".format(table_alias, col.name)
+    return cols
 
 # Returns a fully constructed new Table Column that can be appended to Table.table.columns
 def get_table_column():

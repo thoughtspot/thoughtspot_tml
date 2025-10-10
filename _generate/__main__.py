@@ -75,7 +75,21 @@ def _clean_edoc_proto() -> None:
 
         # STRIP OFF THE PACKAGE IDENTITY (and not following by an underscore, with an optional path separator)
         # fmt: off
-        text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)  # noqa: E501
+        re_match = re.search(rf"(?<=\s){preprocessor.package}(?!_)\.?", text)
+
+        # bryanthowell-ts 2025-10-09: There are some messages with the same names that the basic
+        # "strip the prefix" logic was not working, causing a message like:
+        #  "FilterCondition.FilterValueType" is resolved to "scriptability.CohortEDocProto.FilterCondition.FilterValueType",
+        #  which is not defined. The innermost scope is searched first in name resolution"
+        # This is only happening on a few that have 'callosum.' prefixes. The logic brings those "fill-ins" to the top
+        # of the combined edoc.proto file, with the package name of 'scriptability'.
+        # So this logic prefixes those few with 'scriptability.' which fixes the name resolution issue
+        if re_match is not None:
+            if re_match.group(0) in ["callosum."]:
+                text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", "scriptability.", text,
+                                flags=re.MULTILINE | re.DOTALL)
+            else:
+                text = re.sub(rf"(?<=\s){preprocessor.package}(?!_)\.?", preprocessor.replace, text, flags=re.MULTILINE | re.DOTALL)  # noqa: E501
         # fmt: on
 
         # DIVIDE THE edoc.proto INTO 3 PARTS, INJECT THE LOCAL PROTO, STICK IT BACK TOGETHER

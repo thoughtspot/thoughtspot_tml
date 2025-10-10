@@ -108,6 +108,16 @@ class ComparisonOperatorE(betterproto.Enum):
     ENDS_WITH = 11
 
 
+class FilterConditionFilterValueType(betterproto.Enum):
+    STRING = 1
+    DATE_FILTER = 2
+
+
+class CohortConfigVersion(betterproto.Enum):
+    V1 = 1
+    V1DOT1 = 2
+
+
 class TimeBucketE(betterproto.Enum):
     NO_BUCKET = 0
     DAILY = 1
@@ -128,6 +138,80 @@ class TimeBucketE(betterproto.Enum):
     MONTH_OF_QUARTER = 16
     MONTH_OF_YEAR = 17
     QUARTER_OF_YEAR = 18
+
+
+class SageDateFilterProtoDatePeriod(betterproto.Enum):
+    DAY = 0
+    WEEK = 1
+    MONTH = 2
+    QUARTER = 3
+    YEAR = 4
+    HOUR = 5
+    MINUTE = 6
+    SECOND = 7
+    NUM_DATE_PERIODS = 8
+
+
+class SageDateFilterProtoQuarter(betterproto.Enum):
+    Q1 = 0
+    Q2 = 1
+    Q3 = 2
+    Q4 = 3
+    NUM_QUARTERS = 4
+
+
+class SageDateFilterProtoMonth(betterproto.Enum):
+    JANUARY = 0
+    FEBRUARY = 1
+    MARCH = 2
+    APRIL = 3
+    MAY = 4
+    JUNE = 5
+    JULY = 6
+    AUGUST = 7
+    SEPTEMBER = 8
+    OCTOBER = 9
+    NOVEMBER = 10
+    DECEMBER = 11
+    NUM_MONTHS = 12
+
+
+class SageDateFilterProtoWeekDay(betterproto.Enum):
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
+    NUM_WEEK_DAYS = 7
+
+
+class SageDateFilterProtoDateFilterType(betterproto.Enum):
+    YESTERDAY = 0
+    TODAY = 1
+    TOMORROW = 18
+    LAST_PERIOD = 2
+    LAST_N_PERIOD = 3
+    PERIOD_TO_DATE = 4
+    YEAR_ONLY = 5
+    QUARTER_YEAR = 6
+    QUARTER_ONLY = 20
+    MONTH_ONLY = 7
+    WEEKDAY_ONLY = 8
+    MONTH_YEAR = 9
+    N_PERIOD_AGO = 10
+    THIS_PERIOD = 13
+    NEXT_PERIOD = 14
+    NEXT_N_PERIOD = 17
+    EXACT_DATE = 11
+    EXACT_TIME = 19
+    EXACT_DATE_TIME = 12
+    NOW = 15
+    EXACT_DATE_RANGE = 16
+    PERIOD_ONLY = 21
+    NUM_DATE_FILTERS = 22
+    'e.g. "week of year = 50" Keep it as highest value.'
 
 
 class FormatConfigCategoryType(betterproto.Enum):
@@ -194,6 +278,13 @@ class FrequencySpecFrequencyGranularity(betterproto.Enum):
     MONTHLY = 4
 
 
+class AnswerEDocProtoColumnSortInfoColumnSortCategory(betterproto.Enum):
+    DEFAULT = 1
+    NONE = 2
+    ALPHA = 3
+    CUSTOM = 4
+
+
 class ActionTypeE(betterproto.Enum):
     CALLBACK = 1
     URL = 2
@@ -228,6 +319,8 @@ class FilterCondition(betterproto.Message):
     operator: "ComparisonOperatorE" = betterproto.enum_field(2, optional=True)
     value: list[str] = betterproto.string_field(3, optional=True)
     column_name: str = betterproto.string_field(4, optional=True)
+    filter_value_type: "FilterConditionFilterValueType" = betterproto.enum_field(5, optional=True)
+    date_filter_values: list["SageDateFilterProto"] = betterproto.message_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -242,6 +335,39 @@ class CohortBin(betterproto.Message):
     minimum_value: float = betterproto.double_field(1, optional=True)
     maximum_value: float = betterproto.double_field(2, optional=True)
     bin_size: float = betterproto.double_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class PassThruFilter(betterproto.Message):
+    accept_all: bool = betterproto.bool_field(1, optional=True)
+    include_column_ids: list[str] = betterproto.string_field(2, optional=True)
+    exclude_column_ids: list[str] = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortConfig(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    null_output_value: str = betterproto.string_field(3, optional=True)
+    combine_non_group_values: bool = betterproto.bool_field(4, optional=True)
+    cohort_type: "CohortTypeE" = betterproto.enum_field(5, optional=True)
+    anchor_column_id: str = betterproto.string_field(6, optional=True)
+    return_column_id: str = betterproto.string_field(7, optional=True)
+    groups: list["CohortGroup"] = betterproto.message_field(8, optional=True)
+    bins: "CohortBin" = betterproto.message_field(9, optional=True)
+    cohort_grouping_type: "CohortGroupingTypeE" = betterproto.enum_field(10, optional=True)
+    cohort_answer_guid: str = betterproto.string_field(11, optional=True)
+    is_editable: bool = betterproto.bool_field(12, optional=True)
+    cohort_guid: str = betterproto.string_field(13, optional=True)
+    hide_excluded_query_values: bool = betterproto.bool_field(14, optional=True)
+    group_excluded_query_values: str = betterproto.string_field(15, optional=True)
+    version: "CohortConfigVersion" = betterproto.enum_field(16, optional=True)
+    pass_thru_filter: "PassThruFilter" = betterproto.message_field(17, optional=True)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.is_set("cohort_guid"):
+            warnings.warn("CohortConfig.cohort_guid is deprecated", DeprecationWarning)
 
 
 @dataclass(eq=False, repr=False)
@@ -425,6 +551,7 @@ class ColumnProperties(betterproto.Message):
     is_mandatory_token_filter: bool = betterproto.bool_field(24, optional=True)
     data_type: str = betterproto.string_field(25, optional=True)
     sql_data_type: str = betterproto.string_field(26, optional=True)
+    ai_context: str = betterproto.string_field(27, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -608,6 +735,9 @@ class ObjectEDocProto(betterproto.Message):
     worksheet: "WorksheetEDocProto" = betterproto.message_field(21, optional=True)
     nls_feedback: "FeedbackEDocProto" = betterproto.message_field(22, optional=True)
     belongs_to_all_orgs: bool = betterproto.bool_field(23, optional=True)
+    column_security_rules: "ColumnSecurityRuleEDocProto" = betterproto.message_field(24, optional=True)
+    nl_instruction: "NlInstructionEdocProto" = betterproto.message_field(25, optional=True)
+    column_alias: "ColumnAliasUdfEDocProto" = betterproto.message_field(26, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -662,6 +792,7 @@ class WorksheetEDocProtoQueryProperties(betterproto.Message):
     is_bypass_rls: bool = betterproto.bool_field(1, optional=True)
     join_progressive: bool = betterproto.bool_field(2, optional=True)
     sage_config: "SageConfigProto" = betterproto.message_field(3, optional=True)
+    spotter_config: "SpotterConfigProto" = betterproto.message_field(4, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -732,6 +863,18 @@ class FeedbackEDocProtoFeedback(betterproto.Message):
     display_mode: str = betterproto.string_field(9, optional=True)
     chart_type: str = betterproto.string_field(10, optional=True)
     axis_config: list["ChartVisualizationAxisConfig"] = betterproto.message_field(11, optional=True)
+    nl_context: str = betterproto.string_field(12, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class NlInstructionEdocProto(betterproto.Message):
+    instructions: list["NlInstructionEdocProtoNlInstruction"] = betterproto.message_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class NlInstructionEdocProtoNlInstruction(betterproto.Message):
+    instruction: str = betterproto.string_field(1, optional=True)
+    scope: str = betterproto.string_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -933,6 +1076,13 @@ class AnswerEDocProtoAnswerColumn(betterproto.Message):
     custom_name: str = betterproto.string_field(3, optional=True)
     format: "FormatConfig" = betterproto.message_field(4, optional=True)
     dynamic_title: str = betterproto.string_field(5, optional=True)
+    sort_info: "AnswerEDocProtoColumnSortInfo" = betterproto.message_field(6, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class AnswerEDocProtoColumnSortInfo(betterproto.Message):
+    category: "AnswerEDocProtoColumnSortInfoColumnSortCategory" = betterproto.enum_field(1, optional=True)
+    custom_order: list[str] = betterproto.string_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -943,13 +1093,79 @@ class CohortEDocProto(betterproto.Message):
     cohort_config: "CohortEDocProtoCohortConfig" = betterproto.message_field(4, optional=True)
     referenced_cohorts: list[str] = betterproto.string_field(5, optional=True)
     owner: str = betterproto.string_field(6, optional=True)
-    config: "CohortEDocProtoCohortConfig" = betterproto.message_field(7, optional=True)
     worksheet: "Identity" = betterproto.message_field(8, optional=True)
+    config: "CohortEDocProtoEDocCohortConfig" = betterproto.message_field(9, optional=True)
 
     def __post_init__(self) -> None:
         super().__post_init__()
         if self.is_set("cohort_config"):
             warnings.warn("CohortEDocProto.cohort_config is deprecated", DeprecationWarning)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoFilterCondition(betterproto.Message):
+    operator: "ComparisonOperatorE" = betterproto.enum_field(2, optional=True)
+    value: list[str] = betterproto.string_field(3, optional=True)
+    column_name: str = betterproto.string_field(4, optional=True)
+    filter_value_type: "FilterConditionFilterValueType" = betterproto.enum_field(5, optional=True)
+    date_filter_values: list["DateFilterProto"] = betterproto.message_field(6, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoCohortGroup(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    conditions: list["CohortEDocProtoFilterCondition"] = betterproto.message_field(2, optional=True)
+    combine_type: "ConditionCombineTypeE" = betterproto.enum_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoCohortBin(betterproto.Message):
+    minimum_value: float = betterproto.double_field(1, optional=True)
+    maximum_value: float = betterproto.double_field(2, optional=True)
+    bin_size: float = betterproto.double_field(3, optional=True)
+    binning_column_name: str = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoPassThruFilter(betterproto.Message):
+    accept_all: bool = betterproto.bool_field(1, optional=True)
+    include_column_ids: list[str] = betterproto.string_field(2, optional=True)
+    exclude_column_ids: list[str] = betterproto.string_field(3, optional=True)
+    include_column_names: list[str] = betterproto.string_field(4, optional=True)
+    exclude_column_names: list[str] = betterproto.string_field(5, optional=True)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.is_set("include_column_ids"):
+            warnings.warn("CohortEDocProtoPassThruFilter.include_column_ids is deprecated", DeprecationWarning)
+        if self.is_set("exclude_column_ids"):
+            warnings.warn("CohortEDocProtoPassThruFilter.exclude_column_ids is deprecated", DeprecationWarning)
+
+
+@dataclass(eq=False, repr=False)
+class CohortEDocProtoEDocCohortConfig(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    null_output_value: str = betterproto.string_field(3, optional=True)
+    combine_non_group_values: bool = betterproto.bool_field(4, optional=True)
+    cohort_type: "CohortTypeE" = betterproto.enum_field(5, optional=True)
+    anchor_column_id: str = betterproto.string_field(6, optional=True)
+    return_column_id: str = betterproto.string_field(7, optional=True)
+    groups: list["CohortEDocProtoCohortGroup"] = betterproto.message_field(8, optional=True)
+    bins: "CohortEDocProtoCohortBin" = betterproto.message_field(9, optional=True)
+    cohort_grouping_type: "CohortGroupingTypeE" = betterproto.enum_field(10, optional=True)
+    cohort_answer_guid: str = betterproto.string_field(11, optional=True)
+    is_editable: bool = betterproto.bool_field(12, optional=True)
+    cohort_guid: str = betterproto.string_field(13, optional=True)
+    hide_excluded_query_values: bool = betterproto.bool_field(14, optional=True)
+    group_excluded_query_values: str = betterproto.string_field(15, optional=True)
+    version: "CohortConfigVersion" = betterproto.enum_field(16, optional=True)
+    pass_thru_filter: "CohortEDocProtoPassThruFilter" = betterproto.message_field(17, optional=True)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.is_set("cohort_guid"):
+            warnings.warn("CohortEDocProtoEDocCohortConfig.cohort_guid is deprecated", DeprecationWarning)
 
 
 @dataclass(eq=False, repr=False)
@@ -1090,6 +1306,7 @@ class PinboardParameterOverrideEDoc(betterproto.Message):
     excluded_container_id: list[str] = betterproto.string_field(3, optional=True)
     override_value: str = betterproto.string_field(4, optional=True)
     secondary_parameter: list[str] = betterproto.string_field(5, optional=True)
+    display_name: str = betterproto.string_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1202,6 +1419,7 @@ class LogicalTableEDocProtoDbColumnProperties(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class LogicalTableEDocProtoProperties(betterproto.Message):
     sage_config: "SageConfigProto" = betterproto.message_field(1, optional=True)
+    spotter_config: "SpotterConfigProto" = betterproto.message_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1251,6 +1469,7 @@ class MonitorAlertEDocProto(betterproto.Message):
     alert_type: "AlertType" = betterproto.enum_field(10, optional=True)
     attribute_info: "AttributeInfo" = betterproto.message_field(11, optional=True)
     subscribed_group: list["MonitorAlertEDocProtoGroup"] = betterproto.message_field(12, optional=True)
+    slack_channel_ids: list[str] = betterproto.string_field(13, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1315,5 +1534,65 @@ class UserEdocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class SpotterConfigProto(betterproto.Message):
+    is_spotter_enabled: bool = betterproto.bool_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class SageConfigProto(betterproto.Message):
     is_sage_enabled: bool = betterproto.bool_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnSecurityRuleEDocProto(betterproto.Message):
+    table: "Identity" = betterproto.message_field(1, optional=True)
+    rules: list["ColumnSecurityRuleEDocProtoColumnRule"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnSecurityRuleEDocProtoColumnRule(betterproto.Message):
+    column_name: str = betterproto.string_field(1, optional=True)
+    accessible_groups: "ColumnSecurityRuleEDocProtoColumnRuleAccessibleGroups" = betterproto.message_field(
+        2, optional=True
+    )
+
+
+@dataclass(eq=False, repr=False)
+class ColumnSecurityRuleEDocProtoColumnRuleAccessibleGroups(betterproto.Message):
+    group_name: list[str] = betterproto.string_field(1, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProto(betterproto.Message):
+    model: "Identity" = betterproto.message_field(1, optional=True)
+    columns: list["ColumnAliasUdfEDocProtoColumn"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProtoColumn(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    locales: list["ColumnAliasUdfEDocProtoLocale"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProtoLocale(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    orgs: list["ColumnAliasUdfEDocProtoOrg"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProtoOrg(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    groups: list["ColumnAliasUdfEDocProtoGroup"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProtoGroup(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    entries: list["ColumnAliasUdfEDocProtoEntry"] = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnAliasUdfEDocProtoEntry(betterproto.Message):
+    alias: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
