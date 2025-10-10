@@ -7,6 +7,9 @@ import ast
 import _const
 import _proto_local
 
+import sys
+import traceback
+
 # =====================================================
 # PRE-PROCESSORS  (edits the source .proto files)
 # =====================================================
@@ -111,10 +114,19 @@ class ThoughtSpotLintingFormatter(ast.NodeTransformer):
                 # SKIP THE CONSTRUCTOR
                 if isinstance(cls_attr, ast.FunctionDef) and cls_attr.name == "__post_init__":
                     continue
+                try:
+                    assert isinstance(cls_attr, ast.AnnAssign), "Attempting to camelCase a non-assignment expression."
+                    assert isinstance(cls_attr.target, ast.Name), "Attempting to camelCase a non-assignment expression."
+                except AssertionError:
+                    _, _, tb = sys.exc_info()
+                    traceback.print_tb(tb)  # Fixed format
+                    tb_info = traceback.extract_tb(tb)
+                    filename, line, func, text = tb_info[-1]
 
-                assert isinstance(cls_attr, ast.AnnAssign), "Attempting to camelCase a non-assignment expression."
-                assert isinstance(cls_attr.target, ast.Name), "Attempting to camelCase a non-assignment expression."
-
+                    print('An error occurred on line {} in statement {}'.format(line, text))
+                    print("Line that was processed that failed the assertion:")
+                    print(ast.dump(cls_attr))
+                    exit(1)
                 overrides: set[bool] = set()
 
                 # IF MORE OVERIDES ARE NECESSARY, JUST ADD THEM BELOW.
