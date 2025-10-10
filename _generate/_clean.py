@@ -3,12 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 import ast
+import sys
+import traceback
 
 import _const
 import _proto_local
-
-import sys
-import traceback
 
 # =====================================================
 # PRE-PROCESSORS  (edits the source .proto files)
@@ -123,7 +122,7 @@ class ThoughtSpotLintingFormatter(ast.NodeTransformer):
                     tb_info = traceback.extract_tb(tb)
                     filename, line, func, text = tb_info[-1]
 
-                    print('An error occurred on line {} in statement {}'.format(line, text))
+                    print(f"An error occurred on line {line} in statement {text}")
                     print("Line that was processed that failed the assertion:")
                     print(ast.dump(cls_attr))
                     exit(1)
