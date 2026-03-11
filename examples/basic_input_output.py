@@ -5,7 +5,7 @@ from thoughtspot_tml.utils import *
 from requests import *
 
 # REST API library installable via pip
-from thoughtspot_rest_api_v1 import *
+from thoughtspot_rest_api import *
 
 # Examples of retrieving TML, loading into thoughtspot_tml objects, and serializing objects back into TML files
 # Other examples, showing actual transformations on the TML objects, will refer to this example
