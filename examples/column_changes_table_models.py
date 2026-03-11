@@ -16,7 +16,7 @@ from thoughtspot_tml._scriptability import *
 from requests import *
 
 # REST API library installable via pip
-from thoughtspot_rest_api_v1 import *
+from thoughtspot_rest_api import *
 
 # Please see documentation at https://github.com/thoughtspot/thoughtspot_rest_api_v1_python
 # for all the ways to initialize and auth with library
