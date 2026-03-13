@@ -30,6 +30,11 @@ class AlertType(betterproto.Enum):
     Anomaly = 2
 
 
+class CohortLevel(betterproto.Enum):
+    MODEL = 1
+    ANSWER = 2
+
+
 class QueryTriggerE(betterproto.Enum):
     UNKNOWN = 1
     ANSWER_EDIT = 2
@@ -605,6 +610,7 @@ class Parameter(betterproto.Message):
     linked_parameters: list[str] = betterproto.string_field(9, optional=True)
     description: str = betterproto.string_field(10, optional=True)
     is_hidden: bool = betterproto.bool_field(11, optional=True)
+    dynamic_default_date: "ParameterDynamicDateProto" = betterproto.message_field(12, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -627,6 +633,14 @@ class ParameterRangeConfig(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ParameterDynamicDateProto(betterproto.Message):
+    date_period: str = betterproto.string_field(1, optional=True)
+    type: str = betterproto.string_field(2, optional=True)
+    number: int = betterproto.int32_field(3, optional=True)
+    calendar_id: str = betterproto.string_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class DateFilterProto(betterproto.Message):
     type: str = betterproto.string_field(1, optional=True)
     number: int = betterproto.int32_field(2, optional=True)
@@ -643,6 +657,7 @@ class DateFilterProto(betterproto.Message):
     quarter_name: str = betterproto.string_field(13, optional=True)
     month_name: str = betterproto.string_field(14, optional=True)
     week_day_name: str = betterproto.string_field(15, optional=True)
+    include_current_period: bool = betterproto.bool_field(16, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -910,6 +925,7 @@ class ConnectionDoc(betterproto.Message):
     connection_configurations: list["ConnectionDocConnectionConfigurationDoc"] = betterproto.message_field(
         7, optional=True
     )
+    selected_databases: list[str] = betterproto.string_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1161,6 +1177,7 @@ class CohortEDocProtoEDocCohortConfig(betterproto.Message):
     group_excluded_query_values: str = betterproto.string_field(15, optional=True)
     version: "CohortConfigVersion" = betterproto.enum_field(16, optional=True)
     pass_thru_filter: "CohortEDocProtoPassThruFilter" = betterproto.message_field(17, optional=True)
+    cohort_level: "CohortLevel" = betterproto.enum_field(18, optional=True)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -1409,6 +1426,7 @@ class LogicalTableEDocProtoLogicalColumnEDocProto(betterproto.Message):
     db_column_name: str = betterproto.string_field(3, optional=True)
     properties: "ColumnProperties" = betterproto.message_field(4, optional=True)
     db_column_properties: "LogicalTableEDocProtoDbColumnProperties" = betterproto.message_field(5, optional=True)
+    guid: str = betterproto.string_field(6, optional=True)
 
 
 @dataclass(eq=False, repr=False)
