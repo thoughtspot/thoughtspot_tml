@@ -261,6 +261,27 @@ class QueryConstraintsConstraintDateRangeConditionBucket(betterproto.Enum):
     YEAR = 4
 
 
+class ChartVizConfigAxisAggregationType(betterproto.Enum):
+    NONE = 0
+    TABLE_AGGR = 1
+    SUM = 2
+    AVERAGE = 3
+    MIN = 4
+    MAX = 5
+    COUNT = 6
+
+
+class ChartVizConfigAxisType(betterproto.Enum):
+    FLAT = 0
+    MERGED = 1
+    DUAL = 2
+
+
+class ChartVizConfigCustomChartDimensionMode(betterproto.Enum):
+    COLUMN_DRIVEN = 0
+    AXIS_DRIVEN = 1
+
+
 class ActionObjectApplicationTypeE(betterproto.Enum):
     NONE = 0
     SLACK = 1
@@ -453,9 +474,46 @@ class QueryConstraintsConstraintCondition(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class ChartVizConfigCustomAggregation(betterproto.Message):
+    column_id: str = betterproto.string_field(1, optional=True)
+    aggregation_type: "ChartVizConfigAxisAggregationType" = betterproto.enum_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ChartVizConfigAxisConfig(betterproto.Message):
+    x: list[str] = betterproto.string_field(1, optional=True)
+    y: list[str] = betterproto.string_field(2, optional=True)
+    color: list[str] = betterproto.string_field(3, optional=True)
+    size: str = betterproto.string_field(4, optional=True)
+    hidden: list[str] = betterproto.string_field(5, optional=True)
+    category: list[str] = betterproto.string_field(6, optional=True)
+    sort: list[str] = betterproto.string_field(7, optional=True)
+    measure_values: list[str] = betterproto.string_field(8, optional=True)
+    custom_aggregation: list["ChartVizConfigCustomAggregation"] = betterproto.message_field(9, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ChartVizConfigSimpleAxis(betterproto.Message):
+    type: "ChartVizConfigAxisType" = betterproto.enum_field(1, optional=True)
+    column: str = betterproto.string_field(2, optional=True)
+    columns: list[str] = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ChartVizConfigCustomChartAxisConfig(betterproto.Message):
+    type: "ChartVizConfigAxisType" = betterproto.enum_field(1, optional=True)
+    column: str = betterproto.string_field(2, optional=True)
+    columns: list[str] = betterproto.string_field(3, optional=True)
+    primary: "ChartVizConfigSimpleAxis" = betterproto.message_field(4, optional=True)
+    secondary: "ChartVizConfigSimpleAxis" = betterproto.message_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class ChartVizConfigCustomChartDimension(betterproto.Message):
     key: str = betterproto.string_field(1, optional=True)
     columns: list[str] = betterproto.string_field(2, optional=True)
+    axes: list["ChartVizConfigCustomChartAxisConfig"] = betterproto.message_field(3, optional=True)
+    mode: "ChartVizConfigCustomChartDimensionMode" = betterproto.enum_field(4, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -557,6 +615,7 @@ class ColumnProperties(betterproto.Message):
     data_type: str = betterproto.string_field(25, optional=True)
     sql_data_type: str = betterproto.string_field(26, optional=True)
     ai_context: str = betterproto.string_field(27, optional=True)
+    sync_with_source: bool = betterproto.bool_field(28, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -800,6 +859,7 @@ class WorksheetEDocProto(betterproto.Message):
     use_cases: list["WorksheetEDocProtoUseCase"] = betterproto.message_field(18, optional=True)
     column_groups: list["WorksheetEDocProtoColumnGroup"] = betterproto.message_field(19, optional=True)
     constraints: "QueryConstraints" = betterproto.message_field(20, optional=True)
+    aggregated_models: list["WorksheetEDocProtoAggregatedModel"] = betterproto.message_field(21, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -846,6 +906,20 @@ class WorksheetEDocProtoColumnGroup(betterproto.Message):
     type: str = betterproto.string_field(1, optional=True)
     properties: "WorksheetEDocProtoProperty" = betterproto.message_field(2, optional=True)
     column_group_info: list["WorksheetEDocProtoColumnGroupInfo"] = betterproto.message_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoAggregatedModel(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    date_aggregation_info: list["WorksheetEDocProtoAggregatedModelDateAggregationInfo"] = betterproto.message_field(
+        2, optional=True
+    )
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoAggregatedModelDateAggregationInfo(betterproto.Message):
+    column_id: str = betterproto.string_field(1, optional=True)
+    bucket: str = betterproto.string_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
