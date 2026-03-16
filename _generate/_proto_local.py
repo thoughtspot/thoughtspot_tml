@@ -488,8 +488,14 @@ message QueryConstraints {
 message ChartViz {
   message Config {
     message CustomChartDimension {
+      enum Mode {
+        COLUMN_DRIVEN = 0;
+        AXIS_DRIVEN = 1;
+      }
       optional string key = 1;
       repeated string columns = 2;
+      repeated CustomChartAxisConfig axes = 3;
+      optional Mode mode = 4;
     }
 
     message CustomChartConfig {
