@@ -487,6 +487,53 @@ message QueryConstraints {
 
 message ChartViz {
   message Config {
+  
+  enum AxisAggregationType {
+      NONE = 0;
+      TABLE_AGGR = 1;
+      SUM = 2;
+      AVERAGE = 3;
+      MIN = 4;
+      MAX = 5;
+      COUNT = 6;
+    }
+
+    message CustomAggregation {
+      optional string column_id = 1;
+      optional AxisAggregationType aggregation_type = 2 [default = TABLE_AGGR];
+    }
+
+    message AxisConfig {
+      repeated string x = 1;
+      repeated string y = 2;
+      repeated string color = 3;
+      optional string size = 4;
+      repeated string hidden = 5;
+      repeated string category = 6;
+      repeated string sort = 7;
+      repeated string measureValues = 8;
+      repeated CustomAggregation customAggregation = 9;
+    }
+    enum AxisType {
+      FLAT = 0;
+      MERGED = 1;
+      DUAL = 2;
+    }
+
+    message SimpleAxis {
+      optional AxisType type = 1;
+      optional string column = 2;
+      repeated string columns = 3;
+    }
+
+    message CustomChartAxisConfig {
+      optional AxisType type = 1;
+      optional string column = 2;
+      repeated string columns = 3;
+      optional SimpleAxis primary = 4;
+      optional SimpleAxis secondary = 5;
+    }
+  
     message CustomChartDimension {
       enum Mode {
         COLUMN_DRIVEN = 0;
