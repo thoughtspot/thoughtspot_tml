@@ -1,4 +1,3 @@
-# ruff: noqa: B018
 from __future__ import annotations
 
 from thoughtspot_tml.utils import determine_tml_type

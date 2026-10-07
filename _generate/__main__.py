@@ -79,7 +79,8 @@ def _clean_edoc_proto() -> None:
 
         # bryanthowell-ts 2025-10-09: There are some messages with the same names that the basic
         # "strip the prefix" logic was not working, causing a message like:
-        #  "FilterCondition.FilterValueType" is resolved to "scriptability.CohortEDocProto.FilterCondition.FilterValueType",
+        #  "FilterCondition.FilterValueType" is resolved to
+        #  "scriptability.CohortEDocProto.FilterCondition.FilterValueType",
         #  which is not defined. The innermost scope is searched first in name resolution"
         # This is only happening on a few that have 'callosum.' prefixes. The logic brings those "fill-ins" to the top
         # of the combined edoc.proto file, with the package name of 'scriptability'.
@@ -145,7 +146,7 @@ def _clean_scriptability_py() -> None:
     code_as_text = ast.unparse(code_as_tree)
 
     # SAVE BACK TO _scriptability.py
-    _const._SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, code_as_text]))
+    _const._SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, code_as_text]), encoding="utf-8", newline="\n")
 
     # FINALLY, ENSURE THE OUTPUT FILE IS LINTED.
     _subprocess_run("ruff", "format", _const._SCRIPTABILITY_PY.as_posix(), "-v")

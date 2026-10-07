@@ -69,6 +69,12 @@ class QueryTriggerE(betterproto.Enum):
     CUSTOM_CALENDAR = 31
 
 
+class ApplicabilityLevel(betterproto.Enum):
+    LIVEBOARD = 0
+    TAB = 1
+    GROUP = 2
+
+
 class ChartVizProtoChartSpecificColumnType(betterproto.Enum):
     UNDEFINED = 0
     MEASURE_NAMES = 1
@@ -304,11 +310,18 @@ class FrequencySpecFrequencyGranularity(betterproto.Enum):
     MONTHLY = 4
 
 
+class WorksheetEDocProtoCacheConfigScope(betterproto.Enum):
+    SCOPE_UNSPECIFIED = 0
+    FULL_MODEL = 1
+    CUSTOM = 2
+
+
 class AnswerEDocProtoColumnSortInfoColumnSortCategory(betterproto.Enum):
     DEFAULT = 1
     NONE = 2
     ALPHA = 3
     CUSTOM = 4
+    BY_MEASURE = 5
 
 
 class ActionTypeE(betterproto.Enum):
@@ -326,6 +339,31 @@ class UrlActionDetailsAuthenticationTypeE(betterproto.Enum):
     BASIC = 1
     BEARER = 2
     API_KEY = 3
+
+
+class WebhookStorageTypeE(betterproto.Enum):
+    UNKNOWN = 0
+    AWS_S3 = 1
+    GCP_GCS = 2
+
+
+class WebhookSignatureVerificationTypeE(betterproto.Enum):
+    UNKNOWN = 0
+    HMAC_SHA256 = 1
+
+
+class WebhookAuthTypeE(betterproto.Enum):
+    NO_AUTH = 0
+    BASIC_AUTH = 1
+    BEARER_TOKEN = 2
+    API_KEY = 3
+    OAUTH2 = 4
+
+
+@dataclass(eq=False, repr=False)
+class Applicability(betterproto.Message):
+    level: "ApplicabilityLevel" = betterproto.enum_field(1, optional=True)
+    target_id: str = betterproto.string_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -736,6 +774,7 @@ class Filter(betterproto.Message):
     is_single_value: bool = betterproto.bool_field(7, optional=True)
     display_name: str = betterproto.string_field(8, optional=True)
     apply_on_tables: list[str] = betterproto.string_field(9, optional=True)
+    applicability: "Applicability" = betterproto.message_field(10, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -812,6 +851,10 @@ class ObjectEDocProto(betterproto.Message):
     column_security_rules: "ColumnSecurityRuleEDocProto" = betterproto.message_field(24, optional=True)
     nl_instruction: "NlInstructionEdocProto" = betterproto.message_field(25, optional=True)
     column_alias: "ColumnAliasUdfEDocProto" = betterproto.message_field(26, optional=True)
+    collection_object: "CollectionEdocProto" = betterproto.message_field(27, optional=True)
+    webhook: "WebhookEDocProto" = betterproto.message_field(28, optional=True)
+    template_variable: "TemplateVariableEDocProto" = betterproto.message_field(29, optional=True)
+    input_table: "InputTableEDocProto" = betterproto.message_field(30, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -860,6 +903,7 @@ class WorksheetEDocProto(betterproto.Message):
     column_groups: list["WorksheetEDocProtoColumnGroup"] = betterproto.message_field(19, optional=True)
     constraints: "QueryConstraints" = betterproto.message_field(20, optional=True)
     aggregated_models: list["WorksheetEDocProtoAggregatedModel"] = betterproto.message_field(21, optional=True)
+    cache_config: "WorksheetEDocProtoCacheConfig" = betterproto.message_field(22, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -914,12 +958,34 @@ class WorksheetEDocProtoAggregatedModel(betterproto.Message):
     date_aggregation_info: list["WorksheetEDocProtoAggregatedModelDateAggregationInfo"] = betterproto.message_field(
         2, optional=True
     )
+    filter_info: "QueryConstraints" = betterproto.message_field(3, optional=True)
+    obj_id: str = betterproto.string_field(4, optional=True)
+    fqn: str = betterproto.string_field(5, optional=True)
 
 
 @dataclass(eq=False, repr=False)
 class WorksheetEDocProtoAggregatedModelDateAggregationInfo(betterproto.Message):
     column_id: str = betterproto.string_field(1, optional=True)
     bucket: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoCacheConfig(betterproto.Message):
+    schedule: "WorksheetEDocProtoCacheConfigSchedule" = betterproto.message_field(1, optional=True)
+    scope: "WorksheetEDocProtoCacheConfigScope" = betterproto.enum_field(2, optional=True)
+    tables: list["WorksheetEDocProtoCacheConfigTableConfig"] = betterproto.message_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoCacheConfigSchedule(betterproto.Message):
+    cron: str = betterproto.string_field(1, optional=True)
+    timezone: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WorksheetEDocProtoCacheConfigTableConfig(betterproto.Message):
+    id: str = betterproto.string_field(1, optional=True)
+    filter_info: "QueryConstraints" = betterproto.message_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1077,6 +1143,7 @@ class TableVisualization(betterproto.Message):
     wrap_table_header: bool = betterproto.bool_field(5, optional=True)
     client_state: str = betterproto.string_field(6, optional=True)
     client_state_v2: str = betterproto.string_field(7, optional=True)
+    viz_style: str = betterproto.string_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1088,6 +1155,7 @@ class TableVisualizationTableColumn(betterproto.Message):
     show_headline: bool = betterproto.bool_field(6, optional=True)
     headline_aggregation: str = betterproto.string_field(7, optional=True)
     headline_client_state: str = betterproto.string_field(8, optional=True)
+    headline_viz_style: str = betterproto.string_field(9, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1101,6 +1169,7 @@ class ChartVisualization(betterproto.Message):
     custom_chart_config: list["ChartVizConfigCustomChartConfig"] = betterproto.message_field(7, optional=True)
     custom_chart_name: str = betterproto.string_field(8, optional=True)
     custom_visual_props: str = betterproto.string_field(9, optional=True)
+    viz_style: str = betterproto.string_field(10, optional=True)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -1152,6 +1221,10 @@ class AnswerEDocProto(betterproto.Message):
     action_object_associations: list["ActionObjectAssociationEdocProto"] = betterproto.message_field(15, optional=True)
     dynamic_name: str = betterproto.string_field(16, optional=True)
     dynamic_description: str = betterproto.string_field(17, optional=True)
+    cohorts: list["CohortEDocProto"] = betterproto.message_field(18, optional=True)
+    dynamic_parameter_values: dict[str, "ParameterDynamicDateProto"] = betterproto.map_field(
+        19, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -1173,6 +1246,7 @@ class AnswerEDocProtoAnswerColumn(betterproto.Message):
 class AnswerEDocProtoColumnSortInfo(betterproto.Message):
     category: "AnswerEDocProtoColumnSortInfoColumnSortCategory" = betterproto.enum_field(1, optional=True)
     custom_order: list[str] = betterproto.string_field(2, optional=True)
+    sort_by_guid: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1279,6 +1353,30 @@ class NoteTileEDocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class AiTileScopeVisualizationEDocProto(betterproto.Message):
+    viz_id: str = betterproto.string_field(1, optional=True)
+    search_query: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class AiTileScopeEDocProto(betterproto.Message):
+    tab_names: list[str] = betterproto.string_field(1, optional=True)
+    group_ids: list[str] = betterproto.string_field(2, optional=True)
+    visualizations: list["AiTileScopeVisualizationEDocProto"] = betterproto.message_field(3, optional=True)
+    filter_columns: list[str] = betterproto.string_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class AiTileEDocProto(betterproto.Message):
+    prompt: str = betterproto.string_field(1, optional=True)
+    target_agent: str = betterproto.string_field(2, optional=True)
+    scope: "AiTileScopeEDocProto" = betterproto.message_field(3, optional=True)
+    analysis_code: str = betterproto.string_field(4, optional=True)
+    rolling_date_filters: list[str] = betterproto.string_field(5, optional=True)
+    template_id: str = betterproto.string_field(6, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class UrlActionDetails(betterproto.Message):
     url: str = betterproto.string_field(1, optional=True)
     reference: str = betterproto.string_field(2, optional=True)
@@ -1335,6 +1433,82 @@ class ActionObjectEDocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class WebhookUrlParamEDocProto(betterproto.Message):
+    key: str = betterproto.string_field(1, optional=True)
+    value: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookHeaderEDocProto(betterproto.Message):
+    key: str = betterproto.string_field(1, optional=True)
+    value: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookAwsS3ConfigEDocProto(betterproto.Message):
+    bucket_name: str = betterproto.string_field(1, optional=True)
+    region: str = betterproto.string_field(2, optional=True)
+    role_arn: str = betterproto.string_field(3, optional=True)
+    external_id: str = betterproto.string_field(4, optional=True)
+    path_prefix: str = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookGcsConfigEDocProto(betterproto.Message):
+    bucket_name: str = betterproto.string_field(1, optional=True)
+    service_account_email: str = betterproto.string_field(2, optional=True)
+    path_prefix: str = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookStorageConfigEDocProto(betterproto.Message):
+    aws_s3_config: "WebhookAwsS3ConfigEDocProto" = betterproto.message_field(1, optional=True)
+    gcs_config: "WebhookGcsConfigEDocProto" = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookStorageDestinationEDocProto(betterproto.Message):
+    storage_type: "WebhookStorageTypeE" = betterproto.enum_field(1, optional=True)
+    storage_config: "WebhookStorageConfigEDocProto" = betterproto.message_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookSignatureVerificationEDocProto(betterproto.Message):
+    type: "WebhookSignatureVerificationTypeE" = betterproto.enum_field(1, optional=True)
+    header: str = betterproto.string_field(2, optional=True)
+    algorithm: str = betterproto.string_field(3, optional=True)
+    secret: str = betterproto.string_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookAuthEDocProto(betterproto.Message):
+    auth_type: "WebhookAuthTypeE" = betterproto.enum_field(1, optional=True)
+    username: str = betterproto.string_field(2, optional=True)
+    password: str = betterproto.string_field(3, optional=True)
+    bearer_token: str = betterproto.string_field(4, optional=True)
+    api_key_header: str = betterproto.string_field(5, optional=True)
+    api_key_value: str = betterproto.string_field(6, optional=True)
+    oauth2_client_id: str = betterproto.string_field(7, optional=True)
+    oauth2_client_secret: str = betterproto.string_field(8, optional=True)
+    oauth2_authorization_url: str = betterproto.string_field(9, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class WebhookEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    url: str = betterproto.string_field(3, optional=True)
+    events: list[str] = betterproto.string_field(4, optional=True)
+    authentication: "WebhookAuthEDocProto" = betterproto.message_field(5, optional=True)
+    url_params: list["WebhookUrlParamEDocProto"] = betterproto.message_field(6, optional=True)
+    additional_headers: list["WebhookHeaderEDocProto"] = betterproto.message_field(7, optional=True)
+    signature_verification: "WebhookSignatureVerificationEDocProto" = betterproto.message_field(8, optional=True)
+    storage_destination: "WebhookStorageDestinationEDocProto" = betterproto.message_field(9, optional=True)
+    status: str = betterproto.string_field(10, optional=True)
+    org_name: str = betterproto.string_field(11, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class ActionObjectAssociationEdocProto(betterproto.Message):
     action_id: str = betterproto.string_field(1, optional=True)
     action_name: str = betterproto.string_field(2, optional=True)
@@ -1351,6 +1525,7 @@ class PinnedVisualization(betterproto.Message):
     viz_guid: str = betterproto.string_field(5, optional=True)
     note_tile: "NoteTileEDocProto" = betterproto.message_field(6, optional=True)
     action_object_associations: list["ActionObjectAssociationEdocProto"] = betterproto.message_field(7, optional=True)
+    ai_tile: "AiTileEDocProto" = betterproto.message_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1367,6 +1542,11 @@ class PinboardLayoutTab(betterproto.Message):
     tiles: list["PinboardLayoutTile"] = betterproto.message_field(3, optional=True)
     id: str = betterproto.string_field(4, optional=True)
     group_layouts: list["PinboardLayoutGroupLayout"] = betterproto.message_field(5, optional=True)
+    filters: list["Filter"] = betterproto.message_field(6, optional=True)
+    parameter_overrides: dict[str, "PinboardParameterOverrideEDoc"] = betterproto.map_field(
+        7, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    ordered_chips: list["OrderedChipEDocProto"] = betterproto.message_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1398,6 +1578,8 @@ class PinboardParameterOverrideEDoc(betterproto.Message):
     override_value: str = betterproto.string_field(4, optional=True)
     secondary_parameter: list[str] = betterproto.string_field(5, optional=True)
     display_name: str = betterproto.string_field(6, optional=True)
+    dynamic_override_date: "ParameterDynamicDateProto" = betterproto.message_field(7, optional=True)
+    applicability: "Applicability" = betterproto.message_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1425,6 +1607,11 @@ class PinboardGroupEDocProto(betterproto.Message):
     description: str = betterproto.string_field(3, optional=True)
     visualizations: list[str] = betterproto.string_field(4, optional=True)
     group_guid: str = betterproto.string_field(5, optional=True)
+    filters: list["Filter"] = betterproto.message_field(6, optional=True)
+    parameter_overrides: dict[str, "PinboardParameterOverrideEDoc"] = betterproto.map_field(
+        7, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    ordered_chips: list["OrderedChipEDocProto"] = betterproto.message_field(8, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1454,10 +1641,18 @@ class OrderedChipEDocProto(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class PersonalisedViewEDocProto(betterproto.Message):
     view_guid: str = betterproto.string_field(1, optional=True)
-    name: str = betterproto.string_field(2, optional=True)
-    view_filters: list["Filter"] = betterproto.message_field(3, optional=True)
-    is_public: bool = betterproto.bool_field(4, optional=True)
-    view_parameters: list["PinboardParameterOverrideEDoc"] = betterproto.message_field(5, optional=True)
+    obj_id: str = betterproto.string_field(2, optional=True)
+    name: str = betterproto.string_field(3, optional=True)
+    view_filters: list["Filter"] = betterproto.message_field(4, optional=True)
+    is_public: bool = betterproto.bool_field(5, optional=True)
+    view_parameters: list["PinboardParameterOverrideEDoc"] = betterproto.message_field(6, optional=True)
+    author: "PersonalisedViewEDocProtoUser" = betterproto.message_field(7, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class PersonalisedViewEDocProtoUser(betterproto.Message):
+    username: str = betterproto.string_field(1, optional=True)
+    user_email: str = betterproto.string_field(2, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1519,6 +1714,31 @@ class LogicalTableEDocProtoTemplatedFields(betterproto.Message):
     db: str = betterproto.string_field(1, optional=True)
     schema: str = betterproto.string_field(2, optional=True)
     db_table: str = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class InputTableEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    db: str = betterproto.string_field(3, optional=True)
+    schema: str = betterproto.string_field(4, optional=True)
+    db_table: str = betterproto.string_field(5, optional=True)
+    connection: "Identity" = betterproto.message_field(6, optional=True)
+    model: "Identity" = betterproto.message_field(7, optional=True)
+    columns: list["InputTableEDocProtoInputColumnEDocProto"] = betterproto.message_field(8, optional=True)
+    properties: "LogicalTableEDocProtoProperties" = betterproto.message_field(9, optional=True)
+    parameters: list["Parameter"] = betterproto.message_field(10, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class InputTableEDocProtoInputColumnEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    db_column_name: str = betterproto.string_field(3, optional=True)
+    properties: "ColumnProperties" = betterproto.message_field(4, optional=True)
+    db_column_properties: "LogicalTableEDocProtoDbColumnProperties" = betterproto.message_field(5, optional=True)
+    guid: str = betterproto.string_field(6, optional=True)
+    column_id: str = betterproto.string_field(7, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1626,6 +1846,21 @@ class UserEdocProto(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class CollectionContentDependency(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    type: str = betterproto.string_field(2, optional=True)
+    id: str = betterproto.string_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class CollectionEdocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    description: str = betterproto.string_field(2, optional=True)
+    visibility: str = betterproto.string_field(3, optional=True)
+    content: list["CollectionContentDependency"] = betterproto.message_field(4, optional=True)
+
+
+@dataclass(eq=False, repr=False)
 class SpotterConfigProto(betterproto.Message):
     is_spotter_enabled: bool = betterproto.bool_field(1, optional=True)
 
@@ -1639,6 +1874,14 @@ class SageConfigProto(betterproto.Message):
 class ColumnSecurityRuleEDocProto(betterproto.Message):
     table: "Identity" = betterproto.message_field(1, optional=True)
     rules: list["ColumnSecurityRuleEDocProtoColumnRule"] = betterproto.message_field(2, optional=True)
+    abac_rules: list["ColumnSecurityRuleEDocProtoAbacRule"] = betterproto.message_field(3, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class ColumnSecurityRuleEDocProtoAbacRule(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    expr: str = betterproto.string_field(2, optional=True)
+    description: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1647,6 +1890,7 @@ class ColumnSecurityRuleEDocProtoColumnRule(betterproto.Message):
     accessible_groups: "ColumnSecurityRuleEDocProtoColumnRuleAccessibleGroups" = betterproto.message_field(
         2, optional=True
     )
+    abac_rule: str = betterproto.string_field(3, optional=True)
 
 
 @dataclass(eq=False, repr=False)
@@ -1688,3 +1932,34 @@ class ColumnAliasUdfEDocProtoGroup(betterproto.Message):
 class ColumnAliasUdfEDocProtoEntry(betterproto.Message):
     alias: str = betterproto.string_field(1, optional=True)
     description: str = betterproto.string_field(2, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class TemplateVariableEntryConstraintEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    type: str = betterproto.string_field(2, optional=True)
+    value: str = betterproto.string_field(3, optional=True)
+    values: list[str] = betterproto.string_field(4, optional=True)
+    fqn: str = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class TemplateVariableEntryEDocProto(betterproto.Message):
+    constraints: list["TemplateVariableEntryConstraintEDocProto"] = betterproto.message_field(1, optional=True)
+    variable_value: str = betterproto.string_field(2, optional=True)
+    priority: float = betterproto.double_field(3, optional=True)
+    additional_info: str = betterproto.string_field(4, optional=True)
+    variable_values: list[str] = betterproto.string_field(5, optional=True)
+
+
+@dataclass(eq=False, repr=False)
+class TemplateVariableEDocProto(betterproto.Message):
+    name: str = betterproto.string_field(1, optional=True)
+    namespace: str = betterproto.string_field(2, optional=True)
+    constraint_names: list[str] = betterproto.string_field(3, optional=True)
+    additional_info: str = betterproto.string_field(4, optional=True)
+    type: str = betterproto.string_field(5, optional=True)
+    sensitive: bool = betterproto.bool_field(6, optional=True)
+    data_type: str = betterproto.string_field(7, optional=True)
+    entries: list["TemplateVariableEntryEDocProto"] = betterproto.message_field(8, optional=True)
+    property_type: str = betterproto.string_field(9, optional=True)

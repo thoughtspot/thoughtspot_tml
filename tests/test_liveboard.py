@@ -21,3 +21,12 @@ def _():
     t.liveboard.visualizations[0].answer.search_query
     t.liveboard.visualizations[0].answer.tables[0].name
     t.liveboard.visualizations[0].answer.answer_columns[0].name
+
+
+@test("Liveboard visualizations expose viz_style on tables and charts")
+def _():
+    t = Liveboard.load(_const.DUMMY_LIVEBOARD)
+    answer = t.liveboard.visualizations[0].answer
+
+    assert answer.table.viz_style == "{}"
+    assert answer.chart.viz_style == "{}"
