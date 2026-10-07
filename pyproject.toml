@@ -162,6 +162,9 @@ force-wrap-aliases = true
 from-first = true
 required-imports = ["from __future__ import annotations"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/thoughtspot_tml/types.py" = ["A005"]  # the module name is public API; renaming it would break imports
+
 
 [tool.vulture]
 paths = ["src/thoughtspot_tml"]

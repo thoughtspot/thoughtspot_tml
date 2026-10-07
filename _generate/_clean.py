@@ -120,11 +120,11 @@ class ThoughtSpotLintingFormatter(ast.NodeTransformer):
                     _, _, tb = sys.exc_info()
                     traceback.print_tb(tb)  # Fixed format
                     tb_info = traceback.extract_tb(tb)
-                    filename, line, func, text = tb_info[-1]
+                    _, line, _, text = tb_info[-1]
 
-                    print(f"An error occurred on line {line} in statement {text}")
-                    print("Line that was processed that failed the assertion:")
-                    print(ast.dump(cls_attr))
+                    _const.RICH_CONSOLE.log(f"An error occurred on line {line} in statement {text}")
+                    _const.RICH_CONSOLE.log("Line that was processed that failed the assertion:")
+                    _const.RICH_CONSOLE.log(ast.dump(cls_attr))
                     exit(1)
                 overrides: set[bool] = set()
 
