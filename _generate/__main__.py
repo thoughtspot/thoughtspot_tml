@@ -146,7 +146,7 @@ def _clean_scriptability_py() -> None:
     code_as_text = ast.unparse(code_as_tree)
 
     # SAVE BACK TO _scriptability.py
-    _const._SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, code_as_text]))
+    _const._SCRIPTABILITY_PY.write_text("\n".join([warning + plugin, code_as_text]), encoding="utf-8", newline="\n")
 
     # FINALLY, ENSURE THE OUTPUT FILE IS LINTED.
     _subprocess_run("ruff", "format", _const._SCRIPTABILITY_PY.as_posix(), "-v")

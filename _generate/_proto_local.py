@@ -56,11 +56,27 @@ message QueryTrigger {
 
 
 # DEV NOTE @
-# LAST UPDATE: 2025/01/06 , v10.5.0.cl
+# LAST UPDATE: 2026/10/07
 #  PROTO PATH: callosum/public/metadata/answer_spec.proto
 #  PROTO NAME: package entitylib;
 #
 PROTO_CALLOSUM_ANSWER_SPEC = r"""
+
+// ====================================================
+// Applicability
+// ====================================================
+
+message Applicability {
+  enum Level {
+    LIVEBOARD = 0;
+    TAB = 1;
+    GROUP = 2;
+  }
+
+  optional Level level = 1 [default = LIVEBOARD];
+  optional string target_id = 2;
+}
+
 
 // ====================================================
 // ChartVizProto.ChartSpecificColumn.Type

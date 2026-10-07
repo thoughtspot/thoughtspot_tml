@@ -21,3 +21,11 @@ def _():
     t.answer.search_query
     t.answer.answer_columns
     t.answer.answer_columns[0].name
+
+
+@test("Answer exposes viz_style on its table and chart")
+def _():
+    t = Answer.load(_const.DUMMY_ANSWER)
+
+    assert t.answer.table.viz_style == "{}"
+    assert t.answer.chart.viz_style == "{}"
