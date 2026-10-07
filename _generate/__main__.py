@@ -79,7 +79,8 @@ def _clean_edoc_proto() -> None:
 
         # bryanthowell-ts 2025-10-09: There are some messages with the same names that the basic
         # "strip the prefix" logic was not working, causing a message like:
-        #  "FilterCondition.FilterValueType" is resolved to "scriptability.CohortEDocProto.FilterCondition.FilterValueType",
+        #  "FilterCondition.FilterValueType" is resolved to
+        #  "scriptability.CohortEDocProto.FilterCondition.FilterValueType",
         #  which is not defined. The innermost scope is searched first in name resolution"
         # This is only happening on a few that have 'callosum.' prefixes. The logic brings those "fill-ins" to the top
         # of the combined edoc.proto file, with the package name of 'scriptability'.

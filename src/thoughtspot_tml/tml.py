@@ -60,7 +60,7 @@ class Connection(_tml.TML):
         # Old connections do not offer a TML component, so we'll fake it.
         # The convention that follows is that the pathname contains the connection guid.
         try:
-            name, _, ext = path.name.partition(".")
+            name = path.name.partition(".")[0]
             instance.guid = str(uuid.UUID(name, version=4))
         except ValueError:
             pass
